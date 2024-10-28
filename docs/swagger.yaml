@@ -1,0 +1,31 @@
+info:
+  contact:
+    email: xxyijixx@gmail.com
+    name: xxyijixx
+  description: Description of Doo Store API documentation
+  license:
+    name: AGPL-3.0
+    url: https://opensource.org/license/agpl-v3
+  title: Doo Store API Documentation
+  version: "1.0"
+paths:
+  /public/health:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: health
+      tags:
+      - public
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
