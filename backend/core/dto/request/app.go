@@ -8,8 +8,16 @@ type AppSearch struct {
 }
 
 type AppInstall struct {
-	Name    string                 `json:"name"`
-	Params  map[string]interface{} `json:"params"`
-	Version string                 `json:"-"`
-	Key     string                 `json:"-"`
+	Name   string                 `json:"name"`
+	Params map[string]interface{} `json:"params"`
+	Key    string                 `json:"-"`
+}
+
+type AppUnInstall struct {
+	Key string `json:"-"`
+}
+
+type AppInstalledOperate struct {
+	Action string `json:"action"`
+	Key    string `json:"-"`
 }

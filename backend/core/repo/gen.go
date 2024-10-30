@@ -20,6 +20,7 @@ var (
 	App          *app
 	AppDetail    *appDetail
 	AppInstalled *appInstalled
+	AppLog       *appLog
 	AppTag       *appTag
 	Tag          *tag
 )
@@ -29,6 +30,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	App = &Q.App
 	AppDetail = &Q.AppDetail
 	AppInstalled = &Q.AppInstalled
+	AppLog = &Q.AppLog
 	AppTag = &Q.AppTag
 	Tag = &Q.Tag
 }
@@ -39,6 +41,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		App:          newApp(db, opts...),
 		AppDetail:    newAppDetail(db, opts...),
 		AppInstalled: newAppInstalled(db, opts...),
+		AppLog:       newAppLog(db, opts...),
 		AppTag:       newAppTag(db, opts...),
 		Tag:          newTag(db, opts...),
 	}
@@ -50,6 +53,7 @@ type Query struct {
 	App          app
 	AppDetail    appDetail
 	AppInstalled appInstalled
+	AppLog       appLog
 	AppTag       appTag
 	Tag          tag
 }
@@ -62,6 +66,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		App:          q.App.clone(db),
 		AppDetail:    q.AppDetail.clone(db),
 		AppInstalled: q.AppInstalled.clone(db),
+		AppLog:       q.AppLog.clone(db),
 		AppTag:       q.AppTag.clone(db),
 		Tag:          q.Tag.clone(db),
 	}
@@ -81,6 +86,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		App:          q.App.replaceDB(db),
 		AppDetail:    q.AppDetail.replaceDB(db),
 		AppInstalled: q.AppInstalled.replaceDB(db),
+		AppLog:       q.AppLog.replaceDB(db),
 		AppTag:       q.AppTag.replaceDB(db),
 		Tag:          q.Tag.replaceDB(db),
 	}
@@ -90,6 +96,7 @@ type queryCtx struct {
 	App          IAppDo
 	AppDetail    IAppDetailDo
 	AppInstalled IAppInstalledDo
+	AppLog       IAppLogDo
 	AppTag       IAppTagDo
 	Tag          ITagDo
 }
@@ -99,6 +106,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		App:          q.App.WithContext(ctx),
 		AppDetail:    q.AppDetail.WithContext(ctx),
 		AppInstalled: q.AppInstalled.WithContext(ctx),
+		AppLog:       q.AppLog.WithContext(ctx),
 		AppTag:       q.AppTag.WithContext(ctx),
 		Tag:          q.Tag.WithContext(ctx),
 	}

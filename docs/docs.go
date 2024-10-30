@@ -57,8 +57,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/apps/sync": {
-            "get": {
+        "/apps/{key}": {
+            "put": {
                 "consumes": [
                     "application/json"
                 ],
@@ -68,54 +68,7 @@ const docTemplate = `{
                 "tags": [
                     ""
                 ],
-                "summary": "app sync",
-                "responses": {
-                    "200": {
-                        "description": "ok",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/apps/{key}/detail": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    ""
-                ],
-                "summary": "app detail",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "key",
-                        "name": "key",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "ok",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/apps/{key}/detail/{version}": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    ""
-                ],
-                "summary": "app detail",
+                "summary": "app update",
                 "parameters": [
                     {
                         "type": "string",
@@ -125,11 +78,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "version",
-                        "name": "version",
-                        "in": "path",
-                        "required": true
+                        "description": "RequestBody",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AppInstalledOperate"
+                        }
                     }
                 ],
                 "responses": {
@@ -161,9 +116,40 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "description": "RequestBody",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AppInstall"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    ""
+                ],
+                "summary": "app uninstall",
+                "parameters": [
+                    {
                         "type": "string",
-                        "description": "version",
-                        "name": "version",
+                        "description": "key",
+                        "name": "key",
                         "in": "path",
                         "required": true
                     },
@@ -173,8 +159,36 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/request.AppInstall"
+                            "$ref": "#/definitions/request.AppUnInstall"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{key}/detail": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    ""
+                ],
+                "summary": "app detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "key",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -222,6 +236,17 @@ const docTemplate = `{
                     "additionalProperties": true
                 }
             }
+        },
+        "request.AppInstalledOperate": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.AppUnInstall": {
+            "type": "object"
         }
     },
     "securityDefinitions": {

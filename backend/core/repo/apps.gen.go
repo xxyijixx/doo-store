@@ -33,7 +33,7 @@ func newApp(db *gorm.DB, opts ...gen.DOOption) app {
 	_app.Name = field.NewString(tableName, "name")
 	_app.Key = field.NewString(tableName, "key")
 	_app.Type = field.NewString(tableName, "type")
-	_app.Recommend = field.NewInt(tableName, "recommend")
+	_app.Sort = field.NewInt(tableName, "sort")
 	_app.Status = field.NewString(tableName, "status")
 
 	_app.fillFieldMap()
@@ -51,7 +51,7 @@ type app struct {
 	Name      field.String
 	Key       field.String
 	Type      field.String
-	Recommend field.Int
+	Sort      field.Int
 	Status    field.String
 
 	fieldMap map[string]field.Expr
@@ -75,7 +75,7 @@ func (a *app) updateTableName(table string) *app {
 	a.Name = field.NewString(table, "name")
 	a.Key = field.NewString(table, "key")
 	a.Type = field.NewString(table, "type")
-	a.Recommend = field.NewInt(table, "recommend")
+	a.Sort = field.NewInt(table, "sort")
 	a.Status = field.NewString(table, "status")
 
 	a.fillFieldMap()
@@ -100,7 +100,7 @@ func (a *app) fillFieldMap() {
 	a.fieldMap["name"] = a.Name
 	a.fieldMap["key"] = a.Key
 	a.fieldMap["type"] = a.Type
-	a.fieldMap["recommend"] = a.Recommend
+	a.fieldMap["sort"] = a.Sort
 	a.fieldMap["status"] = a.Status
 }
 

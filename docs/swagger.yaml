@@ -7,6 +7,13 @@ definitions:
         additionalProperties: true
         type: object
     type: object
+  request.AppInstalledOperate:
+    properties:
+      action:
+        type: string
+    type: object
+  request.AppUnInstall:
+    type: object
 info:
   contact:
     email: xxyijixx@gmail.com
@@ -41,14 +48,22 @@ paths:
       summary: app page
       tags:
       - ""
-  /apps/{key}/detail:
-    get:
+  /apps/{key}:
+    delete:
+      consumes:
+      - application/json
       parameters:
       - description: key
         in: path
         name: key
         required: true
         type: string
+      - description: RequestBody
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.AppUnInstall'
       produces:
       - application/json
       responses:
@@ -56,30 +71,7 @@ paths:
           description: ok
           schema:
             type: string
-      summary: app detail
-      tags:
-      - ""
-  /apps/{key}/detail/{version}:
-    get:
-      parameters:
-      - description: key
-        in: path
-        name: key
-        required: true
-        type: string
-      - description: version
-        in: path
-        name: version
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ok
-          schema:
-            type: string
-      summary: app detail
+      summary: app uninstall
       tags:
       - ""
     post:
@@ -89,11 +81,6 @@ paths:
       - description: key
         in: path
         name: key
-        required: true
-        type: string
-      - description: version
-        in: path
-        name: version
         required: true
         type: string
       - description: RequestBody
@@ -112,10 +99,21 @@ paths:
       summary: app install
       tags:
       - ""
-  /apps/sync:
-    get:
+    put:
       consumes:
       - application/json
+      parameters:
+      - description: key
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: RequestBody
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.AppInstalledOperate'
       produces:
       - application/json
       responses:
@@ -123,7 +121,25 @@ paths:
           description: ok
           schema:
             type: string
-      summary: app sync
+      summary: app update
+      tags:
+      - ""
+  /apps/{key}/detail:
+    get:
+      parameters:
+      - description: key
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: app detail
       tags:
       - ""
   /public/health:
