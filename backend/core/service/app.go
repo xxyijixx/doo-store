@@ -27,6 +27,7 @@ type IAppService interface {
 	AppDetailByKey(key string) (*model.AppDetail, error)
 	AppDetailByKeyAndVersion(key, version string) (*model.AppDetail, error)
 	AppInstall(req request.AppInstall) error
+	AppUnInstall(req request.AppUnInstall) error
 }
 
 func NewIAppService() IAppService {
@@ -144,6 +145,29 @@ func (*AppService) AppInstall(req request.AppInstall) error {
 	if port != 0 {
 		nginx.AddLocation(containerName, containerName, port)
 	}
+
+	return nil
+}
+
+func (*AppService) AppUnInstall(req request.AppUnInstall) error {
+	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.Version.Eq(req.Version), repo.AppInstalled.Key.Eq(req.Key)).First()
+	if err != nil {
+		return err
+	}
+	composeFile := fmt.Sprintf("%s/%s/%s/docker-compose.yml", constant.AppInstallDir, appInstalled.Key, appInstalled.Name)
+	stdout, err := compose.Down(composeFile)
+	if err != nil {
+		log.Debug("Error docker compose down")
+		return err
+	}
+	fmt.Println(stdout)
+	_, err = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Delete()
+	if err != nil {
+		return err
+	}
+	containerName := config.EnvConfig.APP_PREFIX + appInstalled.Key + "-" + req.Name
+	nginx.RemoveLocation(containerName)
+	// 删除compose目录
 
 	return nil
 }

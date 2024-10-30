@@ -106,3 +106,32 @@ func (*BaseApi) AppInstall(c *gin.Context) {
 	}
 	helper.SuccessWithData(c, "安装成功")
 }
+
+// @Summary app uninstall
+// @Schemes
+// @Description
+// @Tags
+// @Accept json
+// @Produce json
+// @Param key path string true "key"
+// @Param version path string true "version"
+// @Param data body request.AppUnInstall true "RequestBody"
+// @Success 200 {string} string "ok"
+// @Router /apps/{key}/detail/{version} [delete]
+func (*BaseApi) AppUnInstall(c *gin.Context) {
+	key := c.Param("key")
+	version := c.Param("version")
+	var req request.AppUnInstall
+	err := helper.CheckBindAndValidate(&req, c)
+	if err != nil {
+		return
+	}
+	req.Key = key
+	req.Version = version
+	err = appService.AppUnInstall(req)
+	if err != nil {
+		fmt.Println("err", err)
+		return
+	}
+	helper.SuccessWithData(c, "安装成功")
+}

@@ -13,3 +13,9 @@ type AppInstall struct {
 	Version string                 `json:"-"`
 	Key     string                 `json:"-"`
 }
+
+type AppUnInstall struct {
+	Name    string `json:"name"`
+	Version string `json:"-"`
+	Key     string `json:"-"`
+}

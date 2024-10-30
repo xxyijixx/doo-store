@@ -82,6 +82,15 @@ func AddLocation(locationName, proxyServerName string, port int) {
 	}
 }
 
+func RemoveLocation(locationName string) {
+	locationPath := fmt.Sprintf("%s/%s.conf", constant.NginxAppsConfigDir, locationName)
+	err := os.Remove(locationPath)
+	if err != nil {
+		fmt.Printf("删除文件失败: %v\n", err)
+		return
+	}
+}
+
 // 重载Nginx
 func reloadNginx() error {
 	client, err := docker.NewClient()
