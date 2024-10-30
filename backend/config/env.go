@@ -55,6 +55,12 @@ var defaultConfig = envConfigSchema{
 
 	DATA_DIR: "",
 
+	APP_PREFIX: "doo-store-",
+
+	EXTERNAL_NETWORK_NAME:    "",
+	EXTERNAL_NETWORK_IP:      "",
+	EXTERNAL_NETWORK_GATEWAY: "",
+
 	DB_PREFIX: "",
 }
 
@@ -72,6 +78,12 @@ type envConfigSchema struct {
 	MYSQL_DB_NAME  string
 
 	DATA_DIR string
+
+	APP_PREFIX string
+
+	EXTERNAL_NETWORK_NAME    string
+	EXTERNAL_NETWORK_IP      string
+	EXTERNAL_NETWORK_GATEWAY string
 
 	DB_PREFIX string
 }

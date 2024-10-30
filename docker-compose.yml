@@ -13,8 +13,9 @@ services:
       ENV: "prod"
       STORAGE: sqlite
       SQLITE_PATH: "./db/app.db"
-      DATA_DIR: "/Users/mac-47/Desktop/zeniein/devlop/doo-store/docker/dood"
+      DATA_DIR: "${PWD}/docker/dood"
     volumes:
       - ./docker/sqlite:/app/db
-      - ./docker/dood:/Users/mac-47/Desktop/zeniein/devlop/doo-store/docker/dood
+      - ./docker/dood:${PWD}/docker/dood
       - /var/run/docker.sock:/var/run/docker.sock
+    # /Users/mac-47/Desktop/zeniein/devlop/doo-store

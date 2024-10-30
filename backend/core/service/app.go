@@ -1,19 +1,22 @@
 package service
 
 import (
+	"doo-store/backend/config"
 	"doo-store/backend/constant"
 	"doo-store/backend/core/dto"
 	"doo-store/backend/core/dto/request"
 	"doo-store/backend/core/model"
 	"doo-store/backend/core/repo"
 	"doo-store/backend/utils/compose"
+	"doo-store/backend/utils/docker"
+	"doo-store/backend/utils/nginx"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path"
 	"strings"
 
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type AppService struct {
@@ -74,30 +77,30 @@ func (*AppService) AppInstall(req request.AppInstall) error {
 	fmt.Printf("AppInstallDir: %s, DataDir: %s\n", constant.DataDir, constant.AppInstallDir)
 	app, err := repo.App.Where(repo.App.Key.Eq(req.Key)).First()
 	if err != nil {
-		logrus.Debug("Error query app")
+		log.Debug("Error query app")
 		return err
 	}
 	appDetail, err := repo.AppDetail.Where(repo.AppDetail.AppID.Eq(app.ID), repo.AppDetail.Version.Eq(req.Version)).First()
 	if err != nil {
-		logrus.Debug("Error query app detail")
+		log.Debug("Error query app detail")
 		return err
 	}
 	composeContent := appDetail.DockerCompose
 	workspaceDir := path.Join(constant.AppInstallDir, app.Key)
 	err = createDir(workspaceDir)
 	if err != nil {
-		logrus.Debug("Error create dir")
+		log.Debug("Error create dir")
 		return err
 	}
 	workspaceDir = path.Join(workspaceDir, req.Name)
 	err = createDir(workspaceDir)
 	if err != nil {
-		logrus.Debug("Error create dir")
+		log.Debug("Error create dir")
 		return err
 	}
 	composeFile := fmt.Sprintf("%s/%s/%s/docker-compose.yml", constant.AppInstallDir, app.Key, req.Name)
-
-	composeContent = strings.ReplaceAll(composeContent, "${CONTAINER_NAME}", "app-"+app.Key+"-"+req.Name)
+	containerName := config.EnvConfig.APP_PREFIX + app.Key + "-" + req.Name
+	composeContent = strings.ReplaceAll(composeContent, "${CONTAINER_NAME}", containerName)
 	for key, value := range req.Params {
 		replaceValue := fmt.Sprintf("%v", value)
 		composeContent = strings.ReplaceAll(composeContent, fmt.Sprintf("${%s}", key), replaceValue)
@@ -106,29 +109,42 @@ func (*AppService) AppInstall(req request.AppInstall) error {
 	if err != nil {
 		return err
 	}
-	//
-	repo.AppInstalled.Create(&model.AppInstalled{
+	appInstalled := &model.AppInstalled{
 		Name:          req.Name,
 		AppID:         app.ID,
 		AppDetailID:   appDetail.ID,
 		Version:       appDetail.Version,
 		Params:        string(paramJson),
 		DockerCompose: composeContent,
-	})
-
-	fmt.Println("docker-compose.yml文件内容: ", composeContent)
+		Status:        constant.Installing,
+	}
+	repo.AppInstalled.Create(appInstalled)
 
 	err = os.WriteFile(composeFile, []byte(composeContent), 0644)
 	if err != nil {
-		logrus.Debug("Error WriteFile", err)
+		log.Debug("Error WriteFile", err)
 		return err
 	}
 	stdout, err := compose.Up(composeFile)
 	if err != nil {
-		logrus.Debug("Error docker compose up")
+		log.Debug("Error docker compose up")
+		_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
 		return err
 	}
 	fmt.Println(stdout)
+	// 添加Nginx配置
+	client, err := docker.NewClient()
+	if err != nil {
+		return err
+	}
+	port, err := client.GetExposedFirstPortByName(fmt.Sprintf("%s:%s", app.Key, appDetail.Version))
+	if err != nil {
+		return err
+	}
+	if port != 0 {
+		nginx.AddLocation(containerName, containerName, port)
+	}
+
 	return nil
 }
 
@@ -136,7 +152,7 @@ func createDir(dirPath string) error {
 	err := os.Mkdir(dirPath, 0755)
 	if err != nil {
 		if os.IsExist(err) {
-			logrus.WithField("file", dirPath).Debug("file exists")
+			log.WithField("file", dirPath).Debug("file exists")
 			return nil
 		}
 		return err
