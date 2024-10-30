@@ -1,3 +1,12 @@
+definitions:
+  request.AppInstall:
+    properties:
+      name:
+        type: string
+      params:
+        additionalProperties: true
+        type: object
+    type: object
 info:
   contact:
     email: xxyijixx@gmail.com
@@ -9,6 +18,114 @@ info:
   title: Doo Store API Documentation
   version: "1.0"
 paths:
+  /apps:
+    get:
+      parameters:
+      - default: 0
+        description: page
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: pageSize
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: app page
+      tags:
+      - ""
+  /apps/{key}/detail:
+    get:
+      parameters:
+      - description: key
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: app detail
+      tags:
+      - ""
+  /apps/{key}/detail/{version}:
+    get:
+      parameters:
+      - description: key
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: version
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: app detail
+      tags:
+      - ""
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: key
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: version
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: RequestBody
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.AppInstall'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: app install
+      tags:
+      - ""
+  /apps/sync:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: app sync
+      tags:
+      - ""
   /public/health:
     get:
       consumes:

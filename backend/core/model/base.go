@@ -6,7 +6,7 @@ import (
 )
 
 type BaseModel struct {
-	ID        int64     `gorm:"primaryKey;autoIncrement:true;comment:'id'" json:"id"`
+	ID        int64     `gorm:"primaryKey;not null;autoIncrement:true;comment:'id'" json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

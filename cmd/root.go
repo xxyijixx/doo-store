@@ -17,7 +17,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"doo-store/backend/core/cmd/migrate"
 	"doo-store/backend/server"
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -28,6 +30,12 @@ var rootCmd = &cobra.Command{
 	Use:   "doo-store",
 	Short: "A brief description of your application",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		autoMigrate, _ := cmd.Flags().GetBool("migrate")
+		if autoMigrate {
+			// 执行数据库自动迁移
+			fmt.Println("执行数据库自动迁移")
+			migrate.Migrate()
+		}
 		server.Start()
 		return nil
 	},
@@ -52,4 +60,5 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.Flags().BoolP("migrate", "m", false, "databases auto migrate")
 }

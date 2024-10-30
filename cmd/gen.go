@@ -17,8 +17,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"doo-store/backend/app/cmd/gen"
 	"doo-store/backend/config"
+	"doo-store/backend/core/cmd/gen"
 
 	"github.com/spf13/cobra"
 )

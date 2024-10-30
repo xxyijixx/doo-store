@@ -1,7 +1,7 @@
 package router
 
 import (
-	v1 "doo-store/backend/app/api/v1"
+	v1 "doo-store/backend/core/api/v1"
 
 	"github.com/gin-gonic/gin"
 )

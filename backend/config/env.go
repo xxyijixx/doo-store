@@ -36,13 +36,14 @@ var dsn string
 
 func init() {
 	envInit()
+	systemInit()
 	dsn = fmt.Sprintf("%s:%s@(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", EnvConfig.MYSQL_USERNAME, EnvConfig.MYSQL_PASSWORD, EnvConfig.MYSQL_HOST, EnvConfig.MYSQL_PORT, EnvConfig.MYSQL_DB_NAME)
 }
 
 var defaultConfig = envConfigSchema{
 	ENV: "dev",
 
-	STORAGE: "sqlite",
+	STORAGE: "mysql",
 
 	SQLITE_PATH: "./app.db",
 
@@ -51,6 +52,8 @@ var defaultConfig = envConfigSchema{
 	MYSQL_USERNAME: "devlop",
 	MYSQL_PASSWORD: "123456",
 	MYSQL_DB_NAME:  "devlop",
+
+	DATA_DIR: "",
 
 	DB_PREFIX: "",
 }
@@ -68,11 +71,9 @@ type envConfigSchema struct {
 	MYSQL_PASSWORD string
 	MYSQL_DB_NAME  string
 
-	DB_PREFIX string
+	DATA_DIR string
 
-	DOCKER_APP_IPPR     string
-	DOCKER_NETWORK_NAME string
-	DOCKER_MOUNTED_PATH string
+	DB_PREFIX string
 }
 
 func (s *envConfigSchema) IsDev() bool {

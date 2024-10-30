@@ -1,8 +1,8 @@
 package gen
 
 import (
-	"doo-store/backend/app/model"
 	"doo-store/backend/config"
+	"doo-store/backend/core/model"
 
 	"gorm.io/gen"
 	"gorm.io/gorm"
@@ -10,7 +10,7 @@ import (
 
 func Generate() {
 	g := gen.NewGenerator(gen.Config{
-		OutPath: "./backend/app/repo",
+		OutPath: "./backend/core/repo",
 		Mode:    gen.WithDefaultQuery | gen.WithoutContext | gen.WithQueryInterface, // generate mode
 	})
 
@@ -24,7 +24,7 @@ func Generate() {
 	// reuse your gorm db
 	g.UseDB(gormdb)
 
-	g.ApplyBasic(model.App{})
+	g.ApplyBasic(model.App{}, model.AppDetail{}, model.AppInstalled{}, model.AppTag{}, model.Tag{})
 
 	// Generate the code
 	g.Execute()

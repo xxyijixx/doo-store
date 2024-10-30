@@ -1,8 +1,8 @@
 package migrate
 
 import (
-	"doo-store/backend/app/model"
 	"doo-store/backend/config"
+	"doo-store/backend/core/model"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -18,7 +18,7 @@ func Migrate() {
 	if err != nil {
 		panic(fmt.Errorf("db connection failed: %v", err))
 	}
-	err = db.AutoMigrate(&model.App{})
+	err = db.AutoMigrate(&model.App{}, &model.AppDetail{}, &model.AppInstalled{}, &model.AppTag{}, &model.Tag{})
 	if err != nil {
 		panic(fmt.Errorf("db migrate failed: %v", err))
 	}

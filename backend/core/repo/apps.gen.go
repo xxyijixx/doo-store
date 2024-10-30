@@ -16,7 +16,7 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"doo-store/backend/app/model"
+	"doo-store/backend/core/model"
 )
 
 func newApp(db *gorm.DB, opts ...gen.DOOption) app {
@@ -31,6 +31,10 @@ func newApp(db *gorm.DB, opts ...gen.DOOption) app {
 	_app.CreatedAt = field.NewTime(tableName, "created_at")
 	_app.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_app.Name = field.NewString(tableName, "name")
+	_app.Key = field.NewString(tableName, "key")
+	_app.Type = field.NewString(tableName, "type")
+	_app.Recommend = field.NewInt(tableName, "recommend")
+	_app.Status = field.NewString(tableName, "status")
 
 	_app.fillFieldMap()
 
@@ -45,6 +49,10 @@ type app struct {
 	CreatedAt field.Time
 	UpdatedAt field.Time
 	Name      field.String
+	Key       field.String
+	Type      field.String
+	Recommend field.Int
+	Status    field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -65,6 +73,10 @@ func (a *app) updateTableName(table string) *app {
 	a.CreatedAt = field.NewTime(table, "created_at")
 	a.UpdatedAt = field.NewTime(table, "updated_at")
 	a.Name = field.NewString(table, "name")
+	a.Key = field.NewString(table, "key")
+	a.Type = field.NewString(table, "type")
+	a.Recommend = field.NewInt(table, "recommend")
+	a.Status = field.NewString(table, "status")
 
 	a.fillFieldMap()
 
@@ -81,11 +93,15 @@ func (a *app) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *app) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 4)
+	a.fieldMap = make(map[string]field.Expr, 8)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
 	a.fieldMap["name"] = a.Name
+	a.fieldMap["key"] = a.Key
+	a.fieldMap["type"] = a.Type
+	a.fieldMap["recommend"] = a.Recommend
+	a.fieldMap["status"] = a.Status
 }
 
 func (a app) clone(db *gorm.DB) app {
