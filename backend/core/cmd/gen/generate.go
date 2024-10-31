@@ -24,7 +24,7 @@ func Generate() {
 	// reuse your gorm db
 	g.UseDB(gormdb)
 
-	g.ApplyBasic(model.App{}, model.AppDetail{}, model.AppInstalled{}, model.AppTag{}, model.Tag{})
+	g.ApplyBasic(model.App{}, model.AppDetail{}, model.AppInstalled{}, model.AppTag{}, model.Tag{}, model.AppLog{})
 
 	// Generate the code
 	g.Execute()

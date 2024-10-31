@@ -8,18 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @Summary app sync
-// @Schemes
-// @Description
-// @Tags
-// @Accept json
-// @Produce json
-// @Success 200 {string} string "ok"
-// @Router /apps/sync [get]
-func (*BaseApi) AppSync(c *gin.Context) {
-
-}
-
 // @Summary app page
 // @Schemes
 // @Description
@@ -59,25 +47,6 @@ func (*BaseApi) AppDetailByKey(c *gin.Context) {
 	helper.SuccessWithData(c, data)
 }
 
-// @Summary app detail
-// @Schemes
-// @Description
-// @Tags
-// @Produce json
-// @Param key path string true "key"
-// @Param version path string true "version"
-// @Success 200 {string} string "ok"
-// @Router /apps/{key}/detail/{version} [get]
-func (*BaseApi) AppDeatilByKeyAndVersoin(c *gin.Context) {
-	key := c.Param("key")
-	version := c.Param("version")
-	data, err := appService.AppDetailByKeyAndVersion(key, version)
-	if err != nil {
-		return
-	}
-	helper.SuccessWithData(c, data)
-}
-
 // @Summary app install
 // @Schemes
 // @Description
@@ -85,21 +54,44 @@ func (*BaseApi) AppDeatilByKeyAndVersoin(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param key path string true "key"
-// @Param version path string true "version"
 // @Param data body request.AppInstall true "RequestBody"
 // @Success 200 {string} string "ok"
-// @Router /apps/{key}/detail/{version} [post]
+// @Router /apps/{key} [post]
 func (*BaseApi) AppInstall(c *gin.Context) {
 	key := c.Param("key")
-	version := c.Param("version")
 	var req request.AppInstall
 	err := helper.CheckBindAndValidate(&req, c)
 	if err != nil {
 		return
 	}
 	req.Key = key
-	req.Version = version
 	err = appService.AppInstall(req)
+	if err != nil {
+		fmt.Println("err", err)
+		return
+	}
+	helper.SuccessWithData(c, "安装成功")
+}
+
+// @Summary app update
+// @Schemes
+// @Description
+// @Tags
+// @Accept json
+// @Produce json
+// @Param key path string true "key"
+// @Param data body request.AppInstalledOperate true "RequestBody"
+// @Success 200 {string} string "ok"
+// @Router /apps/{key} [put]
+func (*BaseApi) AppInstallOperate(c *gin.Context) {
+	key := c.Param("key")
+	var req request.AppInstalledOperate
+	err := helper.CheckBindAndValidate(&req, c)
+	if err != nil {
+		return
+	}
+	req.Key = key
+	err = appService.AppInstallOperate(req)
 	if err != nil {
 		fmt.Println("err", err)
 		return
@@ -114,20 +106,17 @@ func (*BaseApi) AppInstall(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param key path string true "key"
-// @Param version path string true "version"
 // @Param data body request.AppUnInstall true "RequestBody"
 // @Success 200 {string} string "ok"
-// @Router /apps/{key}/detail/{version} [delete]
+// @Router /apps/{key} [delete]
 func (*BaseApi) AppUnInstall(c *gin.Context) {
 	key := c.Param("key")
-	version := c.Param("version")
 	var req request.AppUnInstall
 	err := helper.CheckBindAndValidate(&req, c)
 	if err != nil {
 		return
 	}
 	req.Key = key
-	req.Version = version
 	err = appService.AppUnInstall(req)
 	if err != nil {
 		fmt.Println("err", err)

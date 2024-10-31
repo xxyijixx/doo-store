@@ -25,8 +25,8 @@ type AppService struct {
 type IAppService interface {
 	AppPage(req request.AppSearch) (*dto.PageResult, error)
 	AppDetailByKey(key string) (*model.AppDetail, error)
-	AppDetailByKeyAndVersion(key, version string) (*model.AppDetail, error)
 	AppInstall(req request.AppInstall) error
+	AppInstallOperate(req request.AppInstalledOperate) error
 	AppUnInstall(req request.AppUnInstall) error
 }
 
@@ -36,7 +36,7 @@ func NewIAppService() IAppService {
 
 func (*AppService) AppPage(req request.AppSearch) (*dto.PageResult, error) {
 
-	result, count, err := repo.App.FindByPage(req.Page, req.PageSize)
+	result, count, err := repo.App.Order(repo.App.Sort.Desc()).FindByPage(req.Page, req.PageSize)
 
 	if err != nil {
 		return nil, err
@@ -81,7 +81,7 @@ func (*AppService) AppInstall(req request.AppInstall) error {
 		log.Debug("Error query app")
 		return err
 	}
-	appDetail, err := repo.AppDetail.Where(repo.AppDetail.AppID.Eq(app.ID), repo.AppDetail.Version.Eq(req.Version)).First()
+	appDetail, err := repo.AppDetail.Where(repo.AppDetail.AppID.Eq(app.ID)).First()
 	if err != nil {
 		log.Debug("Error query app detail")
 		return err
@@ -93,13 +93,7 @@ func (*AppService) AppInstall(req request.AppInstall) error {
 		log.Debug("Error create dir")
 		return err
 	}
-	workspaceDir = path.Join(workspaceDir, req.Name)
-	err = createDir(workspaceDir)
-	if err != nil {
-		log.Debug("Error create dir")
-		return err
-	}
-	composeFile := fmt.Sprintf("%s/%s/%s/docker-compose.yml", constant.AppInstallDir, app.Key, req.Name)
+	composeFile := fmt.Sprintf("%s/%s/docker-compose.yml", constant.AppInstallDir, app.Key)
 	containerName := config.EnvConfig.APP_PREFIX + app.Key + "-" + req.Name
 	composeContent = strings.ReplaceAll(composeContent, "${CONTAINER_NAME}", containerName)
 	for key, value := range req.Params {
@@ -117,6 +111,7 @@ func (*AppService) AppInstall(req request.AppInstall) error {
 		Version:       appDetail.Version,
 		Params:        string(paramJson),
 		DockerCompose: composeContent,
+		Key:           app.Key,
 		Status:        constant.Installing,
 	}
 	repo.AppInstalled.Create(appInstalled)
@@ -133,28 +128,45 @@ func (*AppService) AppInstall(req request.AppInstall) error {
 		return err
 	}
 	fmt.Println(stdout)
+	insertLog(appInstalled.ID, stdout)
 	// 添加Nginx配置
 	client, err := docker.NewClient()
 	if err != nil {
 		return err
 	}
-	port, err := client.GetExposedFirstPortByName(fmt.Sprintf("%s:%s", app.Key, appDetail.Version))
+	port, err := client.GetImageFirstExposedPortByName(fmt.Sprintf("%s:%s", app.Key, appDetail.Version))
 	if err != nil {
 		return err
 	}
 	if port != 0 {
-		nginx.AddLocation(containerName, containerName, port)
+		nginx.AddLocation(app.Key, containerName, port)
 	}
 
 	return nil
 }
 
-func (*AppService) AppUnInstall(req request.AppUnInstall) error {
-	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.Version.Eq(req.Version), repo.AppInstalled.Key.Eq(req.Key)).First()
+func (*AppService) AppInstallOperate(req request.AppInstalledOperate) error {
+	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.Key.Eq(req.Key)).First()
 	if err != nil {
 		return err
 	}
-	composeFile := fmt.Sprintf("%s/%s/%s/docker-compose.yml", constant.AppInstallDir, appInstalled.Key, appInstalled.Name)
+	composeFile := fmt.Sprintf("%s/%s/docker-compose.yml", constant.AppInstallDir, appInstalled.Key)
+	stdout, err := compose.Operate(composeFile, req.Action)
+	if err != nil {
+		log.Debug("Error docker compose operate")
+		return err
+	}
+	fmt.Println(stdout)
+	insertLog(appInstalled.ID, stdout)
+	return nil
+}
+
+func (*AppService) AppUnInstall(req request.AppUnInstall) error {
+	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.Key.Eq(req.Key)).First()
+	if err != nil {
+		return err
+	}
+	composeFile := fmt.Sprintf("%s/%s/docker-compose.yml", constant.AppInstallDir, appInstalled.Key)
 	stdout, err := compose.Down(composeFile)
 	if err != nil {
 		log.Debug("Error docker compose down")
@@ -165,9 +177,10 @@ func (*AppService) AppUnInstall(req request.AppUnInstall) error {
 	if err != nil {
 		return err
 	}
-	containerName := config.EnvConfig.APP_PREFIX + appInstalled.Key + "-" + req.Name
-	nginx.RemoveLocation(containerName)
+
+	nginx.RemoveLocation(appInstalled.Key)
 	// 删除compose目录
+	_ = os.RemoveAll(fmt.Sprintf("%s/%s", constant.AppInstallDir, appInstalled.Key))
 
 	return nil
 }
@@ -182,4 +195,18 @@ func createDir(dirPath string) error {
 		return err
 	}
 	return nil
+}
+
+func insertLog(appInstalledId int64, content string) {
+	if content == "" {
+		log.Debug("log content is empty")
+		return
+	}
+	err := repo.AppLog.Create(&model.AppLog{
+		AppInstalledId: appInstalledId,
+		Content:        content,
+	})
+	if err != nil {
+		log.Debug("Error create app log")
+	}
 }

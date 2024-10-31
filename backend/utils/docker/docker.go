@@ -2,6 +2,7 @@ package docker
 
 import (
 	"context"
+	"io"
 	"strconv"
 	"strings"
 
@@ -99,20 +100,25 @@ func (c Client) InspectContainer(containerID string) (types.ContainerJSON, error
 	return c.cli.ContainerInspect(context.Background(), containerID)
 }
 
-func (c Client) PullImage(imageName string, force bool) error {
+func (c Client) PullImage(imageName string, force bool) (string, error) {
 	if !force {
 		exist, err := c.CheckImageExist(imageName)
 		if err != nil {
-			return err
+			return "", err
 		}
 		if exist {
-			return nil
+			return "", nil
 		}
 	}
-	if _, err := c.cli.ImagePull(context.Background(), imageName, image.PullOptions{}); err != nil {
-		return err
+	reader, err := c.cli.ImagePull(context.Background(), imageName, image.PullOptions{})
+	if err != nil {
+		return "", err
 	}
-	return nil
+	stdout, err := io.ReadAll(reader)
+	if err != nil {
+		return "", err
+	}
+	return string(stdout), nil
 }
 
 func (c Client) GetImageIDByName(imageName string) (string, error) {
@@ -130,7 +136,7 @@ func (c Client) GetImageIDByName(imageName string) (string, error) {
 	return "", nil
 }
 
-func (c Client) GetExposedFirstPortByName(imageName string) (int, error) {
+func (c Client) GetImageFirstExposedPortByName(imageName string) (int, error) {
 	imageInspect, _, err := c.cli.ImageInspectWithRaw(context.Background(), imageName)
 	if err != nil {
 		return 0, err

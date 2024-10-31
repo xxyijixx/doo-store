@@ -14,9 +14,10 @@ func (a *AppRouter) InitRouter(Router *gin.RouterGroup) {
 	baseApi := v1.ApiGroupApp.BaseApi
 	{
 		appRouter.GET("", baseApi.AppPage)
-		appRouter.GET("/sync", baseApi.AppSync)
+		appRouter.POST("/:key", baseApi.AppInstall)
+		appRouter.PUT("/:key", baseApi.AppInstallOperate)
+		appRouter.DELETE("/:key", baseApi.AppUnInstall)
 		appRouter.GET("/:key/detail", baseApi.AppDetailByKey)
-		appRouter.GET("/:key/detail/:version", baseApi.AppDeatilByKeyAndVersoin)
-		appRouter.POST("/:key/detail/:version", baseApi.AppInstall)
+
 	}
 }
