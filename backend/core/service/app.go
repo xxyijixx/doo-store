@@ -11,6 +11,7 @@ import (
 	"doo-store/backend/utils/docker"
 	"doo-store/backend/utils/nginx"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -18,7 +19,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"gvisor.dev/gvisor/pkg/errors"
 )
 
 type AppService struct {
