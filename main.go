@@ -20,7 +20,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 // @Description Description of Doo Store API documentation
 // @SecurityDefinitions.apiKey BearerAuth
 // @in header
-// @name Authorization
+// @name token
 // @TermsOfService http://swagger.io/terms/
 
 // @Contact.name xxyijixx

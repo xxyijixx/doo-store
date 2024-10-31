@@ -11,6 +11,9 @@ definitions:
     properties:
       action:
         type: string
+      params:
+        additionalProperties: true
+        type: object
     type: object
   request.AppUnInstall:
     type: object
@@ -45,6 +48,8 @@ paths:
           description: ok
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: app page
       tags:
       - ""
@@ -71,6 +76,8 @@ paths:
           description: ok
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: app uninstall
       tags:
       - ""
@@ -96,6 +103,8 @@ paths:
           description: ok
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: app install
       tags:
       - ""
@@ -121,6 +130,8 @@ paths:
           description: ok
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: app update
       tags:
       - ""
@@ -139,6 +150,8 @@ paths:
           description: ok
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: app detail
       tags:
       - ""
@@ -159,6 +172,6 @@ paths:
 securityDefinitions:
   BearerAuth:
     in: header
-    name: Authorization
+    name: token
     type: apiKey
 swagger: "2.0"

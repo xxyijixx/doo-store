@@ -1,15 +1,20 @@
 package v1
 
-import "doo-store/backend/core/service"
+import (
+	"doo-store/backend/core/service"
+)
 
-type BaseApi struct{}
-
-type ApiGroup struct {
-	BaseApi
+type BaseApi struct {
 }
 
-var ApiGroupApp = new(ApiGroup)
+var Api = new(BaseApi)
+
+type DootaskInfo struct {
+	Token    string
+	Userinfo interface{}
+}
 
 var (
-	appService = service.NewIAppService()
+	appService     = service.NewIAppService()
+	dootaskService = service.NewIDootaskService()
 )

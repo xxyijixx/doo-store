@@ -6,11 +6,13 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 // @Summary app page
 // @Schemes
 // @Description
+// @Security BearerAuth
 // @Tags
 // @Produce json
 // @Param page query integer false "page" default(0)
@@ -18,6 +20,16 @@ import (
 // @Success 200 {string} string "ok"
 // @Router /apps [get]
 func (*BaseApi) AppPage(c *gin.Context) {
+	token, tokenExist := c.Get("token")
+	if !tokenExist {
+		logrus.Debug("token not exist")
+		return
+	}
+	logrus.Debug("token", token)
+	t := token.(string)
+	info, _ := dootaskService.GetUserInfo(t)
+	fmt.Println("dootask", info)
+
 	var req request.AppSearch
 	err := helper.CheckBindQueryAndValidate(&req, c)
 	if err != nil {
@@ -33,6 +45,7 @@ func (*BaseApi) AppPage(c *gin.Context) {
 // @Summary app detail
 // @Schemes
 // @Description
+// @Security BearerAuth
 // @Tags
 // @Produce json
 // @Param key path string true "key"
@@ -50,6 +63,7 @@ func (*BaseApi) AppDetailByKey(c *gin.Context) {
 // @Summary app install
 // @Schemes
 // @Description
+// @Security BearerAuth
 // @Tags
 // @Accept json
 // @Produce json
@@ -76,6 +90,7 @@ func (*BaseApi) AppInstall(c *gin.Context) {
 // @Summary app update
 // @Schemes
 // @Description
+// @Security BearerAuth
 // @Tags
 // @Accept json
 // @Produce json
@@ -102,6 +117,7 @@ func (*BaseApi) AppInstallOperate(c *gin.Context) {
 // @Summary app uninstall
 // @Schemes
 // @Description
+// @Security BearerAuth
 // @Tags
 // @Accept json
 // @Produce json

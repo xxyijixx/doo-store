@@ -11,7 +11,7 @@ type PublicRouter struct {
 
 func (a *PublicRouter) InitRouter(Router *gin.RouterGroup) {
 	publicRouter := Router.Group("public")
-	baseApi := v1.ApiGroupApp.BaseApi
+	baseApi := v1.Api
 	{
 		publicRouter.GET("/health", baseApi.HealthCheck)
 	}

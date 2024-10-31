@@ -24,6 +24,11 @@ const docTemplate = `{
     "paths": {
         "/apps": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -59,6 +64,11 @@ const docTemplate = `{
         },
         "/apps/{key}": {
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -97,6 +107,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -135,6 +150,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -175,6 +195,11 @@ const docTemplate = `{
         },
         "/apps/{key}/detail": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -242,6 +267,10 @@ const docTemplate = `{
             "properties": {
                 "action": {
                     "type": "string"
+                },
+                "params": {
+                    "type": "object",
+                    "additionalProperties": true
                 }
             }
         },
@@ -252,7 +281,7 @@ const docTemplate = `{
     "securityDefinitions": {
         "BearerAuth": {
             "type": "apiKey",
-            "name": "Authorization",
+            "name": "token",
             "in": "header"
         }
     }
