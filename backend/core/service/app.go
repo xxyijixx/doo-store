@@ -17,6 +17,8 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+	"gvisor.dev/gvisor/pkg/errors"
 )
 
 type AppService struct {
@@ -76,10 +78,17 @@ func (*AppService) AppDetailByKeyAndVersion(key, version string) (*model.AppDeta
 
 func (*AppService) AppInstall(req request.AppInstall) error {
 	fmt.Printf("AppInstallDir: %s, DataDir: %s\n", constant.DataDir, constant.AppInstallDir)
+
 	app, err := repo.App.Where(repo.App.Key.Eq(req.Key)).First()
 	if err != nil {
 		log.Debug("Error query app")
 		return err
+	}
+	_, err = repo.AppInstalled.Where(repo.AppInstalled.AppID.Eq(app.ID)).First()
+	if err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return errors.New("无需重复安装")
+		}
 	}
 	appDetail, err := repo.AppDetail.Where(repo.AppDetail.AppID.Eq(app.ID)).First()
 	if err != nil {
