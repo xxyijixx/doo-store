@@ -1,3 +1,5 @@
 package constant
 
-const ()
+var (
+	AppNetwork = "doo-store-app-network"
+)

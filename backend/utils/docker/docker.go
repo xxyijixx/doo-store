@@ -2,6 +2,7 @@ package docker
 
 import (
 	"context"
+	"doo-store/backend/constant"
 	"io"
 	"strconv"
 	"strings"
@@ -182,8 +183,8 @@ func CreateDefaultDockerNetwork() error {
 		return err
 	}
 	defer cli.Close()
-	if !cli.NetworkExist("1panel-network") {
-		if err := cli.CreateNetwork("1panel-network"); err != nil {
+	if !cli.NetworkExist(constant.AppNetwork) {
+		if err := cli.CreateNetwork(constant.AppNetwork); err != nil {
 			logrus.Errorf("create default docker network  error %s", err.Error())
 			return err
 		}

@@ -1,0 +1,176 @@
+package app
+
+import (
+	"doo-store/backend/constant"
+	"doo-store/backend/core/dto/response"
+	"doo-store/backend/core/model"
+	"doo-store/backend/core/repo"
+	"encoding/json"
+	"fmt"
+	"os"
+	"strings"
+
+	"gorm.io/gorm"
+)
+
+type Welcome struct {
+	Plugins []Plugin `json:"plugins"`
+}
+
+type Plugin struct {
+	Name           string       `json:"name"`
+	Key            string       `json:"key"`
+	Description    string       `json:"description"`
+	Icon           string       `json:"icon"`
+	Version        string       `json:"version"`
+	Github         string       `json:"github"`
+	DependsVersion string       `json:"depends_version"`
+	Repo           string       `json:"repo"`
+	Volume         []Volume     `json:"volume"`
+	Env            []EnvElement `json:"env"`
+}
+
+type EnvElement struct {
+	Name     string `json:"name"`
+	Key      string `json:"key"`
+	Value    string `json:"value"`
+	Required bool   `json:"required"`
+}
+
+type Volume struct {
+	Local  string `json:"local"`
+	Target string `json:"target"`
+}
+
+func LoadData() error {
+	var config Welcome
+	filename := "./docker/init/data.json"
+	data, err := os.ReadFile(filename)
+	if os.IsNotExist(err) {
+		return err
+	}
+
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(data, &config)
+	if err != nil {
+		return err
+	}
+	apps, err := repo.App.Find()
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
+	appKeyMap := make(map[string]string)
+	for _, app := range apps {
+		appKeyMap[app.Key] = "true"
+	}
+	err = repo.DB.Transaction(func(tx *gorm.DB) error {
+		for _, p := range config.Plugins {
+			fmt.Printf("p.GenComposeFile():\n%v\n", p.GenComposeFile())
+			// 对于key存在，忽略
+			if _, exist := appKeyMap[p.Key]; exist {
+				continue
+			}
+			app := &model.App{
+				Name:        p.Name,
+				Key:         p.Key,
+				Icon:        p.Icon,
+				Description: p.Description,
+				Status:      constant.AppNormal,
+			}
+			err := repo.Use(tx).App.Create(app)
+			if err != nil {
+				return err
+			}
+			appKeyMap[p.Key] = "true"
+			appDetail := &model.AppDetail{
+				AppID:          app.ID,
+				Repo:           p.Repo,
+				Version:        p.Version,
+				DependsVersion: p.DependsVersion,
+				Params:         p.GenParams(),
+				DockerCompose:  p.GenComposeFile(),
+				Status:         constant.AppNormal,
+			}
+			err = repo.Use(tx).AppDetail.Create(appDetail)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	//
+
+	return err
+}
+
+func (p *Plugin) GenComposeFile() string {
+	composeContent := p.GenService()
+	composeContent += p.GenNetwork()
+	return composeContent
+}
+
+func (p *Plugin) GenNetwork() string {
+	networkContent := make([]string, 0)
+	networkContent = append(networkContent, "networks:")
+	networkContent = append(networkContent, fmt.Sprintf("%s%s:", getSpaces(1), constant.AppNetwork))
+	networkContent = append(networkContent, fmt.Sprintf("%sexternal: true", getSpaces(2)))
+
+	networkContent = append(networkContent, "\n")
+
+	return strings.Join(networkContent, "\n")
+}
+
+func (p *Plugin) GenService() string {
+	serviceContent := make([]string, 0)
+	serviceContent = append(serviceContent, "services:")
+	serviceContent = append(serviceContent, fmt.Sprintf("%s%s:", getSpaces(1), p.Key))
+	serviceContent = append(serviceContent, fmt.Sprintf("%simage: %s:%s", getSpaces(2), p.Repo, p.Version))
+	serviceContent = append(serviceContent, fmt.Sprintf("%srestart: always", getSpaces(2)))
+	serviceContent = append(serviceContent, fmt.Sprintf("%scontainer_name: ${CONTAINER_NAME}", getSpaces(2)))
+	// networks:
+	serviceContent = append(serviceContent, fmt.Sprintf("%snetworks:", getSpaces(2)))
+	serviceContent = append(serviceContent, fmt.Sprintf("%s- %s", getSpaces(3), constant.AppNetwork))
+
+	if len(p.Volume) != 0 {
+		serviceContent = append(serviceContent, fmt.Sprintf("%svolumes:", getSpaces(2)))
+		for _, v := range p.Volume {
+			serviceContent = append(serviceContent, fmt.Sprintf("%s- %s:%s", getSpaces(3), v.Local, v.Target))
+		}
+	}
+
+	serviceContent = append(serviceContent, fmt.Sprintf("%slabels:", getSpaces(2)))
+	serviceContent = append(serviceContent, fmt.Sprintf("%screatedBy: \"Apps\"", getSpaces(3)))
+
+	serviceContent = append(serviceContent, "\n")
+
+	return strings.Join(serviceContent, "\n")
+}
+
+func (p *Plugin) GenParams() string {
+	formFields := make([]response.FormField, 0)
+	for _, env := range p.Env {
+		formField := response.FormField{
+			Label:    env.Name,
+			Default:  fmt.Sprintf("%v", env.Value),
+			EnvKey:   env.Key,
+			Required: env.Required,
+		}
+		formFields = append(formFields, formField)
+	}
+	params := map[string]interface{}{
+		"formFields": formFields,
+	}
+	jsonData, err := json.Marshal(params)
+	if err != nil {
+		return ""
+	}
+	return string(jsonData)
+}
+
+func getSpaces(num int) string {
+	spaces := strings.Repeat(" ", 2*num)
+	return spaces
+}
