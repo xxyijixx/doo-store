@@ -32,6 +32,8 @@ func newApp(db *gorm.DB, opts ...gen.DOOption) app {
 	_app.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_app.Name = field.NewString(tableName, "name")
 	_app.Key = field.NewString(tableName, "key")
+	_app.Icon = field.NewString(tableName, "icon")
+	_app.Description = field.NewString(tableName, "description")
 	_app.Type = field.NewString(tableName, "type")
 	_app.Sort = field.NewInt(tableName, "sort")
 	_app.Status = field.NewString(tableName, "status")
@@ -44,15 +46,17 @@ func newApp(db *gorm.DB, opts ...gen.DOOption) app {
 type app struct {
 	appDo
 
-	ALL       field.Asterisk
-	ID        field.Int64
-	CreatedAt field.Time
-	UpdatedAt field.Time
-	Name      field.String
-	Key       field.String
-	Type      field.String
-	Sort      field.Int
-	Status    field.String
+	ALL         field.Asterisk
+	ID          field.Int64
+	CreatedAt   field.Time
+	UpdatedAt   field.Time
+	Name        field.String
+	Key         field.String
+	Icon        field.String
+	Description field.String
+	Type        field.String
+	Sort        field.Int
+	Status      field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -74,6 +78,8 @@ func (a *app) updateTableName(table string) *app {
 	a.UpdatedAt = field.NewTime(table, "updated_at")
 	a.Name = field.NewString(table, "name")
 	a.Key = field.NewString(table, "key")
+	a.Icon = field.NewString(table, "icon")
+	a.Description = field.NewString(table, "description")
 	a.Type = field.NewString(table, "type")
 	a.Sort = field.NewInt(table, "sort")
 	a.Status = field.NewString(table, "status")
@@ -93,12 +99,14 @@ func (a *app) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *app) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 8)
+	a.fieldMap = make(map[string]field.Expr, 10)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
 	a.fieldMap["name"] = a.Name
 	a.fieldMap["key"] = a.Key
+	a.fieldMap["icon"] = a.Icon
+	a.fieldMap["description"] = a.Description
 	a.fieldMap["type"] = a.Type
 	a.fieldMap["sort"] = a.Sort
 	a.fieldMap["status"] = a.Status

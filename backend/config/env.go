@@ -43,7 +43,7 @@ func init() {
 var defaultConfig = envConfigSchema{
 	ENV: "dev",
 
-	STORAGE: "mysql",
+	STORAGE: "sqlite",
 
 	SQLITE_PATH: "./app.db",
 

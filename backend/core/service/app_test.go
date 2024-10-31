@@ -28,7 +28,7 @@ func TestApp(t *testing.T) {
     restart: always
     container_name: ${CONTAINER_NAME}
     networks:
-      - app-network
+      - doo-store-app-network
     ports:
       - 6379:6379
     volumes:
@@ -37,7 +37,7 @@ func TestApp(t *testing.T) {
     labels:
       createdBy: "Apps"
 networks:
-  app-network:
+  doo-store-app-network:
     external: true`,
 		Status: constant.AppNormal,
 	})

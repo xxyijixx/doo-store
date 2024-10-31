@@ -86,21 +86,36 @@ func (*AppService) AppInstall(req request.AppInstall) error {
 		log.Debug("Error query app detail")
 		return err
 	}
-	composeContent := appDetail.DockerCompose
+
 	workspaceDir := path.Join(constant.AppInstallDir, app.Key)
 	err = createDir(workspaceDir)
 	if err != nil {
 		log.Debug("Error create dir")
 		return err
 	}
-	composeFile := fmt.Sprintf("%s/%s/docker-compose.yml", constant.AppInstallDir, app.Key)
+
 	containerName := config.EnvConfig.APP_PREFIX + app.Key + "-" + req.Name
-	composeContent = strings.ReplaceAll(composeContent, "${CONTAINER_NAME}", containerName)
+
+	// 生成环境变量文件
+	envContent := ""
+	envContent += fmt.Sprintf("%s=%s\n", "CONTAINER_NAME", containerName)
 	for key, value := range req.Params {
-		replaceValue := fmt.Sprintf("%v", value)
-		composeContent = strings.ReplaceAll(composeContent, fmt.Sprintf("${%s}", key), replaceValue)
+		envContent += fmt.Sprintf("%s=%s\n", key, value)
 	}
 	paramJson, err := json.Marshal(req.Params)
+	if err != nil {
+		return err
+	}
+	envMap := map[string]string{}
+	envContentLine := strings.Split(envContent, "\n")
+	for _, line := range envContentLine {
+		env := strings.Split(line, "=")
+		if len(env) != 2 {
+			continue
+		}
+		envMap[env[0]] = env[1]
+	}
+	jsonEnv, err := json.Marshal(envMap)
 	if err != nil {
 		return err
 	}
@@ -110,13 +125,21 @@ func (*AppService) AppInstall(req request.AppInstall) error {
 		AppDetailID:   appDetail.ID,
 		Version:       appDetail.Version,
 		Params:        string(paramJson),
-		DockerCompose: composeContent,
+		Env:           string(jsonEnv),
+		DockerCompose: appDetail.DockerCompose,
 		Key:           app.Key,
 		Status:        constant.Installing,
 	}
 	repo.AppInstalled.Create(appInstalled)
 
-	err = os.WriteFile(composeFile, []byte(composeContent), 0644)
+	composeFile := fmt.Sprintf("%s/%s/docker-compose.yml", constant.AppInstallDir, app.Key)
+	err = os.WriteFile(composeFile, []byte(appDetail.DockerCompose), 0644)
+	if err != nil {
+		log.Debug("Error WriteFile", err)
+		return err
+	}
+	envFile := fmt.Sprintf("%s/%s/.env", constant.AppInstallDir, app.Key)
+	err = os.WriteFile(envFile, []byte(envContent), 0644)
 	if err != nil {
 		log.Debug("Error WriteFile", err)
 		return err
@@ -151,6 +174,59 @@ func (*AppService) AppInstallOperate(req request.AppInstalledOperate) error {
 		return err
 	}
 	composeFile := fmt.Sprintf("%s/%s/docker-compose.yml", constant.AppInstallDir, appInstalled.Key)
+
+	if req.Action == "update" {
+		// 重建容器
+		_, err := compose.Down(composeFile)
+		if err != nil {
+			log.Debug("Error docker compose operate")
+			return err
+		}
+
+		_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.Stop)
+
+		envFile := fmt.Sprintf("%s/%s/.env", constant.AppInstallDir, appInstalled.Key)
+		envContent := ""
+		name, exsit := req.Params["name"]
+		containerName := config.EnvConfig.APP_PREFIX + appInstalled.Key + "-"
+		if exsit {
+			containerName += fmt.Sprintf("%s", name)
+		} else {
+			containerName += appInstalled.Name
+		}
+
+		envContent += fmt.Sprintf("%s=%s\n", "CONTAINER_NAME", containerName)
+		for key, value := range req.Params {
+			envContent += fmt.Sprintf("%s=%s\n", key, value)
+		}
+		err = os.WriteFile(envFile, []byte(envContent), 0644)
+		if err != nil {
+			log.Debug("Error WriteFile", err)
+			return err
+		}
+		envMap := map[string]string{}
+		envContentLine := strings.Split(envContent, "\n")
+		for _, line := range envContentLine {
+			env := strings.Split(line, "=")
+			if len(env) != 2 {
+				continue
+			}
+			envMap[env[0]] = env[1]
+		}
+		jsonEnv, err := json.Marshal(envMap)
+		if err != nil {
+			return err
+		}
+		_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Env, string(jsonEnv))
+		_, err = compose.Up(composeFile)
+		if err != nil {
+			_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
+			log.Debug("Error docker compose operate")
+			return err
+		}
+		_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.Running)
+		return nil
+	}
 	stdout, err := compose.Operate(composeFile, req.Action)
 	if err != nil {
 		log.Debug("Error docker compose operate")

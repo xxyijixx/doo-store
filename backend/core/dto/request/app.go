@@ -18,6 +18,7 @@ type AppUnInstall struct {
 }
 
 type AppInstalledOperate struct {
-	Action string `json:"action"`
-	Key    string `json:"-"`
+	Action string                 `json:"action"`
+	Key    string                 `json:"-"`
+	Params map[string]interface{} `json:"params"`
 }

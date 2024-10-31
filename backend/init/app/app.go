@@ -19,6 +19,7 @@ import (
 )
 
 func Init() {
+
 	constant.DataDir = getDataDir(config.EnvConfig.DATA_DIR)
 	constant.AppInstallDir = path.Join(constant.DataDir, "apps")
 	constant.NginxDir = path.Join(constant.DataDir, "nginx")
@@ -35,9 +36,13 @@ func Init() {
 
 	dirs := []string{constant.DataDir, constant.AppInstallDir, constant.NginxDir}
 
+	constant.AppNetwork = config.EnvConfig.APP_PREFIX + "network"
+
 	for _, dir := range dirs {
 		createDir(dir)
 	}
+
+	LoadData()
 
 	_ = docker.CreateDefaultDockerNetwork()
 
@@ -120,7 +125,7 @@ func InitNginxProxy() {
 	}
 
 	endpointsConfig := map[string]*network.EndpointSettings{
-		"app-network": {},
+		constant.AppNetwork: {},
 	}
 	// 添加外部网络
 	if config.EnvConfig.EXTERNAL_NETWORK_NAME != "" {

@@ -1,0 +1,51 @@
+{
+  "plugins": [
+    {
+      "name": "Nginx",
+      "key": "nginx",
+      "description": "Redis is an in-memory data structure store, used as a database, cache and message broker.",
+      "icon": "",
+      "version": "alpine",
+      "github": "",
+      "depends_version": "v0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": 80,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Redis",
+      "key": "redis",
+      "description": "Redis is an in-memory data structure store, used as a database, cache and message broker.",
+      "icon": "",
+      "version": "7.4.1",
+      "github": "",
+      "depends_version": "v0.37.21",
+      "repo": "docker.io/library/redis",
+      "volume": [
+        {
+          "local": "./data",
+          "target": "/data"
+        },
+        {
+          "local": "./logs",
+          "target": "/logs"
+        }
+      ],
+      "env": [
+        {
+          "name": "port",
+          "key": "REDIS_PORT",
+          "value": 6379,
+          "required": false
+        }
+      ]
+    }
+  ]
+}
