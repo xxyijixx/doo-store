@@ -1,6 +1,8 @@
 package v1
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 // @Summary health
 // @Schemes
@@ -10,7 +12,8 @@ import "github.com/gin-gonic/gin"
 // @Produce json
 // @Success 200 {string} string "ok"
 // @Router /public/health [get]
-func (*BaseApi) HealthCheck(c *gin.Context) {
+func (b *BaseApi) HealthCheck(c *gin.Context) {
+
 	c.JSON(200, gin.H{
 		"status": "ok",
 	})

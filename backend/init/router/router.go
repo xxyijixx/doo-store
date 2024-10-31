@@ -2,6 +2,7 @@ package router
 
 import (
 	entryRouter "doo-store/backend/router"
+	"doo-store/backend/router/middleware"
 	"doo-store/docs"
 
 	"github.com/gin-gonic/gin"
@@ -21,6 +22,7 @@ func Routers() *gin.Engine {
 	swaggerRouter.GET("/*any", gs.WrapHandler(swaggerFiles.Handler))
 
 	PrivateGroup := Router.Group("/api/v1")
+	PrivateGroup.Use(middleware.Base())
 	for _, router := range entryRouter.RouterGroupApp {
 		router.InitRouter(PrivateGroup)
 	}

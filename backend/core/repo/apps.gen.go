@@ -34,7 +34,9 @@ func newApp(db *gorm.DB, opts ...gen.DOOption) app {
 	_app.Key = field.NewString(tableName, "key")
 	_app.Icon = field.NewString(tableName, "icon")
 	_app.Description = field.NewString(tableName, "description")
-	_app.Type = field.NewString(tableName, "type")
+	_app.Github = field.NewString(tableName, "github")
+	_app.Class = field.NewString(tableName, "class")
+	_app.DependsVersion = field.NewString(tableName, "depends_version")
 	_app.Sort = field.NewInt(tableName, "sort")
 	_app.Status = field.NewString(tableName, "status")
 
@@ -46,17 +48,19 @@ func newApp(db *gorm.DB, opts ...gen.DOOption) app {
 type app struct {
 	appDo
 
-	ALL         field.Asterisk
-	ID          field.Int64
-	CreatedAt   field.Time
-	UpdatedAt   field.Time
-	Name        field.String
-	Key         field.String
-	Icon        field.String
-	Description field.String
-	Type        field.String
-	Sort        field.Int
-	Status      field.String
+	ALL            field.Asterisk
+	ID             field.Int64
+	CreatedAt      field.Time
+	UpdatedAt      field.Time
+	Name           field.String
+	Key            field.String
+	Icon           field.String
+	Description    field.String
+	Github         field.String
+	Class          field.String
+	DependsVersion field.String
+	Sort           field.Int
+	Status         field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -80,7 +84,9 @@ func (a *app) updateTableName(table string) *app {
 	a.Key = field.NewString(table, "key")
 	a.Icon = field.NewString(table, "icon")
 	a.Description = field.NewString(table, "description")
-	a.Type = field.NewString(table, "type")
+	a.Github = field.NewString(table, "github")
+	a.Class = field.NewString(table, "class")
+	a.DependsVersion = field.NewString(table, "depends_version")
 	a.Sort = field.NewInt(table, "sort")
 	a.Status = field.NewString(table, "status")
 
@@ -99,7 +105,7 @@ func (a *app) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *app) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 10)
+	a.fieldMap = make(map[string]field.Expr, 12)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
@@ -107,7 +113,9 @@ func (a *app) fillFieldMap() {
 	a.fieldMap["key"] = a.Key
 	a.fieldMap["icon"] = a.Icon
 	a.fieldMap["description"] = a.Description
-	a.fieldMap["type"] = a.Type
+	a.fieldMap["github"] = a.Github
+	a.fieldMap["class"] = a.Class
+	a.fieldMap["depends_version"] = a.DependsVersion
 	a.fieldMap["sort"] = a.Sort
 	a.fieldMap["status"] = a.Status
 }

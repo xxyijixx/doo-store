@@ -24,6 +24,11 @@ const docTemplate = `{
     "paths": {
         "/apps": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -42,16 +47,16 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "default": 10,
-                        "description": "pageSize",
-                        "name": "pageSize",
+                        "description": "page_size",
+                        "name": "page_size",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "success",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Response"
                         }
                     }
                 }
@@ -59,6 +64,11 @@ const docTemplate = `{
         },
         "/apps/{key}": {
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -89,14 +99,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "success",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Response"
                         }
                     }
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -127,14 +142,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "success",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Response"
                         }
                     }
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -165,9 +185,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "success",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Response"
                         }
                     }
                 }
@@ -175,6 +195,11 @@ const docTemplate = `{
         },
         "/apps/{key}/detail": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -193,9 +218,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "success",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Response"
                         }
                     }
                 }
@@ -225,6 +250,20 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.Response": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 200
+                },
+                "data": {},
+                "msg": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
         "request.AppInstall": {
             "type": "object",
             "properties": {
@@ -242,6 +281,10 @@ const docTemplate = `{
             "properties": {
                 "action": {
                     "type": "string"
+                },
+                "params": {
+                    "type": "object",
+                    "additionalProperties": true
                 }
             }
         },
@@ -252,7 +295,7 @@ const docTemplate = `{
     "securityDefinitions": {
         "BearerAuth": {
             "type": "apiKey",
-            "name": "Authorization",
+            "name": "token",
             "in": "header"
         }
     }

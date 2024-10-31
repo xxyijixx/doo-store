@@ -11,13 +11,12 @@ type AppRouter struct {
 
 func (a *AppRouter) InitRouter(Router *gin.RouterGroup) {
 	appRouter := Router.Group("apps")
-	baseApi := v1.ApiGroupApp.BaseApi
+	baseApi := v1.Api
 	{
 		appRouter.GET("", baseApi.AppPage)
 		appRouter.POST("/:key", baseApi.AppInstall)
 		appRouter.PUT("/:key", baseApi.AppInstallOperate)
 		appRouter.DELETE("/:key", baseApi.AppUnInstall)
 		appRouter.GET("/:key/detail", baseApi.AppDetailByKey)
-
 	}
 }

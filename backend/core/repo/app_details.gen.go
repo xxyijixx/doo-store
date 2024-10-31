@@ -31,7 +31,9 @@ func newAppDetail(db *gorm.DB, opts ...gen.DOOption) appDetail {
 	_appDetail.CreatedAt = field.NewTime(tableName, "created_at")
 	_appDetail.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_appDetail.AppID = field.NewInt64(tableName, "app_id")
+	_appDetail.Repo = field.NewString(tableName, "repo")
 	_appDetail.Version = field.NewString(tableName, "version")
+	_appDetail.DependsVersion = field.NewString(tableName, "depends_version")
 	_appDetail.Params = field.NewString(tableName, "params")
 	_appDetail.DockerCompose = field.NewString(tableName, "docker_compose")
 	_appDetail.Status = field.NewString(tableName, "status")
@@ -44,15 +46,17 @@ func newAppDetail(db *gorm.DB, opts ...gen.DOOption) appDetail {
 type appDetail struct {
 	appDetailDo
 
-	ALL           field.Asterisk
-	ID            field.Int64
-	CreatedAt     field.Time
-	UpdatedAt     field.Time
-	AppID         field.Int64
-	Version       field.String
-	Params        field.String
-	DockerCompose field.String
-	Status        field.String
+	ALL            field.Asterisk
+	ID             field.Int64
+	CreatedAt      field.Time
+	UpdatedAt      field.Time
+	AppID          field.Int64
+	Repo           field.String
+	Version        field.String
+	DependsVersion field.String
+	Params         field.String
+	DockerCompose  field.String
+	Status         field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -73,7 +77,9 @@ func (a *appDetail) updateTableName(table string) *appDetail {
 	a.CreatedAt = field.NewTime(table, "created_at")
 	a.UpdatedAt = field.NewTime(table, "updated_at")
 	a.AppID = field.NewInt64(table, "app_id")
+	a.Repo = field.NewString(table, "repo")
 	a.Version = field.NewString(table, "version")
+	a.DependsVersion = field.NewString(table, "depends_version")
 	a.Params = field.NewString(table, "params")
 	a.DockerCompose = field.NewString(table, "docker_compose")
 	a.Status = field.NewString(table, "status")
@@ -93,12 +99,14 @@ func (a *appDetail) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *appDetail) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 8)
+	a.fieldMap = make(map[string]field.Expr, 10)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
 	a.fieldMap["app_id"] = a.AppID
+	a.fieldMap["repo"] = a.Repo
 	a.fieldMap["version"] = a.Version
+	a.fieldMap["depends_version"] = a.DependsVersion
 	a.fieldMap["params"] = a.Params
 	a.fieldMap["docker_compose"] = a.DockerCompose
 	a.fieldMap["status"] = a.Status
