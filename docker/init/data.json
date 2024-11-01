@@ -3,7 +3,7 @@
     {
       "name": "Nginx",
       "key": "nginx",
-      "description": "Redis is an in-memory data structure store, used as a database, cache and message broker.",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
       "icon": "",
       "version": "alpine",
       "github": "",

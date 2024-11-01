@@ -3,6 +3,7 @@ package v1
 import (
 	"doo-store/backend/core/api/v1/helper"
 	"doo-store/backend/core/dto/request"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,8 +14,12 @@ import (
 // @Security BearerAuth
 // @Tags
 // @Produce json
-// @Param page query integer false "page" default(0)
-// @Param page_size query integer false "page_size" default(10)
+// @Param page query integer true "page" default(1)
+// @Param page_size query integer true "page_size" default(10)
+// @Param class query string false "class"
+// @Param name query string false "name"
+// @Param id query integer false "id"
+// @Param description query string false "description"
 // @Success 200 {object} dto.Response "success"
 // @Router /apps [get]
 func (*BaseApi) AppPage(c *gin.Context) {
@@ -29,6 +34,7 @@ func (*BaseApi) AppPage(c *gin.Context) {
 		helper.Error(c, err.Error())
 		return
 	}
+	fmt.Println("req", req)
 	data, err := appService.AppPage(req)
 	if err != nil {
 		helper.Error(c, err.Error())

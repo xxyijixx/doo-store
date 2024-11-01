@@ -40,7 +40,21 @@ func NewIAppService() IAppService {
 
 func (*AppService) AppPage(req request.AppSearch) (*dto.PageResult, error) {
 
-	result, count, err := repo.App.Order(repo.App.Sort.Desc()).FindByPage(req.Page, req.PageSize)
+	var query repo.IAppDo
+	query = repo.App.Order(repo.App.Sort.Desc())
+	if req.Name != "" {
+		query = query.Where(repo.App.Name.Like(fmt.Sprintf("%%%s%%", req.Name)))
+	}
+	if req.Class != "" {
+		query = query.Where(repo.App.Class.Eq(req.Class))
+	}
+	if req.ID != 0 {
+		query = query.Where(repo.App.ID.Eq(req.ID))
+	}
+	if req.Description != "" {
+		query = query.Where(repo.App.Description.Like(fmt.Sprintf("%%%s%%", req.Description)))
+	}
+	result, count, err := query.FindByPage(req.Page-1, req.PageSize)
 
 	if err != nil {
 		return nil, err

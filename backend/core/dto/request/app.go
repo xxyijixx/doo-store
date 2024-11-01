@@ -4,7 +4,10 @@ import "doo-store/backend/core/dto"
 
 type AppSearch struct {
 	dto.PageInfo
-	Name string `json:"name"`
+	ID          int64  `form:"id" json:"id"`
+	Name        string `form:"name" json:"name"`
+	Class       string `form:"class" json:"class"`
+	Description string `form:"description" json:"description"`
 }
 
 type AppInstall struct {
