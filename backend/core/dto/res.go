@@ -6,7 +6,7 @@ type PageResult struct {
 }
 
 type Response struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
+	Code int         `json:"code" example:"200"`
+	Msg  string      `json:"msg" example:"success"`
+	Data interface{} `json:"data"`
 }

@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -24,6 +25,7 @@ type Plugin struct {
 	Icon           string       `json:"icon"`
 	Version        string       `json:"version"`
 	Github         string       `json:"github"`
+	Class          string       `json:"class"`
 	DependsVersion string       `json:"depends_version"`
 	Repo           string       `json:"repo"`
 	Volume         []Volume     `json:"volume"`
@@ -43,23 +45,28 @@ type Volume struct {
 }
 
 func LoadData() error {
+	logrus.Info("Loading data...")
 	var config Welcome
 	filename := "./docker/init/data.json"
 	data, err := os.ReadFile(filename)
 	if os.IsNotExist(err) {
+		logrus.Debug("File not exist:", filename)
 		return err
 	}
 
 	if err != nil {
+		logrus.Debug(err.Error())
 		return err
 	}
 
 	err = json.Unmarshal(data, &config)
 	if err != nil {
+		logrus.Debug(err.Error())
 		return err
 	}
 	apps, err := repo.App.Find()
 	if err != nil && err != gorm.ErrRecordNotFound {
+		logrus.Debug(err.Error())
 		return err
 	}
 	appKeyMap := make(map[string]string)
@@ -68,20 +75,22 @@ func LoadData() error {
 	}
 	err = repo.DB.Transaction(func(tx *gorm.DB) error {
 		for _, p := range config.Plugins {
-			fmt.Printf("p.GenComposeFile():\n%v\n", p.GenComposeFile())
 			// 对于key存在，忽略
 			if _, exist := appKeyMap[p.Key]; exist {
 				continue
 			}
 			app := &model.App{
-				Name:        p.Name,
-				Key:         p.Key,
-				Icon:        p.Icon,
-				Description: p.Description,
-				Status:      constant.AppNormal,
+				Name:           p.Name,
+				Key:            p.Key,
+				Icon:           p.Icon,
+				Class:          p.Class,
+				Description:    p.Description,
+				DependsVersion: p.DependsVersion,
+				Status:         constant.AppNormal,
 			}
 			err := repo.Use(tx).App.Create(app)
 			if err != nil {
+				logrus.Debug(err.Error())
 				return err
 			}
 			appKeyMap[p.Key] = "true"
@@ -96,6 +105,7 @@ func LoadData() error {
 			}
 			err = repo.Use(tx).AppDetail.Create(appDetail)
 			if err != nil {
+				logrus.Debug(err.Error())
 				return err
 			}
 		}
@@ -161,7 +171,7 @@ func (p *Plugin) GenParams() string {
 		formFields = append(formFields, formField)
 	}
 	params := map[string]interface{}{
-		"formFields": formFields,
+		"form_fields": formFields,
 	}
 	jsonData, err := json.Marshal(params)
 	if err != nil {

@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"doo-store/backend/core/api/v1/helper"
-	"math/rand"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,7 +15,7 @@ func Base() gin.HandlerFunc {
 
 		// 记录登录信息
 		c.Set("token", helper.Token(c))
-		c.Set("userid", rand.Intn(1000000))
+		c.Set("client_version", helper.Version(c))
 
 		c.Next()
 	}

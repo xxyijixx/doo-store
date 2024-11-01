@@ -2,6 +2,7 @@ package service
 
 import (
 	"doo-store/backend/constant"
+	"doo-store/backend/core/dto"
 	"doo-store/backend/utils/common"
 	"encoding/json"
 	"errors"
@@ -18,7 +19,8 @@ type DootaskService struct {
 }
 
 type IDootaskService interface {
-	GetUserInfo(token string) (interface{}, error)
+	GetUserInfo(token string) (*dto.UserInfoResp, error)
+	GetVersoinInfo() (*dto.VersionInfoResp, error)
 }
 
 func NewIDootaskService() IDootaskService {
@@ -27,7 +29,10 @@ func NewIDootaskService() IDootaskService {
 	}
 }
 
-func (d *DootaskService) GetUserInfo(token string) (interface{}, error) {
+func (d *DootaskService) GetUserInfo(token string) (*dto.UserInfoResp, error) {
+	if token == "" {
+		return nil, errors.New(constant.ErrNoPermission)
+	}
 	url := fmt.Sprintf("%s%s?token=%s", constant.DooTaskUrl, "/api/users/info", token)
 	logrus.Debugf("dootask get user info url: %s", url)
 	result, err := d.client.Get(url)
@@ -35,17 +40,34 @@ func (d *DootaskService) GetUserInfo(token string) (interface{}, error) {
 		return nil, err
 	}
 
+	fmt.Println("DooTask Result", string(result))
+
 	info, err := d.UnmarshalAndCheckResponse(result)
 	if err != nil {
 		return nil, err
 	}
-	// userInfo := new(interfaces.UserInfoResp)
-	// if err := common.MapToStruct(info, userInfo); err != nil {
-	// 	return nil, err
-	// }
+	userInfo := new(dto.UserInfoResp)
+	if err := common.MapToStruct(info, userInfo); err != nil {
+		return nil, err
+	}
 	// okr普通人员是否拥有管理员有权限
 	// userInfo.OkrAdminOwner = OkrService.GetSettingSuperiorUserId() == userInfo.Userid
-	return info, nil
+	return userInfo, nil
+}
+
+func (d *DootaskService) GetVersoinInfo() (*dto.VersionInfoResp, error) {
+	url := fmt.Sprintf("%s%s", constant.DooTaskUrl, "/api/system/version")
+	logrus.Debugf("dootask get system info url: %s", url)
+	result, err := d.client.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	versionInfo := &dto.VersionInfoResp{}
+
+	if err := common.StrToStruct(string(result), &versionInfo); err != nil {
+		return nil, err
+	}
+	return versionInfo, nil
 }
 
 // 解码并检查返回数据

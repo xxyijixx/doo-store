@@ -5,8 +5,10 @@ import (
 	"doo-store/backend/constant"
 	"doo-store/backend/core/dto"
 	"doo-store/backend/core/dto/request"
+	"doo-store/backend/core/dto/response"
 	"doo-store/backend/core/model"
 	"doo-store/backend/core/repo"
+	"doo-store/backend/utils/common"
 	"doo-store/backend/utils/compose"
 	"doo-store/backend/utils/docker"
 	"doo-store/backend/utils/nginx"
@@ -26,7 +28,7 @@ type AppService struct {
 
 type IAppService interface {
 	AppPage(req request.AppSearch) (*dto.PageResult, error)
-	AppDetailByKey(key string) (*model.AppDetail, error)
+	AppDetailByKey(key string) (*response.AppDetail, error)
 	AppInstall(req request.AppInstall) error
 	AppInstallOperate(req request.AppInstalledOperate) error
 	AppUnInstall(req request.AppUnInstall) error
@@ -51,7 +53,7 @@ func (*AppService) AppPage(req request.AppSearch) (*dto.PageResult, error) {
 	return pageResult, nil
 }
 
-func (*AppService) AppDetailByKey(key string) (*model.AppDetail, error) {
+func (*AppService) AppDetailByKey(key string) (*response.AppDetail, error) {
 
 	app, err := repo.App.Where(repo.App.Key.Eq(key)).First()
 	if err != nil {
@@ -61,19 +63,17 @@ func (*AppService) AppDetailByKey(key string) (*model.AppDetail, error) {
 	if err != nil {
 		return nil, err
 	}
-	return appDetail, nil
-}
+	params := response.AppParams{}
+	err = common.StrToStruct(appDetail.Params, &params)
+	if err != nil {
+		return nil, err
+	}
+	resp := &response.AppDetail{
+		AppDetail: *appDetail,
+		Params:    params,
+	}
 
-func (*AppService) AppDetailByKeyAndVersion(key, version string) (*model.AppDetail, error) {
-	app, err := repo.App.Where(repo.App.Key.Eq(key)).First()
-	if err != nil {
-		return nil, err
-	}
-	appDetail, err := repo.AppDetail.Where(repo.AppDetail.AppID.Eq(app.ID), repo.AppDetail.Version.Eq(version)).First()
-	if err != nil {
-		return nil, err
-	}
-	return appDetail, nil
+	return resp, nil
 }
 
 func (*AppService) AppInstall(req request.AppInstall) error {

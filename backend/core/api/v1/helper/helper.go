@@ -1,7 +1,6 @@
 package helper
 
 import (
-	"doo-store/backend/constant"
 	"doo-store/backend/core/dto"
 	"net/http"
 	"strings"
@@ -35,6 +34,18 @@ func Token(c *gin.Context) string {
 	return token
 }
 
+// Version 获取Version（Header、Query、Cookie）
+func Version(c *gin.Context) string {
+	token := c.GetHeader("version")
+	if token == "" {
+		token = Input(c, "version")
+	}
+	if token == "" {
+		token = Cookie(c, "version")
+	}
+	return token
+}
+
 // Input 获取参数（优先POST、取Query）
 func Input(c *gin.Context, key string) string {
 	if c.PostForm(key) != "" {
@@ -58,14 +69,32 @@ func Cookie(c *gin.Context, name string) string {
 	return value
 }
 
-func SuccessWithData(ctx *gin.Context, data interface{}) {
-	if data == nil {
+func Response(c *gin.Context, code int, msg string, values ...any) {
+	var data any
+	if len(values) == 1 {
+		data = values[0]
+	} else if len(values) == 0 {
 		data = gin.H{}
+	} else {
+		data = values
 	}
-	res := dto.Response{
-		Code: constant.CodeSuccess,
+	c.JSON(code, dto.Response{
+		Code: code,
+		Msg:  msg,
 		Data: data,
-	}
-	ctx.JSON(http.StatusOK, res)
-	ctx.Abort()
+	})
+	c.Abort()
+}
+
+func SuccessWith(ctx *gin.Context, values ...any) {
+	Response(ctx, http.StatusOK, "success", values...)
+}
+
+// Error 失败
+func Error(c *gin.Context, values ...any) {
+	Response(c, http.StatusBadRequest, "error", values...)
+}
+
+func ErrorWith(c *gin.Context, msgKey string, err error, values ...any) {
+	Response(c, http.StatusBadRequest, "error", values...)
 }

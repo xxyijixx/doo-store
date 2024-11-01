@@ -1,4 +1,14 @@
 definitions:
+  dto.Response:
+    properties:
+      code:
+        example: 200
+        type: integer
+      data: {}
+      msg:
+        example: success
+        type: string
+    type: object
   request.AppInstall:
     properties:
       name:
@@ -37,17 +47,17 @@ paths:
         name: page
         type: integer
       - default: 10
-        description: pageSize
+        description: page_size
         in: query
-        name: pageSize
+        name: page_size
         type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: ok
+          description: success
           schema:
-            type: string
+            $ref: '#/definitions/dto.Response'
       security:
       - BearerAuth: []
       summary: app page
@@ -73,9 +83,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: ok
+          description: success
           schema:
-            type: string
+            $ref: '#/definitions/dto.Response'
       security:
       - BearerAuth: []
       summary: app uninstall
@@ -100,9 +110,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: ok
+          description: success
           schema:
-            type: string
+            $ref: '#/definitions/dto.Response'
       security:
       - BearerAuth: []
       summary: app install
@@ -127,9 +137,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: ok
+          description: success
           schema:
-            type: string
+            $ref: '#/definitions/dto.Response'
       security:
       - BearerAuth: []
       summary: app update
@@ -147,9 +157,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: ok
+          description: success
           schema:
-            type: string
+            $ref: '#/definitions/dto.Response'
       security:
       - BearerAuth: []
       summary: app detail

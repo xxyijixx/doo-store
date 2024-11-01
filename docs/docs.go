@@ -47,16 +47,16 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "default": 10,
-                        "description": "pageSize",
-                        "name": "pageSize",
+                        "description": "page_size",
+                        "name": "page_size",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "success",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Response"
                         }
                     }
                 }
@@ -99,9 +99,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "success",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Response"
                         }
                     }
                 }
@@ -142,9 +142,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "success",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Response"
                         }
                     }
                 }
@@ -185,9 +185,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "success",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Response"
                         }
                     }
                 }
@@ -218,9 +218,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "success",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Response"
                         }
                     }
                 }
@@ -250,6 +250,20 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.Response": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 200
+                },
+                "data": {},
+                "msg": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
         "request.AppInstall": {
             "type": "object",
             "properties": {
