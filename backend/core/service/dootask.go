@@ -40,7 +40,7 @@ func (d *DootaskService) GetUserInfo(token string) (*dto.UserInfoResp, error) {
 		return nil, err
 	}
 
-	fmt.Println("DooTask Result", string(result))
+	// fmt.Println("DooTask Result", string(result))
 
 	info, err := d.UnmarshalAndCheckResponse(result)
 	if err != nil {

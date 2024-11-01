@@ -31,16 +31,42 @@
                 "parameters": [
                     {
                         "type": "integer",
-                        "default": 0,
+                        "default": 1,
                         "description": "page",
                         "name": "page",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "integer",
                         "default": 10,
                         "description": "page_size",
                         "name": "page_size",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "class",
+                        "name": "class",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "name",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "description",
+                        "name": "description",
                         "in": "query"
                     }
                 ],
