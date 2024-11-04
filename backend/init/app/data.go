@@ -86,7 +86,7 @@ func LoadData() error {
 				Class:          p.Class,
 				Description:    p.Description,
 				DependsVersion: p.DependsVersion,
-				Status:         constant.AppNormal,
+				Status:         constant.AppUnused,
 			}
 			err := repo.Use(tx).App.Create(app)
 			if err != nil {

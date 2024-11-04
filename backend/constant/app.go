@@ -10,7 +10,9 @@ const (
 	UpErr      = "UpErr"
 
 	AppNormal   = "Normal"
+	AppUnused   = "Unused"
 	AppTakeDown = "TakeDown"
+	AppInUse    = "InUse"
 
 	CPUS          = "CPUS"
 	MemoryLimit   = "MEMORY_LIMIT"

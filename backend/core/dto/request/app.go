@@ -25,3 +25,8 @@ type AppInstalledOperate struct {
 	Key    string                 `json:"-"`
 	Params map[string]interface{} `json:"params"`
 }
+
+type AppInstalledSearch struct {
+	dto.PageInfo
+	Class string
+}
