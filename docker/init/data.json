@@ -48,6 +48,186 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "Nginx2",
+      "key": "nginx2",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Nginx3",
+      "key": "nginx3",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Nginx4",
+      "key": "nginx4",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Nginx5",
+      "key": "nginx5",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Nginx6",
+      "key": "nginx6",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Nginx7",
+      "key": "nginx7",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Nginx8",
+      "key": "nginx8",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Nginx9",
+      "key": "nginx9",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Nginx10",
+      "key": "nginx10",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "required": true
+        }
+      ]
     }
   ]
 }

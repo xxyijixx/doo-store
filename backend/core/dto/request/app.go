@@ -28,5 +28,5 @@ type AppInstalledOperate struct {
 
 type AppInstalledSearch struct {
 	dto.PageInfo
-	Class string
+	Class string `form:"class" json:"class"`
 }

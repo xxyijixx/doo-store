@@ -15,7 +15,7 @@ import (
 // @Security BearerAuth
 // @Tags app
 // @Produce json
-// @Param Language header string false "i18n" default("zh")
+// @Param language header string false "i18n" default(zh)
 // @Param page query integer true "page" default(1)
 // @Param page_size query integer true "page_size" default(10)
 // @Param class query string false "class"
@@ -51,7 +51,7 @@ func (*BaseApi) AppPage(c *gin.Context) {
 // @Security BearerAuth
 // @Tags app
 // @Produce json
-// @Param Language header string false "i18n" default("zh")
+// @Param language header string false "i18n" default(zh)
 // @Param key path string true "key"
 // @Success 200 {object} dto.Response "success"
 // @Router /apps/{key}/detail [get]
@@ -77,7 +77,7 @@ func (*BaseApi) AppDetailByKey(c *gin.Context) {
 // @Tags app
 // @Accept json
 // @Produce json
-// @Param Language header string false "i18n" default("zh")
+// @Param language header string false "i18n" default(zh)
 // @Param key path string true "key"
 // @Param data body request.AppInstall true "RequestBody"
 // @Success 200 {object} dto.Response "success"
@@ -111,7 +111,7 @@ func (*BaseApi) AppInstall(c *gin.Context) {
 // @Tags app
 // @Accept json
 // @Produce json
-// @Param Language header string false "i18n" default("zh")
+// @Param language header string false "i18n" default(zh)
 // @Param key path string true "key"
 // @Param data body request.AppInstalledOperate true "RequestBody"
 // @Success 200 {object} dto.Response "success"
@@ -145,7 +145,7 @@ func (*BaseApi) AppInstallOperate(c *gin.Context) {
 // @Tags app
 // @Accept json
 // @Produce json
-// @Param Language header string false "i18n" default("zh")
+// @Param language header string false "i18n" default(zh)
 // @Param key path string true "key"
 // @Param data body request.AppUnInstall true "RequestBody"
 // @Success 200 {object} dto.Response "success"
@@ -178,7 +178,7 @@ func (*BaseApi) AppUnInstall(c *gin.Context) {
 // @Security BearerAuth
 // @Tags app
 // @Produce json
-// @Param Language header string false "i18n" default("zh")
+// @Param language header string false "i18n" default(zh)
 // @Param page query integer true "page" default(1)
 // @Param page_size query integer true "page_size" default(10)
 // @Param class query string false "class"
@@ -210,7 +210,7 @@ func (*BaseApi) AppInstalledPage(c *gin.Context) {
 // @Security BearerAuth
 // @Tags app
 // @Produce json
-// @Param Language header string false "i18n" default("zh")
+// @Param language header string false "i18n" default(zh)
 // @Success 200 {object} dto.Response "success"
 // @Router /apps/tags [get]
 func (*BaseApi) AppTags(c *gin.Context) {

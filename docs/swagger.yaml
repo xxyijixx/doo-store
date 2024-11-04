@@ -41,10 +41,10 @@ paths:
   /apps:
     get:
       parameters:
-      - default: '"zh"'
+      - default: zh
         description: i18n
         in: header
-        name: Language
+        name: language
         type: string
       - default: 1
         description: page
@@ -91,10 +91,10 @@ paths:
       consumes:
       - application/json
       parameters:
-      - default: '"zh"'
+      - default: zh
         description: i18n
         in: header
-        name: Language
+        name: language
         type: string
       - description: key
         in: path
@@ -123,10 +123,10 @@ paths:
       consumes:
       - application/json
       parameters:
-      - default: '"zh"'
+      - default: zh
         description: i18n
         in: header
-        name: Language
+        name: language
         type: string
       - description: key
         in: path
@@ -155,10 +155,10 @@ paths:
       consumes:
       - application/json
       parameters:
-      - default: '"zh"'
+      - default: zh
         description: i18n
         in: header
-        name: Language
+        name: language
         type: string
       - description: key
         in: path
@@ -186,10 +186,10 @@ paths:
   /apps/{key}/detail:
     get:
       parameters:
-      - default: '"zh"'
+      - default: zh
         description: i18n
         in: header
-        name: Language
+        name: language
         type: string
       - description: key
         in: path
@@ -211,10 +211,10 @@ paths:
   /apps/installed:
     get:
       parameters:
-      - default: '"zh"'
+      - default: zh
         description: i18n
         in: header
-        name: Language
+        name: language
         type: string
       - default: 1
         description: page
@@ -247,10 +247,10 @@ paths:
   /apps/tags:
     get:
       parameters:
-      - default: '"zh"'
+      - default: zh
         description: i18n
         in: header
-        name: Language
+        name: language
         type: string
       produces:
       - application/json

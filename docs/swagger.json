@@ -31,9 +31,9 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "default": "\"zh\"",
+                        "default": "zh",
                         "description": "i18n",
-                        "name": "Language",
+                        "name": "language",
                         "in": "header"
                     },
                     {
@@ -104,9 +104,9 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "default": "\"zh\"",
+                        "default": "zh",
                         "description": "i18n",
-                        "name": "Language",
+                        "name": "language",
                         "in": "header"
                     },
                     {
@@ -159,9 +159,9 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "default": "\"zh\"",
+                        "default": "zh",
                         "description": "i18n",
-                        "name": "Language",
+                        "name": "language",
                         "in": "header"
                     }
                 ],
@@ -195,9 +195,9 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "default": "\"zh\"",
+                        "default": "zh",
                         "description": "i18n",
-                        "name": "Language",
+                        "name": "language",
                         "in": "header"
                     },
                     {
@@ -245,9 +245,9 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "default": "\"zh\"",
+                        "default": "zh",
                         "description": "i18n",
-                        "name": "Language",
+                        "name": "language",
                         "in": "header"
                     },
                     {
@@ -295,9 +295,9 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "default": "\"zh\"",
+                        "default": "zh",
                         "description": "i18n",
-                        "name": "Language",
+                        "name": "language",
                         "in": "header"
                     },
                     {
@@ -344,9 +344,9 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "default": "\"zh\"",
+                        "default": "zh",
                         "description": "i18n",
-                        "name": "Language",
+                        "name": "language",
                         "in": "header"
                     },
                     {

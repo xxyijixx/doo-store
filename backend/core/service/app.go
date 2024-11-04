@@ -153,6 +153,7 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 		Name:          req.Name,
 		AppID:         app.ID,
 		AppDetailID:   appDetail.ID,
+		Class:         app.Class,
 		Repo:          appDetail.Repo,
 		Version:       appDetail.Version,
 		Params:        string(paramJson),
@@ -276,7 +277,7 @@ func (*AppService) AppInstalledPage(ctx dto.ServiceContext, req request.AppInsta
 	query = repo.AppInstalled.Order(repo.AppInstalled.ID.Desc())
 
 	if req.Class != "" {
-		query = query.Where(repo.App.Class.Eq(req.Class))
+		query = query.Where(repo.AppInstalled.Class.Eq(req.Class))
 	}
 
 	result, count, err := query.FindByPage(req.Page-1, req.PageSize)

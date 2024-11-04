@@ -35,6 +35,7 @@ func newAppInstalled(db *gorm.DB, opts ...gen.DOOption) appInstalled {
 	_appInstalled.AppDetailID = field.NewInt64(tableName, "app_detail_id")
 	_appInstalled.Key = field.NewString(tableName, "key")
 	_appInstalled.Repo = field.NewString(tableName, "repo")
+	_appInstalled.Class = field.NewString(tableName, "class")
 	_appInstalled.Version = field.NewString(tableName, "version")
 	_appInstalled.Params = field.NewString(tableName, "params")
 	_appInstalled.Env = field.NewString(tableName, "env")
@@ -58,6 +59,7 @@ type appInstalled struct {
 	AppDetailID   field.Int64
 	Key           field.String
 	Repo          field.String
+	Class         field.String
 	Version       field.String
 	Params        field.String
 	Env           field.String
@@ -87,6 +89,7 @@ func (a *appInstalled) updateTableName(table string) *appInstalled {
 	a.AppDetailID = field.NewInt64(table, "app_detail_id")
 	a.Key = field.NewString(table, "key")
 	a.Repo = field.NewString(table, "repo")
+	a.Class = field.NewString(table, "class")
 	a.Version = field.NewString(table, "version")
 	a.Params = field.NewString(table, "params")
 	a.Env = field.NewString(table, "env")
@@ -108,7 +111,7 @@ func (a *appInstalled) GetFieldByName(fieldName string) (field.OrderExpr, bool) 
 }
 
 func (a *appInstalled) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 13)
+	a.fieldMap = make(map[string]field.Expr, 14)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
@@ -117,6 +120,7 @@ func (a *appInstalled) fillFieldMap() {
 	a.fieldMap["app_detail_id"] = a.AppDetailID
 	a.fieldMap["key"] = a.Key
 	a.fieldMap["repo"] = a.Repo
+	a.fieldMap["class"] = a.Class
 	a.fieldMap["version"] = a.Version
 	a.fieldMap["params"] = a.Params
 	a.fieldMap["env"] = a.Env

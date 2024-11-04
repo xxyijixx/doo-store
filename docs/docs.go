@@ -39,9 +39,9 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "default": "\"zh\"",
+                        "default": "zh",
                         "description": "i18n",
-                        "name": "Language",
+                        "name": "language",
                         "in": "header"
                     },
                     {
@@ -112,9 +112,9 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "default": "\"zh\"",
+                        "default": "zh",
                         "description": "i18n",
-                        "name": "Language",
+                        "name": "language",
                         "in": "header"
                     },
                     {
@@ -167,9 +167,9 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "default": "\"zh\"",
+                        "default": "zh",
                         "description": "i18n",
-                        "name": "Language",
+                        "name": "language",
                         "in": "header"
                     }
                 ],
@@ -203,9 +203,9 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "default": "\"zh\"",
+                        "default": "zh",
                         "description": "i18n",
-                        "name": "Language",
+                        "name": "language",
                         "in": "header"
                     },
                     {
@@ -253,9 +253,9 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "default": "\"zh\"",
+                        "default": "zh",
                         "description": "i18n",
-                        "name": "Language",
+                        "name": "language",
                         "in": "header"
                     },
                     {
@@ -303,9 +303,9 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "default": "\"zh\"",
+                        "default": "zh",
                         "description": "i18n",
-                        "name": "Language",
+                        "name": "language",
                         "in": "header"
                     },
                     {
@@ -352,9 +352,9 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "default": "\"zh\"",
+                        "default": "zh",
                         "description": "i18n",
-                        "name": "Language",
+                        "name": "language",
                         "in": "header"
                     },
                     {

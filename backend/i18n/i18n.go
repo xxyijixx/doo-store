@@ -68,7 +68,7 @@ func GinI18nLocalize() gin.HandlerFunc {
 		}),
 		ginI18n.WithGetLngHandle(
 			func(context *gin.Context, defaultLng string) string {
-				lng := context.GetHeader("Language")
+				lng := context.GetHeader("language")
 				if lng == "" {
 					lng = context.Query("language")
 				}
