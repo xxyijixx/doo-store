@@ -60,8 +60,8 @@ type VersionInfoResp struct {
 	} `json:"publish"`
 }
 
-func (v *VersionInfoResp) CheckVersion(currentVersion, requiredVersion string) (bool, error) {
-	current, err := v.parseVersion(currentVersion)
+func (v *VersionInfoResp) CheckVersion(requiredVersion string) (bool, error) {
+	current, err := v.parseVersion(v.Version)
 	if err != nil {
 		return false, err
 	}
