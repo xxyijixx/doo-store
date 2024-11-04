@@ -73,8 +73,19 @@ func LoadData() error {
 	for _, app := range apps {
 		appKeyMap[app.Key] = "true"
 	}
+	tags, err := repo.Tag.Find()
+	if err != nil && err != gorm.ErrRecordNotFound {
+		logrus.Debug(err.Error())
+		return err
+	}
+	tagMap := make(map[string]string)
+	oldTagMap := make(map[string]*model.Tag)
+	for _, tag := range tags {
+		oldTagMap[tag.Name] = tag
+	}
 	err = repo.DB.Transaction(func(tx *gorm.DB) error {
 		for _, p := range config.Plugins {
+			tagMap[p.Class] = "true"
 			// 对于key存在，忽略
 			if _, exist := appKeyMap[p.Key]; exist {
 				continue
@@ -94,6 +105,7 @@ func LoadData() error {
 				return err
 			}
 			appKeyMap[p.Key] = "true"
+
 			appDetail := &model.AppDetail{
 				AppID:          app.ID,
 				Repo:           p.Repo,
@@ -109,6 +121,24 @@ func LoadData() error {
 				return err
 			}
 		}
+
+		needTags := make([]*model.Tag, 0)
+		unneedTags := make([]*model.Tag, 0)
+		for key := range tagMap {
+			if _, exist := oldTagMap[key]; !exist {
+				needTags = append(needTags, &model.Tag{
+					Name: key,
+					Key:  key,
+				})
+			}
+		}
+		for key, tag := range oldTagMap {
+			if _, exist := tagMap[key]; !exist {
+				unneedTags = append(unneedTags, tag)
+			}
+		}
+		repo.Use(tx).Tag.Create(needTags...)
+		repo.Use(tx).Tag.Delete(unneedTags...)
 		return nil
 	})
 	//

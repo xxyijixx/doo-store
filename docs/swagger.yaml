@@ -80,7 +80,7 @@ paths:
       - BearerAuth: []
       summary: app page
       tags:
-      - ""
+      - app
   /apps/{key}:
     delete:
       consumes:
@@ -108,7 +108,7 @@ paths:
       - BearerAuth: []
       summary: app uninstall
       tags:
-      - ""
+      - app
     post:
       consumes:
       - application/json
@@ -135,7 +135,7 @@ paths:
       - BearerAuth: []
       summary: app install
       tags:
-      - ""
+      - app
     put:
       consumes:
       - application/json
@@ -162,7 +162,7 @@ paths:
       - BearerAuth: []
       summary: app update
       tags:
-      - ""
+      - app
   /apps/{key}/detail:
     get:
       parameters:
@@ -182,7 +182,7 @@ paths:
       - BearerAuth: []
       summary: app detail
       tags:
-      - ""
+      - app
   /apps/installed:
     get:
       parameters:
@@ -213,7 +213,21 @@ paths:
       - BearerAuth: []
       summary: installed app page
       tags:
-      - ""
+      - app
+  /apps/tags:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - BearerAuth: []
+      summary: app tags
+      tags:
+      - app
   /public/health:
     get:
       consumes:

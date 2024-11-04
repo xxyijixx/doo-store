@@ -12,7 +12,7 @@ import (
 // @Schemes
 // @Description
 // @Security BearerAuth
-// @Tags
+// @Tags app
 // @Produce json
 // @Param page query integer true "page" default(1)
 // @Param page_size query integer true "page_size" default(10)
@@ -47,7 +47,7 @@ func (*BaseApi) AppPage(c *gin.Context) {
 // @Schemes
 // @Description
 // @Security BearerAuth
-// @Tags
+// @Tags app
 // @Produce json
 // @Param key path string true "key"
 // @Success 200 {object} dto.Response "success"
@@ -71,7 +71,7 @@ func (*BaseApi) AppDetailByKey(c *gin.Context) {
 // @Schemes
 // @Description
 // @Security BearerAuth
-// @Tags
+// @Tags app
 // @Accept json
 // @Produce json
 // @Param key path string true "key"
@@ -104,7 +104,7 @@ func (*BaseApi) AppInstall(c *gin.Context) {
 // @Schemes
 // @Description
 // @Security BearerAuth
-// @Tags
+// @Tags app
 // @Accept json
 // @Produce json
 // @Param key path string true "key"
@@ -137,7 +137,7 @@ func (*BaseApi) AppInstallOperate(c *gin.Context) {
 // @Schemes
 // @Description
 // @Security BearerAuth
-// @Tags
+// @Tags app
 // @Accept json
 // @Produce json
 // @Param key path string true "key"
@@ -170,7 +170,7 @@ func (*BaseApi) AppUnInstall(c *gin.Context) {
 // @Schemes
 // @Description
 // @Security BearerAuth
-// @Tags
+// @Tags app
 // @Produce json
 // @Param page query integer true "page" default(1)
 // @Param page_size query integer true "page_size" default(10)
@@ -190,6 +190,28 @@ func (*BaseApi) AppInstalledPage(c *gin.Context) {
 		return
 	}
 	data, err := appService.AppInstalledPage(req)
+	if err != nil {
+		helper.Error(c, err.Error())
+		return
+	}
+	helper.SuccessWith(c, data)
+}
+
+// @Summary app tags
+// @Schemes
+// @Description
+// @Security BearerAuth
+// @Tags app
+// @Produce json
+// @Success 200 {object} dto.Response "success"
+// @Router /apps/tags [get]
+func (*BaseApi) AppTags(c *gin.Context) {
+	err := checkAuth(c, false)
+	if err != nil {
+		helper.Error(c, err.Error())
+		return
+	}
+	data, err := appService.AppTags()
 	if err != nil {
 		helper.Error(c, err.Error())
 		return

@@ -33,6 +33,7 @@ type IAppService interface {
 	AppInstallOperate(req request.AppInstalledOperate) error
 	AppUnInstall(req request.AppUnInstall) error
 	AppInstalledPage(req request.AppInstalledSearch) (*dto.PageResult, error)
+	AppTags() ([]*model.Tag, error)
 }
 
 func NewIAppService() IAppService {
@@ -148,6 +149,7 @@ func (*AppService) AppInstall(req request.AppInstall) error {
 		Name:          req.Name,
 		AppID:         app.ID,
 		AppDetailID:   appDetail.ID,
+		Repo:          appDetail.Repo,
 		Version:       appDetail.Version,
 		Params:        string(paramJson),
 		Env:           envJson,
@@ -216,8 +218,10 @@ func (*AppService) AppInstallOperate(req request.AppInstalledOperate) error {
 		return nil
 	}
 	if req.Action == "stop" {
-		_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.Stopped)
+		err := appStop(appInstalled)
+		return err
 	}
+
 	stdout, err := compose.Operate(composeFile, req.Action)
 	if err != nil {
 		log.Debug("Error docker compose operate")
@@ -284,6 +288,10 @@ func (*AppService) AppInstalledPage(req request.AppInstalledSearch) (*dto.PageRe
 	return pageResult, nil
 }
 
+func (*AppService) AppTags() ([]*model.Tag, error) {
+	return repo.Tag.Find()
+}
+
 // appUp
 // envContent key=value
 func appUp(appInstalled *model.AppInstalled, envContent string) error {
@@ -326,8 +334,18 @@ func appUp(appInstalled *model.AppInstalled, envContent string) error {
 	return err
 }
 
-func appStop(appInstalled model.AppInstalled) error {
-
+func appStop(appInstalled *model.AppInstalled) error {
+	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
+	composeFile := fmt.Sprintf("%s/%s/docker-compose.yml", constant.AppInstallDir, appKey)
+	_, err := repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.Stopped)
+	if err != nil {
+		return err
+	}
+	stdout, err := compose.Stop(composeFile)
+	if err != nil {
+		return fmt.Errorf("error docker compose stop: %s", err.Error())
+	}
+	insertLog(appInstalled.ID, stdout)
 	return nil
 }
 
