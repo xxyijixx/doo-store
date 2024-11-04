@@ -30,6 +30,13 @@
                 "summary": "app page",
                 "parameters": [
                     {
+                        "type": "string",
+                        "default": "\"zh\"",
+                        "description": "i18n",
+                        "name": "Language",
+                        "in": "header"
+                    },
+                    {
                         "type": "integer",
                         "default": 1,
                         "description": "page",
@@ -96,6 +103,13 @@
                 "summary": "installed app page",
                 "parameters": [
                     {
+                        "type": "string",
+                        "default": "\"zh\"",
+                        "description": "i18n",
+                        "name": "Language",
+                        "in": "header"
+                    },
+                    {
                         "type": "integer",
                         "default": 1,
                         "description": "page",
@@ -142,6 +156,15 @@
                     "app"
                 ],
                 "summary": "app tags",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "\"zh\"",
+                        "description": "i18n",
+                        "name": "Language",
+                        "in": "header"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "success",
@@ -170,6 +193,13 @@
                 ],
                 "summary": "app update",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "default": "\"zh\"",
+                        "description": "i18n",
+                        "name": "Language",
+                        "in": "header"
+                    },
                     {
                         "type": "string",
                         "description": "key",
@@ -215,6 +245,13 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "default": "\"zh\"",
+                        "description": "i18n",
+                        "name": "Language",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
                         "description": "key",
                         "name": "key",
                         "in": "path",
@@ -258,6 +295,13 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "default": "\"zh\"",
+                        "description": "i18n",
+                        "name": "Language",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
                         "description": "key",
                         "name": "key",
                         "in": "path",
@@ -298,6 +342,13 @@
                 ],
                 "summary": "app detail",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "default": "\"zh\"",
+                        "description": "i18n",
+                        "name": "Language",
+                        "in": "header"
+                    },
                     {
                         "type": "string",
                         "description": "key",

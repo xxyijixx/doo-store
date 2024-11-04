@@ -41,6 +41,11 @@ paths:
   /apps:
     get:
       parameters:
+      - default: '"zh"'
+        description: i18n
+        in: header
+        name: Language
+        type: string
       - default: 1
         description: page
         in: query
@@ -86,6 +91,11 @@ paths:
       consumes:
       - application/json
       parameters:
+      - default: '"zh"'
+        description: i18n
+        in: header
+        name: Language
+        type: string
       - description: key
         in: path
         name: key
@@ -113,6 +123,11 @@ paths:
       consumes:
       - application/json
       parameters:
+      - default: '"zh"'
+        description: i18n
+        in: header
+        name: Language
+        type: string
       - description: key
         in: path
         name: key
@@ -140,6 +155,11 @@ paths:
       consumes:
       - application/json
       parameters:
+      - default: '"zh"'
+        description: i18n
+        in: header
+        name: Language
+        type: string
       - description: key
         in: path
         name: key
@@ -166,6 +186,11 @@ paths:
   /apps/{key}/detail:
     get:
       parameters:
+      - default: '"zh"'
+        description: i18n
+        in: header
+        name: Language
+        type: string
       - description: key
         in: path
         name: key
@@ -186,6 +211,11 @@ paths:
   /apps/installed:
     get:
       parameters:
+      - default: '"zh"'
+        description: i18n
+        in: header
+        name: Language
+        type: string
       - default: 1
         description: page
         in: query
@@ -216,6 +246,12 @@ paths:
       - app
   /apps/tags:
     get:
+      parameters:
+      - default: '"zh"'
+        description: i18n
+        in: header
+        name: Language
+        type: string
       produces:
       - application/json
       responses:

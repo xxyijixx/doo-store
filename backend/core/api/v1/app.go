@@ -2,6 +2,7 @@ package v1
 
 import (
 	"doo-store/backend/core/api/v1/helper"
+	"doo-store/backend/core/dto"
 	"doo-store/backend/core/dto/request"
 	"fmt"
 
@@ -14,6 +15,7 @@ import (
 // @Security BearerAuth
 // @Tags app
 // @Produce json
+// @Param Language header string false "i18n" default("zh")
 // @Param page query integer true "page" default(1)
 // @Param page_size query integer true "page_size" default(10)
 // @Param class query string false "class"
@@ -25,19 +27,19 @@ import (
 func (*BaseApi) AppPage(c *gin.Context) {
 	err := checkAuth(c, true)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	var req request.AppSearch
 	err = helper.CheckBindQueryAndValidate(&req, c)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	fmt.Println("req", req)
-	data, err := appService.AppPage(req)
+	data, err := appService.AppPage(dto.ServiceContext{C: c}, req)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	helper.SuccessWith(c, data)
@@ -49,19 +51,20 @@ func (*BaseApi) AppPage(c *gin.Context) {
 // @Security BearerAuth
 // @Tags app
 // @Produce json
+// @Param Language header string false "i18n" default("zh")
 // @Param key path string true "key"
 // @Success 200 {object} dto.Response "success"
 // @Router /apps/{key}/detail [get]
 func (*BaseApi) AppDetailByKey(c *gin.Context) {
 	err := checkAuth(c, true)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	key := c.Param("key")
-	data, err := appService.AppDetailByKey(key)
+	data, err := appService.AppDetailByKey(dto.ServiceContext{C: c}, key)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	helper.SuccessWith(c, data)
@@ -74,6 +77,7 @@ func (*BaseApi) AppDetailByKey(c *gin.Context) {
 // @Tags app
 // @Accept json
 // @Produce json
+// @Param Language header string false "i18n" default("zh")
 // @Param key path string true "key"
 // @Param data body request.AppInstall true "RequestBody"
 // @Success 200 {object} dto.Response "success"
@@ -81,20 +85,20 @@ func (*BaseApi) AppDetailByKey(c *gin.Context) {
 func (*BaseApi) AppInstall(c *gin.Context) {
 	err := checkAuth(c, true)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	key := c.Param("key")
 	var req request.AppInstall
 	err = helper.CheckBindAndValidate(&req, c)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	req.Key = key
-	err = appService.AppInstall(req)
+	err = appService.AppInstall(dto.ServiceContext{C: c}, req)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	helper.SuccessWith(c, "安装成功")
@@ -107,6 +111,7 @@ func (*BaseApi) AppInstall(c *gin.Context) {
 // @Tags app
 // @Accept json
 // @Produce json
+// @Param Language header string false "i18n" default("zh")
 // @Param key path string true "key"
 // @Param data body request.AppInstalledOperate true "RequestBody"
 // @Success 200 {object} dto.Response "success"
@@ -114,20 +119,20 @@ func (*BaseApi) AppInstall(c *gin.Context) {
 func (*BaseApi) AppInstallOperate(c *gin.Context) {
 	err := checkAuth(c, true)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	key := c.Param("key")
 	var req request.AppInstalledOperate
 	err = helper.CheckBindAndValidate(&req, c)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	req.Key = key
-	err = appService.AppInstallOperate(req)
+	err = appService.AppInstallOperate(dto.ServiceContext{C: c}, req)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	helper.SuccessWith(c, "操作成功")
@@ -140,6 +145,7 @@ func (*BaseApi) AppInstallOperate(c *gin.Context) {
 // @Tags app
 // @Accept json
 // @Produce json
+// @Param Language header string false "i18n" default("zh")
 // @Param key path string true "key"
 // @Param data body request.AppUnInstall true "RequestBody"
 // @Success 200 {object} dto.Response "success"
@@ -147,20 +153,20 @@ func (*BaseApi) AppInstallOperate(c *gin.Context) {
 func (*BaseApi) AppUnInstall(c *gin.Context) {
 	err := checkAuth(c, true)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	key := c.Param("key")
 	var req request.AppUnInstall
 	err = helper.CheckBindAndValidate(&req, c)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	req.Key = key
-	err = appService.AppUnInstall(req)
+	err = appService.AppUnInstall(dto.ServiceContext{C: c}, req)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	helper.SuccessWith(c, "卸载成功")
@@ -172,6 +178,7 @@ func (*BaseApi) AppUnInstall(c *gin.Context) {
 // @Security BearerAuth
 // @Tags app
 // @Produce json
+// @Param Language header string false "i18n" default("zh")
 // @Param page query integer true "page" default(1)
 // @Param page_size query integer true "page_size" default(10)
 // @Param class query string false "class"
@@ -180,18 +187,18 @@ func (*BaseApi) AppUnInstall(c *gin.Context) {
 func (*BaseApi) AppInstalledPage(c *gin.Context) {
 	err := checkAuth(c, true)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	var req request.AppInstalledSearch
 	err = helper.CheckBindQueryAndValidate(&req, c)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	data, err := appService.AppInstalledPage(req)
+	data, err := appService.AppInstalledPage(dto.ServiceContext{C: c}, req)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	helper.SuccessWith(c, data)
@@ -203,17 +210,18 @@ func (*BaseApi) AppInstalledPage(c *gin.Context) {
 // @Security BearerAuth
 // @Tags app
 // @Produce json
+// @Param Language header string false "i18n" default("zh")
 // @Success 200 {object} dto.Response "success"
 // @Router /apps/tags [get]
 func (*BaseApi) AppTags(c *gin.Context) {
 	err := checkAuth(c, false)
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	data, err := appService.AppTags()
+	data, err := appService.AppTags(dto.ServiceContext{C: c})
 	if err != nil {
-		helper.Error(c, err.Error())
+		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	helper.SuccessWith(c, data)
