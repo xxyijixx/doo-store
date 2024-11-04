@@ -11,6 +11,7 @@ import (
 	"doo-store/backend/utils/common"
 	"doo-store/backend/utils/compose"
 	"doo-store/backend/utils/docker"
+	e "doo-store/backend/utils/error"
 	"doo-store/backend/utils/nginx"
 	"encoding/json"
 	"errors"
@@ -27,20 +28,20 @@ type AppService struct {
 }
 
 type IAppService interface {
-	AppPage(req request.AppSearch) (*dto.PageResult, error)
-	AppDetailByKey(key string) (*response.AppDetail, error)
-	AppInstall(req request.AppInstall) error
-	AppInstallOperate(req request.AppInstalledOperate) error
-	AppUnInstall(req request.AppUnInstall) error
-	AppInstalledPage(req request.AppInstalledSearch) (*dto.PageResult, error)
-	AppTags() ([]*model.Tag, error)
+	AppPage(ctx dto.ServiceContext, req request.AppSearch) (*dto.PageResult, error)
+	AppDetailByKey(ctx dto.ServiceContext, key string) (*response.AppDetail, error)
+	AppInstall(ctx dto.ServiceContext, req request.AppInstall) error
+	AppInstallOperate(ctx dto.ServiceContext, req request.AppInstalledOperate) error
+	AppUnInstall(ctx dto.ServiceContext, req request.AppUnInstall) error
+	AppInstalledPage(ctx dto.ServiceContext, req request.AppInstalledSearch) (*dto.PageResult, error)
+	AppTags(ctx dto.ServiceContext) ([]*model.Tag, error)
 }
 
 func NewIAppService() IAppService {
 	return &AppService{}
 }
 
-func (*AppService) AppPage(req request.AppSearch) (*dto.PageResult, error) {
+func (*AppService) AppPage(ctx dto.ServiceContext, req request.AppSearch) (*dto.PageResult, error) {
 
 	var query repo.IAppDo
 	query = repo.App.Order(repo.App.Sort.Desc())
@@ -69,7 +70,7 @@ func (*AppService) AppPage(req request.AppSearch) (*dto.PageResult, error) {
 	return pageResult, nil
 }
 
-func (*AppService) AppDetailByKey(key string) (*response.AppDetail, error) {
+func (*AppService) AppDetailByKey(ctx dto.ServiceContext, key string) (*response.AppDetail, error) {
 
 	app, err := repo.App.Where(repo.App.Key.Eq(key)).First()
 	if err != nil {
@@ -92,7 +93,7 @@ func (*AppService) AppDetailByKey(key string) (*response.AppDetail, error) {
 	return resp, nil
 }
 
-func (*AppService) AppInstall(req request.AppInstall) error {
+func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) error {
 	app, err := repo.App.Where(repo.App.Key.Eq(req.Key)).First()
 	if err != nil {
 		log.Debug("Error query app")
@@ -109,7 +110,10 @@ func (*AppService) AppInstall(req request.AppInstall) error {
 		return err
 	}
 	if !check {
-		return fmt.Errorf("当前版本不满足要求，需要版本%s以上", app.DependsVersion)
+		// return fmt.Errorf("当前版本不满足要求，需要版本%s以上", app.DependsVersion)
+		return e.WithMap(ctx.C, constant.ErrPluginVersionNotSupport, map[string]interface{}{
+			"detail": app.DependsVersion,
+		}, nil)
 	}
 	_, err = repo.AppInstalled.Where(repo.AppInstalled.AppID.Eq(app.ID)).First()
 	if err != nil {
@@ -178,7 +182,7 @@ func (*AppService) AppInstall(req request.AppInstall) error {
 	return nil
 }
 
-func (*AppService) AppInstallOperate(req request.AppInstalledOperate) error {
+func (*AppService) AppInstallOperate(ctx dto.ServiceContext, req request.AppInstalledOperate) error {
 	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.Key.Eq(req.Key)).First()
 	if err != nil {
 		return err
@@ -232,7 +236,7 @@ func (*AppService) AppInstallOperate(req request.AppInstalledOperate) error {
 	return nil
 }
 
-func (*AppService) AppUnInstall(req request.AppUnInstall) error {
+func (*AppService) AppUnInstall(ctx dto.ServiceContext, req request.AppUnInstall) error {
 	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.Key.Eq(req.Key)).First()
 	if err != nil {
 		return err
@@ -267,7 +271,7 @@ func (*AppService) AppUnInstall(req request.AppUnInstall) error {
 	return nil
 }
 
-func (*AppService) AppInstalledPage(req request.AppInstalledSearch) (*dto.PageResult, error) {
+func (*AppService) AppInstalledPage(ctx dto.ServiceContext, req request.AppInstalledSearch) (*dto.PageResult, error) {
 	var query repo.IAppInstalledDo
 	query = repo.AppInstalled.Order(repo.AppInstalled.ID.Desc())
 
@@ -288,8 +292,15 @@ func (*AppService) AppInstalledPage(req request.AppInstalledSearch) (*dto.PageRe
 	return pageResult, nil
 }
 
-func (*AppService) AppTags() ([]*model.Tag, error) {
-	return repo.Tag.Find()
+func (*AppService) AppTags(ctx dto.ServiceContext) ([]*model.Tag, error) {
+	tags, err := repo.Tag.Find()
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return []*model.Tag{}, nil
+		}
+		return nil, err
+	}
+	return tags, nil
 }
 
 // appUp

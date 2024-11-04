@@ -5,9 +5,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"golang.org/x/text/language"
 )
 
 var System SystemConfig
+
+var (
+	Language = []string{language.Chinese.String(), language.English.String()}
+)
 
 type SystemConfig struct {
 	Port      int    `json:"port"`

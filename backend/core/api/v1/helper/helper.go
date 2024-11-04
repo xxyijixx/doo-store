@@ -2,6 +2,7 @@ package helper
 
 import (
 	"doo-store/backend/core/dto"
+	"doo-store/backend/i18n"
 	"net/http"
 	"strings"
 
@@ -96,5 +97,7 @@ func Error(c *gin.Context, values ...any) {
 }
 
 func ErrorWith(c *gin.Context, msgKey string, err error, values ...any) {
-	Response(c, http.StatusBadRequest, "error", values...)
+	msgDetail := i18n.GetMsgWithMap(c, msgKey, map[string]any{"detail": err})
+	// msgDetail := msgKey
+	Response(c, http.StatusBadRequest, msgDetail, values...)
 }

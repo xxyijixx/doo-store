@@ -38,6 +38,13 @@ const docTemplate = `{
                 "summary": "app page",
                 "parameters": [
                     {
+                        "type": "string",
+                        "default": "\"zh\"",
+                        "description": "i18n",
+                        "name": "Language",
+                        "in": "header"
+                    },
+                    {
                         "type": "integer",
                         "default": 1,
                         "description": "page",
@@ -104,6 +111,13 @@ const docTemplate = `{
                 "summary": "installed app page",
                 "parameters": [
                     {
+                        "type": "string",
+                        "default": "\"zh\"",
+                        "description": "i18n",
+                        "name": "Language",
+                        "in": "header"
+                    },
+                    {
                         "type": "integer",
                         "default": 1,
                         "description": "page",
@@ -150,6 +164,15 @@ const docTemplate = `{
                     "app"
                 ],
                 "summary": "app tags",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "\"zh\"",
+                        "description": "i18n",
+                        "name": "Language",
+                        "in": "header"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "success",
@@ -178,6 +201,13 @@ const docTemplate = `{
                 ],
                 "summary": "app update",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "default": "\"zh\"",
+                        "description": "i18n",
+                        "name": "Language",
+                        "in": "header"
+                    },
                     {
                         "type": "string",
                         "description": "key",
@@ -223,6 +253,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "default": "\"zh\"",
+                        "description": "i18n",
+                        "name": "Language",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
                         "description": "key",
                         "name": "key",
                         "in": "path",
@@ -266,6 +303,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "default": "\"zh\"",
+                        "description": "i18n",
+                        "name": "Language",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
                         "description": "key",
                         "name": "key",
                         "in": "path",
@@ -306,6 +350,13 @@ const docTemplate = `{
                 ],
                 "summary": "app detail",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "default": "\"zh\"",
+                        "description": "i18n",
+                        "name": "Language",
+                        "in": "header"
+                    },
                     {
                         "type": "string",
                         "description": "key",
