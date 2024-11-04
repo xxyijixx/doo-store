@@ -97,6 +97,19 @@ func (*AppService) AppInstall(req request.AppInstall) error {
 		log.Debug("Error query app")
 		return err
 	}
+	// 检测版本
+	dootaskService := NewIDootaskService()
+	versionInfoResp, err := dootaskService.GetVersoinInfo()
+	if err != nil {
+		return err
+	}
+	check, err := versionInfoResp.CheckVersion(app.DependsVersion)
+	if err != nil {
+		return err
+	}
+	if !check {
+		return fmt.Errorf("当前版本不满足要求，需要版本%s以上", app.DependsVersion)
+	}
 	_, err = repo.AppInstalled.Where(repo.AppInstalled.AppID.Eq(app.ID)).First()
 	if err != nil {
 		if err != gorm.ErrRecordNotFound {
@@ -222,13 +235,23 @@ func (*AppService) AppUnInstall(req request.AppUnInstall) error {
 	}
 	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
 	composeFile := fmt.Sprintf("%s/%s/docker-compose.yml", constant.AppInstallDir, appKey)
-	stdout, err := compose.Down(composeFile)
-	if err != nil {
-		log.Debug("Error docker compose down")
+	err = repo.DB.Transaction(func(tx *gorm.DB) error {
+		_, err = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Delete()
+		if err != nil {
+			return err
+		}
+		_, err = repo.Use(tx).App.Where(repo.App.ID.Eq(appInstalled.AppID)).Update(repo.App.Status, constant.AppUnused)
+		if err != nil {
+			return err
+		}
+		stdout, err := compose.Down(composeFile)
+		if err != nil {
+			log.Debug("Error docker compose down")
+			return err
+		}
+		fmt.Println(stdout)
 		return err
-	}
-	fmt.Println(stdout)
-	_, err = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Delete()
+	})
 	if err != nil {
 		return err
 	}
@@ -266,7 +289,7 @@ func (*AppService) AppInstalledPage(req request.AppInstalledSearch) (*dto.PageRe
 func appUp(appInstalled *model.AppInstalled, envContent string) error {
 	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
 	err := repo.DB.Transaction(func(tx *gorm.DB) error {
-		_, err := repo.Use(tx).App.Where(repo.App.ID.Eq(appInstalled.ID)).Update(repo.App.Status, constant.AppInUse)
+		_, err := repo.Use(tx).App.Where(repo.App.ID.Eq(appInstalled.AppID)).Update(repo.App.Status, constant.AppInUse)
 		if err != nil {
 			return err
 		}

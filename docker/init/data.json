@@ -8,7 +8,7 @@
       "version": "alpine",
       "github": "",
       "class": "web",
-      "depends_version": "v0.37.21",
+      "depends_version": "0.37.21",
       "repo": "docker.io/library/nginx",
       "volume": [],
       "env": [
@@ -28,7 +28,7 @@
       "version": "7.4.1",
       "github": "",
       "class": "database",
-      "depends_version": "v0.37.21",
+      "depends_version": "0.39.21",
       "repo": "docker.io/library/redis",
       "volume": [
         {
