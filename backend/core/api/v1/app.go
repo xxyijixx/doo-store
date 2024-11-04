@@ -165,3 +165,34 @@ func (*BaseApi) AppUnInstall(c *gin.Context) {
 	}
 	helper.SuccessWith(c, "卸载成功")
 }
+
+// @Summary installed app page
+// @Schemes
+// @Description
+// @Security BearerAuth
+// @Tags
+// @Produce json
+// @Param page query integer true "page" default(1)
+// @Param page_size query integer true "page_size" default(10)
+// @Param class query string false "class"
+// @Success 200 {object} dto.Response "success"
+// @Router /apps/installed [get]
+func (*BaseApi) AppInstalledPage(c *gin.Context) {
+	err := checkAuth(c, true)
+	if err != nil {
+		helper.Error(c, err.Error())
+		return
+	}
+	var req request.AppInstalledSearch
+	err = helper.CheckBindQueryAndValidate(&req, c)
+	if err != nil {
+		helper.Error(c, err.Error())
+		return
+	}
+	data, err := appService.AppInstalledPage(req)
+	if err != nil {
+		helper.Error(c, err.Error())
+		return
+	}
+	helper.SuccessWith(c, data)
+}

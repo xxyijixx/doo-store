@@ -183,6 +183,37 @@ paths:
       summary: app detail
       tags:
       - ""
+  /apps/installed:
+    get:
+      parameters:
+      - default: 1
+        description: page
+        in: query
+        name: page
+        required: true
+        type: integer
+      - default: 10
+        description: page_size
+        in: query
+        name: page_size
+        required: true
+        type: integer
+      - description: class
+        in: query
+        name: class
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - BearerAuth: []
+      summary: installed app page
+      tags:
+      - ""
   /public/health:
     get:
       consumes:

@@ -18,5 +18,7 @@ func (a *AppRouter) InitRouter(Router *gin.RouterGroup) {
 		appRouter.PUT("/:key", baseApi.AppInstallOperate)
 		appRouter.DELETE("/:key", baseApi.AppUnInstall)
 		appRouter.GET("/:key/detail", baseApi.AppDetailByKey)
+
+		appRouter.GET("/installed", baseApi.AppInstalledPage)
 	}
 }

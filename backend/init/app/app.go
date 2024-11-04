@@ -11,6 +11,7 @@ import (
 	"path"
 
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/go-connections/nat"
@@ -82,12 +83,26 @@ func InitNginxProxy() {
 
 	ctx := context.Background()
 
-	reader, err := client.ImagePull(ctx, ImageNginxName, image.PullOptions{})
+	nginxImage, err := client.ImageList(ctx, image.ListOptions{
+		Filters: filters.NewArgs(
+			filters.Arg("reference", ImageNginxName),
+		),
+	})
 	if err != nil {
-		log.Debug("拉取镜像失败", err)
+		log.Debug("获取镜像列表失败", err)
 		return
 	}
-	io.Copy(os.Stdout, reader)
+	if len(nginxImage) == 0 {
+		reader, err := client.ImagePull(ctx, ImageNginxName, image.PullOptions{})
+		if err != nil {
+			log.Debug("拉取镜像失败", err)
+			return
+		}
+		io.Copy(os.Stdout, reader)
+	} else {
+		log.Debugf("镜像%s已存在", ImageNginxName)
+	}
+
 	// 定义容器配置
 	containerConfig := &container.Config{
 		Image: ImageNginxName,
