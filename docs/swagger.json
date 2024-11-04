@@ -25,7 +25,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    ""
+                    "app"
                 ],
                 "summary": "app page",
                 "parameters": [
@@ -91,7 +91,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    ""
+                    "app"
                 ],
                 "summary": "installed app page",
                 "parameters": [
@@ -128,6 +128,30 @@
                 }
             }
         },
+        "/apps/tags": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app"
+                ],
+                "summary": "app tags",
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/apps/{key}": {
             "put": {
                 "security": [
@@ -142,7 +166,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    ""
+                    "app"
                 ],
                 "summary": "app update",
                 "parameters": [
@@ -185,7 +209,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    ""
+                    "app"
                 ],
                 "summary": "app install",
                 "parameters": [
@@ -228,7 +252,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    ""
+                    "app"
                 ],
                 "summary": "app uninstall",
                 "parameters": [
@@ -270,7 +294,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    ""
+                    "app"
                 ],
                 "summary": "app detail",
                 "parameters": [

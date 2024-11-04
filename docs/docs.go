@@ -33,7 +33,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    ""
+                    "app"
                 ],
                 "summary": "app page",
                 "parameters": [
@@ -99,7 +99,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    ""
+                    "app"
                 ],
                 "summary": "installed app page",
                 "parameters": [
@@ -136,6 +136,30 @@ const docTemplate = `{
                 }
             }
         },
+        "/apps/tags": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app"
+                ],
+                "summary": "app tags",
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/apps/{key}": {
             "put": {
                 "security": [
@@ -150,7 +174,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    ""
+                    "app"
                 ],
                 "summary": "app update",
                 "parameters": [
@@ -193,7 +217,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    ""
+                    "app"
                 ],
                 "summary": "app install",
                 "parameters": [
@@ -236,7 +260,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    ""
+                    "app"
                 ],
                 "summary": "app uninstall",
                 "parameters": [
@@ -278,7 +302,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    ""
+                    "app"
                 ],
                 "summary": "app detail",
                 "parameters": [

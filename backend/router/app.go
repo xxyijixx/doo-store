@@ -20,5 +20,7 @@ func (a *AppRouter) InitRouter(Router *gin.RouterGroup) {
 		appRouter.GET("/:key/detail", baseApi.AppDetailByKey)
 
 		appRouter.GET("/installed", baseApi.AppInstalledPage)
+
+		appRouter.GET("/tags", baseApi.AppTags)
 	}
 }
