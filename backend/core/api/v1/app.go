@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @Summary app page
+// @Summary 安装
 // @Schemes
 // @Description
 // @Security BearerAuth

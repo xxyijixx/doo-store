@@ -137,8 +137,10 @@ func LoadData() error {
 				unneedTags = append(unneedTags, tag)
 			}
 		}
+		if len(unneedTags) != 0 {
+			repo.Use(tx).Tag.Delete(unneedTags...)
+		}
 		repo.Use(tx).Tag.Create(needTags...)
-		repo.Use(tx).Tag.Delete(unneedTags...)
 		return nil
 	})
 	//

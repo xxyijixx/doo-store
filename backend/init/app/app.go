@@ -166,7 +166,7 @@ func InitNginxProxy() {
 	log.WithField("container_id", resp.ID).Debug("nginx容器创建成功")
 	err = client.ContainerStart(ctx, resp.ID, container.StartOptions{})
 	if err != nil {
-		log.Debug("Nginx容器启动失败")
+		log.Debug("Nginx容器启动失败", err)
 		return
 	}
 	log.WithField("container_id", resp.ID).Debug("nginx容器启动成功")

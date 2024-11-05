@@ -273,14 +273,14 @@ func (*AppService) AppUnInstall(ctx dto.ServiceContext, req request.AppUnInstall
 }
 
 func (*AppService) AppInstalledPage(ctx dto.ServiceContext, req request.AppInstalledSearch) (*dto.PageResult, error) {
-	var query repo.IAppInstalledDo
-	query = repo.AppInstalled.Order(repo.AppInstalled.ID.Desc())
-
+	// var query repo.IAppInstalledDo
+	// query := repo.AppInstalled.Order(repo.AppInstalled.ID.Desc())
+	query := repo.AppInstalled.Join(repo.App, repo.App.ID.EqCol(repo.AppInstalled.AppID))
 	if req.Class != "" {
 		query = query.Where(repo.AppInstalled.Class.Eq(req.Class))
 	}
-
-	result, count, err := query.FindByPage(req.Page-1, req.PageSize)
+	result := map[string]any{}
+	count, err := query.Select(repo.App.Icon, repo.App.Description, repo.AppInstalled.ALL).ScanByPage(&result, req.Page-1, req.PageSize)
 
 	if err != nil {
 		return nil, err
@@ -330,7 +330,6 @@ func appUp(appInstalled *model.AppInstalled, envContent string) error {
 		stdout, err := compose.Up(composeFile)
 		if err != nil {
 			log.Debug("Error docker compose up")
-			insertLog(appInstalled.ID, err.Error())
 			_, _ = repo.Use(tx).AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
 			return err
 		}
@@ -342,6 +341,8 @@ func appUp(appInstalled *model.AppInstalled, envContent string) error {
 	})
 	if err != nil {
 		insertLog(appInstalled.ID, err.Error())
+	} else {
+		insertLog(appInstalled.ID, "插件启动")
 	}
 	return err
 }
