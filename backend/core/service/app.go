@@ -35,6 +35,8 @@ type IAppService interface {
 	AppInstallOperate(ctx dto.ServiceContext, req request.AppInstalledOperate) error
 	AppUnInstall(ctx dto.ServiceContext, req request.AppUnInstall) error
 	AppInstalledPage(ctx dto.ServiceContext, req request.AppInstalledSearch) (*dto.PageResult, error)
+	Params(ctx dto.ServiceContext, id int64) (any, error)
+	UpdateParams(ctx dto.ServiceContext, req request.AppInstall) error
 	AppTags(ctx dto.ServiceContext) ([]*model.Tag, error)
 }
 
@@ -57,7 +59,7 @@ func (*AppService) AppPage(ctx dto.ServiceContext, req request.AppSearch) (*dto.
 	if req.Description != "" {
 		query = query.Where(repo.App.Description.Like(fmt.Sprintf("%%%s%%", req.Description)))
 	}
-	result, count, err := query.FindByPage(req.Page-1, req.PageSize)
+	result, count, err := query.FindByPage((req.Page-1)*req.PageSize, req.PageSize)
 
 	if err != nil {
 		return nil, err
@@ -152,6 +154,10 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 		return err
 	}
 
+	// 资源限制
+	req.Params[constant.CPUS] = req.CPUS
+	req.Params[constant.MemoryLimit] = req.MemoryLimit
+
 	envContent, envJson, err := docker.GenEnv(appKey, containerName, req.Params, false)
 	if err != nil {
 		return err
@@ -171,6 +177,7 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 	}
 	err = appUp(appInstalled, envContent)
 	if err != nil {
+		log.Debug("启动失败", err)
 		return err
 	}
 
@@ -179,7 +186,7 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 	if err != nil {
 		return err
 	}
-	port, err := client.GetImageFirstExposedPortByName(fmt.Sprintf("%s:%s", app.Key, appDetail.Version))
+	port, err := client.GetImageFirstExposedPortByName(fmt.Sprintf("%s:%s", appDetail.Repo, appDetail.Version))
 	if err != nil {
 		return err
 	}
@@ -286,7 +293,7 @@ func (*AppService) AppInstalledPage(ctx dto.ServiceContext, req request.AppInsta
 		query = query.Where(repo.AppInstalled.Class.Eq(req.Class))
 	}
 	result := []map[string]any{}
-	count, err := query.Select(repo.AppInstalled.ALL, repo.App.Icon, repo.App.Description, repo.App.Name).ScanByPage(&result, req.Page-1, req.PageSize)
+	count, err := query.Select(repo.AppInstalled.ALL, repo.App.Icon, repo.App.Description, repo.App.Name).ScanByPage(&result, (req.Page-1)*req.PageSize, req.PageSize)
 
 	if err != nil {
 		return nil, err
@@ -297,6 +304,77 @@ func (*AppService) AppInstalledPage(ctx dto.ServiceContext, req request.AppInsta
 		Items: result,
 	}
 	return pageResult, nil
+}
+
+func (*AppService) Params(ctx dto.ServiceContext, id int64) (any, error) {
+	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(id)).First()
+	if err != nil {
+		return nil, err
+	}
+	appDetail, err := repo.AppDetail.Where(repo.AppDetail.ID.Eq(appInstalled.AppDetailID)).First()
+	if err != nil {
+		return nil, err
+	}
+	// appDetail.Params
+	// 解析原始参数
+	params := response.AppParams{}
+	err = common.StrToStruct(appDetail.Params, &params)
+	if err != nil {
+		return nil, err
+	}
+	env := map[string]string{}
+	err = json.Unmarshal([]byte(appInstalled.Env), &env)
+	if err != nil {
+		return nil, err
+	}
+	for _, formField := range params.FormFields {
+		formField.Value = env[formField.EnvKey]
+		formField.Key = formField.EnvKey
+	}
+	// 构建插件参数
+	aParams := response.AppInstalledParamsResp{
+		Params:        params.FormFields,
+		DockerCompose: appInstalled.DockerCompose,
+		CPUS:          env[constant.CPUS],
+		MemoryLimit:   env[constant.MemoryLimit],
+	}
+	return aParams, nil
+}
+
+func (*AppService) UpdateParams(ctx dto.ServiceContext, req request.AppInstall) error {
+	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(req.InstalledId)).First()
+	if err != nil {
+		return err
+	}
+	appDetail, err := repo.AppDetail.Where(repo.AppDetail.ID.Eq(appInstalled.AppDetailID)).First()
+	if err != nil {
+		return err
+	}
+	// appDetail.Params
+	// 解析原始参数
+	params := response.AppParams{}
+	err = common.StrToStruct(appDetail.Params, &params)
+	if err != nil {
+		return err
+	}
+	// TODO 参数校验
+	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
+	containerName := config.EnvConfig.APP_PREFIX + appInstalled.Key + "-" + appInstalled.Name
+
+	req.Params[constant.CPUS] = req.CPUS
+	req.Params[constant.MemoryLimit] = req.MemoryLimit
+
+	envContent, envJson, err := docker.GenEnv(appKey, containerName, req.Params, false)
+	if err != nil {
+		return err
+	}
+	appInstalled.Env = envJson
+	err = appRe(appInstalled, envContent)
+	if err != nil {
+		log.Debug("重启失败", err)
+		return err
+	}
+	return nil
 }
 
 func (*AppService) AppTags(ctx dto.ServiceContext) ([]*model.Tag, error) {
@@ -310,6 +388,37 @@ func (*AppService) AppTags(ctx dto.ServiceContext) ([]*model.Tag, error) {
 	return tags, nil
 }
 
+func appRe(appInstalled *model.AppInstalled, envContent string) error {
+	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
+	composeFile := docker.GetComposeFile(appKey)
+	_, err := compose.Down(composeFile)
+	if err != nil {
+		log.Debug("Error docker compose down", err)
+		return err
+	}
+	_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.Installing)
+	// 写入docker-compose.yaml和环境文件
+	composeFile, err = docker.WriteComposeFile(appKey, appInstalled.DockerCompose)
+	if err != nil {
+		log.Debug("Error WriteFile", err)
+		return err
+	}
+	_, err = docker.WrietEnvFile(appKey, envContent)
+	if err != nil {
+		log.Debug("Error WriteFile", err)
+		return err
+	}
+	stdout, err := compose.Up(composeFile)
+	if err != nil {
+		log.Debug("Error docker compose up", stdout)
+		_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
+		return err
+	}
+	_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.Running)
+
+	return nil
+}
+
 // appUp
 // envContent key=value
 func appUp(appInstalled *model.AppInstalled, envContent string) error {
@@ -319,23 +428,23 @@ func appUp(appInstalled *model.AppInstalled, envContent string) error {
 		if err != nil {
 			return err
 		}
-		repo.Use(tx).AppInstalled.Create(appInstalled)
-
-		composeFile := fmt.Sprintf("%s/%s/docker-compose.yml", constant.AppInstallDir, appKey)
-		err = os.WriteFile(composeFile, []byte(appInstalled.DockerCompose), 0644)
+		err = repo.Use(tx).AppInstalled.Create(appInstalled)
+		if err != nil {
+			return err
+		}
+		composeFile, err := docker.WriteComposeFile(appKey, appInstalled.DockerCompose)
 		if err != nil {
 			log.Debug("Error WriteFile", err)
 			return err
 		}
-		envFile := fmt.Sprintf("%s/%s/.env", constant.AppInstallDir, appKey)
-		err = os.WriteFile(envFile, []byte(envContent), 0644)
+		_, err = docker.WrietEnvFile(appKey, envContent)
 		if err != nil {
 			log.Debug("Error WriteFile", err)
 			return err
 		}
 		stdout, err := compose.Up(composeFile)
 		if err != nil {
-			log.Debug("Error docker compose up")
+			log.Debug("Error docker compose up", stdout)
 			_, _ = repo.Use(tx).AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
 			return err
 		}

@@ -142,6 +142,93 @@
                 }
             }
         },
+        "/apps/installed/{id}/params": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app"
+                ],
+                "summary": "获取插件参数信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "zh",
+                        "description": "i18n",
+                        "name": "language",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app"
+                ],
+                "summary": "修改插件参数信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "zh",
+                        "description": "i18n",
+                        "name": "language",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "RequestBody",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AppInstall"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/apps/tags": {
             "get": {
                 "security": [
@@ -408,14 +495,14 @@
         "request.AppInstall": {
             "type": "object",
             "properties": {
-                "cpu_quota": {
-                    "type": "integer"
+                "cpus": {
+                    "type": "string"
                 },
                 "docker_compose": {
                     "type": "string"
                 },
                 "memory_limit": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "params": {
                     "type": "object",

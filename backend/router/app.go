@@ -20,7 +20,8 @@ func (a *AppRouter) InitRouter(Router *gin.RouterGroup) {
 		appRouter.GET("/:key/detail", baseApi.AppDetailByKey)
 
 		appRouter.GET("/installed", baseApi.AppInstalledPage)
-
+		appRouter.GET("/installed/:id/params", baseApi.AppInstalledParams)
+		appRouter.PUT("/installed/:id/params", baseApi.AppInstalledUpdateParams)
 		appRouter.GET("/tags", baseApi.AppTags)
 	}
 }

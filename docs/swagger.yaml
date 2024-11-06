@@ -11,12 +11,12 @@ definitions:
     type: object
   request.AppInstall:
     properties:
-      cpu_quota:
-        type: integer
+      cpus:
+        type: string
       docker_compose:
         type: string
       memory_limit:
-        type: integer
+        type: string
       params:
         additionalProperties: true
         type: object
@@ -246,6 +246,61 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取已安装插件列表
+      tags:
+      - app
+  /apps/installed/{id}/params:
+    get:
+      parameters:
+      - default: zh
+        description: i18n
+        in: header
+        name: language
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取插件参数信息
+      tags:
+      - app
+    put:
+      parameters:
+      - default: zh
+        description: i18n
+        in: header
+        name: language
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: RequestBody
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.AppInstall'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - BearerAuth: []
+      summary: 修改插件参数信息
       tags:
       - app
   /apps/tags:

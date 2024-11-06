@@ -16,6 +16,7 @@
           "name": "port",
           "key": "NGINX_PORT",
           "value": "80",
+          "type": "number",
           "required": true
         }
       ],
@@ -214,6 +215,7 @@
           "name": "port",
           "key": "NGINX_PORT",
           "value": "80",
+          "type": "number",
           "required": true
         }
       ],

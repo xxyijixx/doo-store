@@ -8,5 +8,6 @@ type PageInfo struct {
 }
 
 type ServiceContext struct {
-	C *gin.Context
+	C        *gin.Context
+	UserInfo UserInfoResp
 }

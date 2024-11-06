@@ -5,6 +5,7 @@ import (
 	"doo-store/backend/core/dto"
 	"doo-store/backend/core/dto/request"
 	"fmt"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -202,6 +203,65 @@ func (*BaseApi) AppInstalledPage(c *gin.Context) {
 		return
 	}
 	helper.SuccessWith(c, data)
+}
+
+// @Summary 获取插件参数信息
+// @Schemes
+// @Description
+// @Security BearerAuth
+// @Tags app
+// @Produce json
+// @Param language header string false "i18n" default(zh)
+// @Param id path integer true "id"
+// @Success 200 {object} dto.Response "success"
+// @Router /apps/installed/{id}/params [get]
+func (*BaseApi) AppInstalledParams(c *gin.Context) {
+	err := checkAuth(c, true)
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	id, _ := strconv.Atoi(c.Param("id"))
+	data, err := appService.Params(dto.ServiceContext{C: c}, int64(id))
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	helper.SuccessWith(c, data)
+}
+
+// @Summary 修改插件参数信息
+// @Schemes
+// @Description
+// @Security BearerAuth
+// @Tags app
+// @Produce json
+// @Param language header string false "i18n" default(zh)
+// @Param id path integer true "id"
+// @Param data body request.AppInstall true "RequestBody"
+// @Success 200 {object} dto.Response "success"
+// @Router /apps/installed/{id}/params [put]
+func (*BaseApi) AppInstalledUpdateParams(c *gin.Context) {
+	err := checkAuth(c, true)
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	id, _ := strconv.Atoi(c.Param("id"))
+	var req request.AppInstall
+	err = helper.CheckBindAndValidate(&req, c)
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	req.InstalledId = int64(id)
+
+	err = appService.UpdateParams(dto.ServiceContext{C: c}, req)
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	helper.SuccessWith(c, nil)
 }
 
 // @Summary 获取插件分类信息

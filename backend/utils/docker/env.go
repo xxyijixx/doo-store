@@ -34,7 +34,40 @@ func GenEnv(appKey, containerName string, envs map[string]any, writeFile bool) (
 	}
 	jsonData, err := json.Marshal(envMap)
 	if err != nil {
-		envJson = string(jsonData)
+		return
 	}
+	envJson = string(jsonData)
 	return
+}
+
+// 写环境变量文件
+func WrietEnvFile(appKey, envContent string) (string, error) {
+	envFile := GetEnvFile(appKey)
+	err := os.WriteFile(envFile, []byte(envContent), 0644)
+	if err != nil {
+		log.Debug("Error WriteFile", err)
+		return "", err
+	}
+	return envFile, nil
+}
+
+// 写Compose文件
+func WriteComposeFile(appKey, composeContent string) (string, error) {
+	composeFile := GetComposeFile(appKey)
+	err := os.WriteFile(composeFile, []byte(composeContent), 0644)
+	if err != nil {
+		log.Debug("Error WriteFile", err)
+		return "", err
+	}
+	return composeFile, nil
+}
+
+func GetComposeFile(appKey string) string {
+	composeFile := fmt.Sprintf("%s/%s/docker-compose.yml", constant.AppInstallDir, appKey)
+	return composeFile
+}
+
+func GetEnvFile(appKey string) string {
+	envFile := fmt.Sprintf("%s/%s/.env", constant.AppInstallDir, appKey)
+	return envFile
 }

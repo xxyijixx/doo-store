@@ -37,6 +37,7 @@ type EnvElement struct {
 	Name     string `json:"name"`
 	Key      string `json:"key"`
 	Value    string `json:"value"`
+	Type     string `json:"type"`
 	Required bool   `json:"required"`
 }
 
@@ -184,8 +185,8 @@ func (p *Plugin) GenService() string {
 		}
 	}
 
-	serviceContent = append(serviceContent, fmt.Sprintf("%scpus: \"${CPUS:-0}\"", getSpaces(2)))
-	serviceContent = append(serviceContent, fmt.Sprintf("%smem_limit: \"${MemoryLimit:-0}\"", getSpaces(2)))
+	serviceContent = append(serviceContent, fmt.Sprintf("%scpus: \"${CPUS}\"", getSpaces(2)))
+	serviceContent = append(serviceContent, fmt.Sprintf("%smem_limit: \"${MEMORY_LIMIT}\"", getSpaces(2)))
 
 	serviceContent = append(serviceContent, fmt.Sprintf("%slabels:", getSpaces(2)))
 	serviceContent = append(serviceContent, fmt.Sprintf("%screatedBy: \"Apps\"", getSpaces(3)))
@@ -206,6 +207,7 @@ func (p *Plugin) GenParams() string {
 			Label:    env.Name,
 			Default:  fmt.Sprintf("%v", env.Value),
 			EnvKey:   env.Key,
+			Type:     env.Type,
 			Required: env.Required,
 		}
 		formFields = append(formFields, formField)

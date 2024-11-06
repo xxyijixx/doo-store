@@ -13,9 +13,10 @@ type AppSearch struct {
 type AppInstall struct {
 	Name          string                 `json:"-"`
 	Key           string                 `json:"-"`
+	InstalledId   int64                  `json:"-"`
 	DockerCompose string                 `json:"docker_compose"`
-	CpuQuota      int                    `json:"cpu_quota"`
-	MemoryLimit   int                    `json:"memory_limit"`
+	CPUS          string                 `json:"cpus"`
+	MemoryLimit   string                 `json:"memory_limit"`
 	Params        map[string]interface{} `json:"params"`
 }
 
