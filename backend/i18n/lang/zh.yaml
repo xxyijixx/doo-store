@@ -10,4 +10,9 @@ ErrInvalidParameter: 参数错误
 ErrNoPermission: 权限不足
 ErrPluginAdminNotCancel: 仅限管理员操作
 ErrPluginVersionNotSupport: 当前版本不满足要求，需要版本 {{.detail}} 或以上
+ErrPluginUnmarshalDockerCompose: 无法解析 Docker Compose 文件
+ErrPluginNetworkModeHost: 使用了host网络模式
+ErrPluginNotAllowedPrivileged: 不允许使用特权模式
+ErrPluginInvalidLocalVolumeMount: 本地卷挂载路径无效
+ErrPluginEnvVarInVolumeMount: 不允许在挂载路径使用环境变量
 ErrTypeNotLogin: 未登录

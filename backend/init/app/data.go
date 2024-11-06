@@ -30,6 +30,7 @@ type Plugin struct {
 	Repo           string       `json:"repo"`
 	Volume         []Volume     `json:"volume"`
 	Env            []EnvElement `json:"env"`
+	Command        string       `json:"command"`
 }
 
 type EnvElement struct {
@@ -183,8 +184,15 @@ func (p *Plugin) GenService() string {
 		}
 	}
 
+	serviceContent = append(serviceContent, fmt.Sprintf("%scpus: \"${CPUS:-0}\"", getSpaces(2)))
+	serviceContent = append(serviceContent, fmt.Sprintf("%smem_limit: \"${MemoryLimit:-0}\"", getSpaces(2)))
+
 	serviceContent = append(serviceContent, fmt.Sprintf("%slabels:", getSpaces(2)))
 	serviceContent = append(serviceContent, fmt.Sprintf("%screatedBy: \"Apps\"", getSpaces(3)))
+
+	if p.Command != "" {
+		serviceContent = append(serviceContent, fmt.Sprintf("%scommand: %s", getSpaces(2), p.Command))
+	}
 
 	serviceContent = append(serviceContent, "\n")
 

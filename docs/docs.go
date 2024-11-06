@@ -35,7 +35,7 @@ const docTemplate = `{
                 "tags": [
                     "app"
                 ],
-                "summary": "app page",
+                "summary": "获取插件列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -108,7 +108,7 @@ const docTemplate = `{
                 "tags": [
                     "app"
                 ],
-                "summary": "installed app page",
+                "summary": "获取已安装插件列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -163,7 +163,7 @@ const docTemplate = `{
                 "tags": [
                     "app"
                 ],
-                "summary": "app tags",
+                "summary": "获取插件分类信息",
                 "parameters": [
                     {
                         "type": "string",
@@ -249,7 +249,7 @@ const docTemplate = `{
                 "tags": [
                     "app"
                 ],
-                "summary": "app install",
+                "summary": "插件安装",
                 "parameters": [
                     {
                         "type": "string",
@@ -299,7 +299,7 @@ const docTemplate = `{
                 "tags": [
                     "app"
                 ],
-                "summary": "app uninstall",
+                "summary": "插件卸载",
                 "parameters": [
                     {
                         "type": "string",
@@ -348,7 +348,7 @@ const docTemplate = `{
                 "tags": [
                     "app"
                 ],
-                "summary": "app detail",
+                "summary": "获取插件详情",
                 "parameters": [
                     {
                         "type": "string",
@@ -416,8 +416,14 @@ const docTemplate = `{
         "request.AppInstall": {
             "type": "object",
             "properties": {
-                "name": {
+                "cpu_quota": {
+                    "type": "integer"
+                },
+                "docker_compose": {
                     "type": "string"
+                },
+                "memory_limit": {
+                    "type": "integer"
                 },
                 "params": {
                     "type": "object",

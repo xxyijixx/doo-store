@@ -21,6 +21,7 @@ import (
 	"path"
 
 	log "github.com/sirupsen/logrus"
+
 	"gorm.io/gorm"
 )
 
@@ -42,7 +43,6 @@ func NewIAppService() IAppService {
 }
 
 func (*AppService) AppPage(ctx dto.ServiceContext, req request.AppSearch) (*dto.PageResult, error) {
-
 	var query repo.IAppDo
 	query = repo.App.Order(repo.App.Sort.Desc())
 	if req.Name != "" {
@@ -99,6 +99,7 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 		log.Debug("Error query app")
 		return err
 	}
+
 	// 检测版本
 	dootaskService := NewIDootaskService()
 	versionInfoResp, err := dootaskService.GetVersoinInfo()
@@ -115,6 +116,7 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 			"detail": app.DependsVersion,
 		}, nil)
 	}
+
 	_, err = repo.AppInstalled.Where(repo.AppInstalled.AppID.Eq(app.ID)).First()
 	if err != nil {
 		if err != gorm.ErrRecordNotFound {
@@ -126,6 +128,13 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 		log.Debug("Error query app detail")
 		return err
 	}
+
+	// 检测 docker-compose 文件
+	err = compose.Check(req.DockerCompose)
+	if err != nil {
+		return err
+	}
+
 	appKey := config.EnvConfig.APP_PREFIX + app.Key
 	// 创建工作目录
 	workspaceDir := path.Join(constant.AppInstallDir, appKey)
@@ -134,11 +143,9 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 		log.Debug("Error create dir")
 		return err
 	}
-	// 如果名称不存在则随机生成
-	if req.Name == "" {
-		req.Name = fmt.Sprintf("%d", rand.Int31n(100000))
-	}
-	containerName := config.EnvConfig.APP_PREFIX + app.Key + "-" + req.Name
+	// 名称
+	name := fmt.Sprintf("plugin-%d", rand.Int31n(100000))
+	containerName := config.EnvConfig.APP_PREFIX + app.Key + "-" + name
 
 	paramJson, err := json.Marshal(req.Params)
 	if err != nil {
@@ -150,7 +157,7 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 		return err
 	}
 	appInstalled := &model.AppInstalled{
-		Name:          req.Name,
+		Name:          name,
 		AppID:         app.ID,
 		AppDetailID:   appDetail.ID,
 		Class:         app.Class,
@@ -158,7 +165,7 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 		Version:       appDetail.Version,
 		Params:        string(paramJson),
 		Env:           envJson,
-		DockerCompose: appDetail.DockerCompose,
+		DockerCompose: req.DockerCompose,
 		Key:           app.Key,
 		Status:        constant.Installing,
 	}
@@ -273,14 +280,13 @@ func (*AppService) AppUnInstall(ctx dto.ServiceContext, req request.AppUnInstall
 }
 
 func (*AppService) AppInstalledPage(ctx dto.ServiceContext, req request.AppInstalledSearch) (*dto.PageResult, error) {
-	// var query repo.IAppInstalledDo
-	// query := repo.AppInstalled.Order(repo.AppInstalled.ID.Desc())
+
 	query := repo.AppInstalled.Join(repo.App, repo.App.ID.EqCol(repo.AppInstalled.AppID))
 	if req.Class != "" {
 		query = query.Where(repo.AppInstalled.Class.Eq(req.Class))
 	}
-	result := map[string]any{}
-	count, err := query.Select(repo.App.Icon, repo.App.Description, repo.AppInstalled.ALL).ScanByPage(&result, req.Page-1, req.PageSize)
+	result := []map[string]any{}
+	count, err := query.Select(repo.AppInstalled.ALL, repo.App.Icon, repo.App.Description, repo.App.Name).ScanByPage(&result, req.Page-1, req.PageSize)
 
 	if err != nil {
 		return nil, err

@@ -18,7 +18,8 @@
           "value": "80",
           "required": true
         }
-      ]
+      ],
+      "command": ""
     },
     {
       "name": "Redis",
@@ -47,7 +48,8 @@
           "value": "6379",
           "required": false
         }
-      ]
+      ],
+      "command": ""
     },
     {
       "name": "Nginx2",
@@ -67,7 +69,8 @@
           "value": "80",
           "required": true
         }
-      ]
+      ],
+      "command": ""
     },
     {
       "name": "Nginx3",
@@ -87,7 +90,8 @@
           "value": "80",
           "required": true
         }
-      ]
+      ],
+      "command": ""
     },
     {
       "name": "Nginx4",
@@ -107,7 +111,8 @@
           "value": "80",
           "required": true
         }
-      ]
+      ],
+      "command": ""
     },
     {
       "name": "Nginx5",
@@ -127,7 +132,8 @@
           "value": "80",
           "required": true
         }
-      ]
+      ],
+      "command": ""
     },
     {
       "name": "Nginx6",
@@ -147,7 +153,8 @@
           "value": "80",
           "required": true
         }
-      ]
+      ],
+      "command": ""
     },
     {
       "name": "Nginx7",
@@ -167,7 +174,8 @@
           "value": "80",
           "required": true
         }
-      ]
+      ],
+      "command": ""
     },
     {
       "name": "Nginx8",
@@ -187,7 +195,8 @@
           "value": "80",
           "required": true
         }
-      ]
+      ],
+      "command": ""
     },
     {
       "name": "Nginx9",
@@ -207,7 +216,8 @@
           "value": "80",
           "required": true
         }
-      ]
+      ],
+      "command": ""
     },
     {
       "name": "Nginx10",
@@ -227,7 +237,8 @@
           "value": "80",
           "required": true
         }
-      ]
+      ],
+      "command": ""
     }
   ]
 }

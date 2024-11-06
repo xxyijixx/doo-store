@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @Summary 安装
+// @Summary 获取插件列表
 // @Schemes
 // @Description
 // @Security BearerAuth
@@ -45,7 +45,7 @@ func (*BaseApi) AppPage(c *gin.Context) {
 	helper.SuccessWith(c, data)
 }
 
-// @Summary app detail
+// @Summary 获取插件详情
 // @Schemes
 // @Description
 // @Security BearerAuth
@@ -70,7 +70,7 @@ func (*BaseApi) AppDetailByKey(c *gin.Context) {
 	helper.SuccessWith(c, data)
 }
 
-// @Summary app install
+// @Summary 插件安装
 // @Schemes
 // @Description
 // @Security BearerAuth
@@ -138,7 +138,7 @@ func (*BaseApi) AppInstallOperate(c *gin.Context) {
 	helper.SuccessWith(c, "操作成功")
 }
 
-// @Summary app uninstall
+// @Summary 插件卸载
 // @Schemes
 // @Description
 // @Security BearerAuth
@@ -172,7 +172,7 @@ func (*BaseApi) AppUnInstall(c *gin.Context) {
 	helper.SuccessWith(c, "卸载成功")
 }
 
-// @Summary installed app page
+// @Summary 获取已安装插件列表
 // @Schemes
 // @Description
 // @Security BearerAuth
@@ -204,7 +204,7 @@ func (*BaseApi) AppInstalledPage(c *gin.Context) {
 	helper.SuccessWith(c, data)
 }
 
-// @Summary app tags
+// @Summary 获取插件分类信息
 // @Schemes
 // @Description
 // @Security BearerAuth

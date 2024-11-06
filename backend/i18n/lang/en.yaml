@@ -13,5 +13,10 @@ ErrMailToInvalid: Please enter the correct recipient address
 ErrNoPermission: Insufficient authority
 ErrPluginAdminNotCancel: Administrators only
 ErrPluginVersionNotSupport: The current version does not meet the requirements, requires the version {{.detail}} or above
+ErrPluginUnmarshalDockerCompose: Unable to parse Docker Compose file
+ErrPluginNetworkModeHost: The host network mode is used
+ErrPluginNotAllowedPrivileged: Privileged mode is not allowed
+ErrPluginInvalidLocalVolumeMount: Invalid local volume mount path
+ErrPluginEnvVarInVolumeMount: Environment variables are not allowed on the mount path
 ErrRequestTimeout: Request timeout
 ErrTypeNotLogin: Not logged in

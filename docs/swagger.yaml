@@ -11,8 +11,12 @@ definitions:
     type: object
   request.AppInstall:
     properties:
-      name:
+      cpu_quota:
+        type: integer
+      docker_compose:
         type: string
+      memory_limit:
+        type: integer
       params:
         additionalProperties: true
         type: object
@@ -83,7 +87,7 @@ paths:
             $ref: '#/definitions/dto.Response'
       security:
       - BearerAuth: []
-      summary: app page
+      summary: 获取插件列表
       tags:
       - app
   /apps/{key}:
@@ -116,7 +120,7 @@ paths:
             $ref: '#/definitions/dto.Response'
       security:
       - BearerAuth: []
-      summary: app uninstall
+      summary: 插件卸载
       tags:
       - app
     post:
@@ -148,7 +152,7 @@ paths:
             $ref: '#/definitions/dto.Response'
       security:
       - BearerAuth: []
-      summary: app install
+      summary: 插件安装
       tags:
       - app
     put:
@@ -205,7 +209,7 @@ paths:
             $ref: '#/definitions/dto.Response'
       security:
       - BearerAuth: []
-      summary: app detail
+      summary: 获取插件详情
       tags:
       - app
   /apps/installed:
@@ -241,7 +245,7 @@ paths:
             $ref: '#/definitions/dto.Response'
       security:
       - BearerAuth: []
-      summary: installed app page
+      summary: 获取已安装插件列表
       tags:
       - app
   /apps/tags:
@@ -261,7 +265,7 @@ paths:
             $ref: '#/definitions/dto.Response'
       security:
       - BearerAuth: []
-      summary: app tags
+      summary: 获取插件分类信息
       tags:
       - app
   /public/health:
