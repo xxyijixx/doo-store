@@ -1,6 +1,8 @@
 package service
 
 import (
+	"bufio"
+	"context"
 	"doo-store/backend/config"
 	"doo-store/backend/constant"
 	"doo-store/backend/core/dto"
@@ -16,11 +18,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math/rand"
 	"os"
 	"path"
+	"strings"
+	"unicode/utf8"
 
+	"github.com/docker/docker/api/types/container"
+	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/text/transform"
 
 	"gorm.io/gorm"
 )
@@ -38,6 +47,7 @@ type IAppService interface {
 	Params(ctx dto.ServiceContext, id int64) (any, error)
 	UpdateParams(ctx dto.ServiceContext, req request.AppInstall) error
 	AppTags(ctx dto.ServiceContext) ([]*model.Tag, error)
+	GetLogs(ctx dto.ServiceContext, conn *websocket.Conn, req request.AppLogsSearch) (any, error)
 }
 
 func NewIAppService() IAppService {
@@ -388,6 +398,50 @@ func (*AppService) AppTags(ctx dto.ServiceContext) ([]*model.Tag, error) {
 	return tags, nil
 }
 
+func (*AppService) GetLogs(ctx dto.ServiceContext, conn *websocket.Conn, req request.AppLogsSearch) (any, error) {
+	log.Debug("获取日志")
+	client, err := docker.NewDockerClient()
+	if err != nil {
+		return nil, err
+	}
+	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(req.Id)).First()
+	if err != nil {
+		return nil, err
+	}
+	containerName := config.EnvConfig.APP_PREFIX + appInstalled.Key + "-" + appInstalled.Name
+	reader, err := client.ContainerLogs(context.Background(), containerName, container.LogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		// Follow:     true,
+		Since: req.Since,
+		Until: req.Until,
+		// Timestamps: true,
+		Tail: req.Tail,
+	})
+	if err != nil {
+		return nil, err
+	}
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		line := scanner.Text()
+		// 检查是否是有效的 UTF-8 编码
+		if !utf8.ValidString(line) {
+			fmt.Println("非UTF8 ")
+			convertedLine, err := ConvertToUTF8([]byte(line))
+			if err != nil {
+				log.Println("转换非 UTF-8 数据错误:", err)
+				continue
+			}
+			line = convertedLine
+		}
+		// log.Debug("读取到的日志", line)
+		conn.WriteMessage(websocket.TextMessage, []byte(line))
+	}
+	fmt.Println("日志读取完成")
+
+	return nil, nil
+}
+
 func appRe(appInstalled *model.AppInstalled, envContent string) error {
 	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
 	composeFile := docker.GetComposeFile(appKey)
@@ -433,6 +487,7 @@ func appUp(appInstalled *model.AppInstalled, envContent string) error {
 			return err
 		}
 		composeFile, err := docker.WriteComposeFile(appKey, appInstalled.DockerCompose)
+		log.Debug("Docker容器UP,", composeFile)
 		if err != nil {
 			log.Debug("Error WriteFile", err)
 			return err
@@ -444,7 +499,7 @@ func appUp(appInstalled *model.AppInstalled, envContent string) error {
 		}
 		stdout, err := compose.Up(composeFile)
 		if err != nil {
-			log.Debug("Error docker compose up", stdout)
+			log.Debug("Error docker compose up", stdout, err)
 			_, _ = repo.Use(tx).AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
 			return err
 		}
@@ -501,4 +556,15 @@ func insertLog(appInstalledId int64, content string) {
 	if err != nil {
 		log.Debug("Error create app log")
 	}
+}
+
+// ConvertToUTF8 尝试将非 UTF-8 内容转换为 UTF-8
+func ConvertToUTF8(input []byte) (string, error) {
+	// 尝试使用 GBK 解码（示例，可以替换为其他编码）
+	reader := transform.NewReader(strings.NewReader(string(input)), simplifiedchinese.GBK.NewDecoder())
+	converted, err := io.ReadAll(reader)
+	if err != nil {
+		return "", err
+	}
+	return string(converted), nil
 }

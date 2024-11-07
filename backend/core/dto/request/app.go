@@ -34,3 +34,10 @@ type AppInstalledSearch struct {
 	dto.PageInfo
 	Class string `form:"class" json:"class"`
 }
+
+type AppLogsSearch struct {
+	Id    int64  `json:"-"`
+	Since string `form:"since"`
+	Until string `form:"until"`
+	Tail  string `form:"tail"`
+}

@@ -84,7 +84,7 @@ func (c Client) ListAllContainers() ([]types.Container, error) {
 }
 
 func (c Client) CreateNetwork(name string) error {
-	_, err := c.cli.NetworkCreate(context.Background(), name, types.NetworkCreate{
+	_, err := c.cli.NetworkCreate(context.Background(), name, network.CreateOptions{
 		Driver: "bridge",
 	})
 	return err

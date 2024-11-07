@@ -101,12 +101,12 @@ func (*BaseApi) AppInstall(c *gin.Context) {
 	req.Key = key
 
 	// 校验CPUS和MemoryLimit
-	re := regexp.MustCompile(`^(\\d+(\\.\\d+)?(B|b|K|k|M|m|G|g|T|t)?)$|^\\d+(\\.\\d+)?$`)
+	re := regexp.MustCompile(`^(\d+(\.\d+)?(B|b|K|k|M|m|G|g|T|t)?)$|^\d+(\.\d+)?$`)
 	if !re.MatchString(req.MemoryLimit) {
 		helper.ErrorWith(c, constant.ErrInvalidParameter, nil)
 		return
 	}
-	re = regexp.MustCompile(`^\\d+(\\.\\d{1,2})?$`)
+	re = regexp.MustCompile(`^\d+(\.\d{1,2})?$`)
 	if !re.MatchString(req.CPUS) {
 		helper.ErrorWith(c, constant.ErrInvalidParameter, nil)
 		return
@@ -272,12 +272,12 @@ func (*BaseApi) AppInstalledUpdateParams(c *gin.Context) {
 	req.InstalledId = int64(id)
 
 	// 校验CPUS和MemoryLimit
-	re := regexp.MustCompile(`^(\\d+(\\.\\d+)?(B|b|K|k|M|m|G|g|T|t)?)$|^\\d+(\\.\\d+)?$`)
+	re := regexp.MustCompile(`^(\d+(\.\d+)?(B|b|K|k|M|m|G|g|T|t)?)$|^\d+(\.\d+)?$`)
 	if !re.MatchString(req.MemoryLimit) {
 		helper.ErrorWith(c, constant.ErrInvalidParameter, nil)
 		return
 	}
-	re = regexp.MustCompile(`^\\d+(\\.\\d{1,2})?$`)
+	re = regexp.MustCompile(`^\d+(\.\d{1,2})?$`)
 	if !re.MatchString(req.CPUS) {
 		helper.ErrorWith(c, constant.ErrInvalidParameter, nil)
 		return
@@ -312,4 +312,30 @@ func (*BaseApi) AppTags(c *gin.Context) {
 		return
 	}
 	helper.SuccessWith(c, data)
+}
+
+func (*BaseApi) AppLogs(c *gin.Context) {
+	err := checkAuth(c, true)
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	id, _ := strconv.Atoi(c.Param("id"))
+	var req request.AppLogsSearch
+	err = helper.CheckBindQueryAndValidate(&req, c)
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	req.Id = int64(id)
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	defer conn.Close()
+	_, err = appService.GetLogs(dto.ServiceContext{C: c}, conn, req)
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+	}
 }
