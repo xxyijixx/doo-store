@@ -10,6 +10,34 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// 自定义类型用于处理两种格式
+type Environment map[string]string
+
+// UnmarshalYAML 方法处理 []string 和 map[string]string 格式
+func (e *Environment) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	// 尝试解析为 map[string]string 格式
+	var mapFormat map[string]string
+	if err := unmarshal(&mapFormat); err == nil {
+		*e = mapFormat
+		return nil
+	}
+
+	// 尝试解析为 []string 格式
+	var sliceFormat []string
+	if err := unmarshal(&sliceFormat); err == nil {
+		*e = make(map[string]string)
+		for _, item := range sliceFormat {
+			parts := strings.SplitN(item, "=", 2)
+			if len(parts) == 2 {
+				(*e)[parts[0]] = parts[1]
+			}
+		}
+		return nil
+	}
+
+	return fmt.Errorf("environment format not supported")
+}
+
 type DockerComposeConfig struct {
 	Version  string                   `yaml:"version"`
 	Services map[string]ServiceConfig `yaml:"services"`
@@ -17,14 +45,14 @@ type DockerComposeConfig struct {
 }
 
 type ServiceConfig struct {
-	Image         string   `yaml:"image"`
-	Restart       string   `yaml:"restart,omitempty"`
-	ContainerName string   `yaml:"container_name"`
-	Ports         []string `yaml:"ports,omitempty"`
-	Environment   []string `yaml:"environment,omitempty"`
-	Volumes       []string `yaml:"volumes,omitempty"`
-	NetworkMode   string   `yaml:"network_mode"`
-	Privileged    bool     `yaml:"privileged,omitempty"`
+	Image         string      `yaml:"image"`
+	Restart       string      `yaml:"restart,omitempty"`
+	ContainerName string      `yaml:"container_name"`
+	Ports         []string    `yaml:"ports,omitempty"`
+	Env           Environment `yaml:"environment,omitempty"`
+	Volumes       []string    `yaml:"volumes,omitempty"`
+	NetworkMode   string      `yaml:"network_mode"`
+	Privileged    bool        `yaml:"privileged,omitempty"`
 }
 
 type NetworkConfig struct {

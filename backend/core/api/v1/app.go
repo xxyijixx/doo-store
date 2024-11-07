@@ -1,10 +1,12 @@
 package v1
 
 import (
+	"doo-store/backend/constant"
 	"doo-store/backend/core/api/v1/helper"
 	"doo-store/backend/core/dto"
 	"doo-store/backend/core/dto/request"
 	"fmt"
+	"regexp"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -97,6 +99,19 @@ func (*BaseApi) AppInstall(c *gin.Context) {
 		return
 	}
 	req.Key = key
+
+	// 校验CPUS和MemoryLimit
+	re := regexp.MustCompile(`^(\\d+(\\.\\d+)?(B|b|K|k|M|m|G|g|T|t)?)$|^\\d+(\\.\\d+)?$`)
+	if !re.MatchString(req.MemoryLimit) {
+		helper.ErrorWith(c, constant.ErrInvalidParameter, nil)
+		return
+	}
+	re = regexp.MustCompile(`^\\d+(\\.\\d{1,2})?$`)
+	if !re.MatchString(req.CPUS) {
+		helper.ErrorWith(c, constant.ErrInvalidParameter, nil)
+		return
+	}
+
 	err = appService.AppInstall(dto.ServiceContext{C: c}, req)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
@@ -182,7 +197,7 @@ func (*BaseApi) AppUnInstall(c *gin.Context) {
 // @Param language header string false "i18n" default(zh)
 // @Param page query integer true "page" default(1)
 // @Param page_size query integer true "page_size" default(10)
-// @Param class query string false "class"
+// @Param class query string false "分类"
 // @Success 200 {object} dto.Response "success"
 // @Router /apps/installed [get]
 func (*BaseApi) AppInstalledPage(c *gin.Context) {
@@ -255,6 +270,18 @@ func (*BaseApi) AppInstalledUpdateParams(c *gin.Context) {
 		return
 	}
 	req.InstalledId = int64(id)
+
+	// 校验CPUS和MemoryLimit
+	re := regexp.MustCompile(`^(\\d+(\\.\\d+)?(B|b|K|k|M|m|G|g|T|t)?)$|^\\d+(\\.\\d+)?$`)
+	if !re.MatchString(req.MemoryLimit) {
+		helper.ErrorWith(c, constant.ErrInvalidParameter, nil)
+		return
+	}
+	re = regexp.MustCompile(`^\\d+(\\.\\d{1,2})?$`)
+	if !re.MatchString(req.CPUS) {
+		helper.ErrorWith(c, constant.ErrInvalidParameter, nil)
+		return
+	}
 
 	err = appService.UpdateParams(dto.ServiceContext{C: c}, req)
 	if err != nil {

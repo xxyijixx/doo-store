@@ -14,7 +14,16 @@ func GenEnv(appKey, containerName string, envs map[string]any, writeFile bool) (
 	envFile := fmt.Sprintf("%s/%s/.env", constant.AppInstallDir, appKey)
 	envContent = fmt.Sprintf("%s=%s\n", "CONTAINER_NAME", containerName)
 	for key, value := range envs {
-		envContent += fmt.Sprintf("%s=%s\n", key, value)
+		var envValue string
+		switch v := value.(type) {
+		case float64:
+			envValue = fmt.Sprintf("%f", v)
+		case string:
+			envValue = v
+		default:
+			envValue = fmt.Sprintf("%v", v)
+		}
+		envContent += fmt.Sprintf("%s=%s\n", key, envValue)
 	}
 	if writeFile {
 		err = os.WriteFile(envFile, []byte(envContent), 0644)

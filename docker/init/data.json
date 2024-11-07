@@ -53,6 +53,51 @@
       "command": ""
     },
     {
+      "name": "DooAliOSS",
+      "key": "dooalioss",
+      "description": "DooAliOSS is a plugin for DooTask to support AliOSS storage. Note: This is a local image",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "0.0.1",
+      "github": "",
+      "class": "oss",
+      "depends_version": "0.37.21",
+      "repo": "xxyijixx/dooalioss",
+      "volume": [],
+      "env": [
+        {
+          "name": "OSS_REGION",
+          "key": "OSS_REGION",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "OSS_ENDPOINT",
+          "key": "OSS_ENDPOINT",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "OSS_BUCKET",
+          "key": "OSS_BUCKET",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "OSS_ACCESS_KEY_ID",
+          "key": "OSS_ACCESS_KEY_ID",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "OSS_ACCESS_KEY_SECRET",
+          "key": "OSS_ACCESS_KEY_SECRET",
+          "value": "",
+          "required": true
+        }
+      ],
+      "command": ""
+    },
+    {
       "name": "Nginx2",
       "key": "nginx2",
       "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",

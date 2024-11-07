@@ -20,6 +20,10 @@ definitions:
       params:
         additionalProperties: true
         type: object
+    required:
+    - cpus
+    - docker_compose
+    - memory_limit
     type: object
   request.AppInstalledOperate:
     properties:
@@ -232,7 +236,7 @@ paths:
         name: page_size
         required: true
         type: integer
-      - description: class
+      - description: 分类
         in: query
         name: class
         type: string

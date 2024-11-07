@@ -135,7 +135,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "class",
+                        "description": "分类",
                         "name": "class",
                         "in": "query"
                     }
@@ -502,6 +502,11 @@ const docTemplate = `{
         },
         "request.AppInstall": {
             "type": "object",
+            "required": [
+                "cpus",
+                "docker_compose",
+                "memory_limit"
+            ],
             "properties": {
                 "cpus": {
                     "type": "string"

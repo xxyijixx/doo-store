@@ -184,6 +184,12 @@ func (p *Plugin) GenService() string {
 			serviceContent = append(serviceContent, fmt.Sprintf("%s- %s:%s", getSpaces(3), v.Local, v.Target))
 		}
 	}
+	if len(p.Env) != 0 {
+		serviceContent = append(serviceContent, fmt.Sprintf("%senvironment:", getSpaces(2)))
+		for _, env := range p.Env {
+			serviceContent = append(serviceContent, fmt.Sprintf("%s- %s=\"${%s}\"", getSpaces(3), env.Key, env.Key))
+		}
+	}
 
 	serviceContent = append(serviceContent, fmt.Sprintf("%scpus: \"${CPUS}\"", getSpaces(2)))
 	serviceContent = append(serviceContent, fmt.Sprintf("%smem_limit: \"${MEMORY_LIMIT}\"", getSpaces(2)))
