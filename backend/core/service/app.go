@@ -1,7 +1,6 @@
 package service
 
 import (
-	"bufio"
 	"context"
 	"doo-store/backend/config"
 	"doo-store/backend/constant"
@@ -19,14 +18,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math/rand"
 	"os"
 	"path"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/docker/docker/api/types/container"
-	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
@@ -47,7 +43,7 @@ type IAppService interface {
 	Params(ctx dto.ServiceContext, id int64) (any, error)
 	UpdateParams(ctx dto.ServiceContext, req request.AppInstall) error
 	AppTags(ctx dto.ServiceContext) ([]*model.Tag, error)
-	GetLogs(ctx dto.ServiceContext, conn *websocket.Conn, req request.AppLogsSearch) (any, error)
+	GetLogs(ctx dto.ServiceContext, req request.AppLogsSearch) (any, error)
 }
 
 func NewIAppService() IAppService {
@@ -108,7 +104,7 @@ func (*AppService) AppDetailByKey(ctx dto.ServiceContext, key string) (*response
 func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) error {
 	app, err := repo.App.Where(repo.App.Key.Eq(req.Key)).First()
 	if err != nil {
-		log.Debug("Error query app")
+		log.Info("Error query app")
 		return err
 	}
 
@@ -129,21 +125,25 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 		}, nil)
 	}
 
-	_, err = repo.AppInstalled.Where(repo.AppInstalled.AppID.Eq(app.ID)).First()
+	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.AppID.Eq(app.ID)).First()
 	if err != nil {
 		if err != gorm.ErrRecordNotFound {
-			return errors.New("无需重复安装")
+			return errors.New("安装失败")
 		}
+	}
+	if appInstalled != nil {
+		return errors.New("无需重复安装")
 	}
 	appDetail, err := repo.AppDetail.Where(repo.AppDetail.AppID.Eq(app.ID)).First()
 	if err != nil {
-		log.Debug("Error query app detail")
+		log.Info("Error query app detail")
 		return err
 	}
 
 	// 检测 docker-compose 文件
 	err = compose.Check(req.DockerCompose)
 	if err != nil {
+		log.Info("DockerCompose 内容未通过检测", err)
 		return err
 	}
 
@@ -152,11 +152,11 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 	workspaceDir := path.Join(constant.AppInstallDir, appKey)
 	err = createDir(workspaceDir)
 	if err != nil {
-		log.Debug("Error create dir")
+		log.Info("Error create dir", err)
 		return err
 	}
 	// 名称
-	name := fmt.Sprintf("plugin-%d", rand.Int31n(100000))
+	name := fmt.Sprintf("plugin-%s", common.RandString(6))
 	containerName := config.EnvConfig.APP_PREFIX + app.Key + "-" + name
 
 	paramJson, err := json.Marshal(req.Params)
@@ -172,7 +172,7 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 	if err != nil {
 		return err
 	}
-	appInstalled := &model.AppInstalled{
+	appInstalled = &model.AppInstalled{
 		Name:          name,
 		AppID:         app.ID,
 		AppDetailID:   appDetail.ID,
@@ -187,7 +187,7 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 	}
 	err = appUp(appInstalled, envContent)
 	if err != nil {
-		log.Debug("启动失败", err)
+		log.Info("启动失败", err)
 		return err
 	}
 
@@ -215,37 +215,11 @@ func (*AppService) AppInstallOperate(ctx dto.ServiceContext, req request.AppInst
 	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
 	composeFile := fmt.Sprintf("%s/%s/docker-compose.yml", constant.AppInstallDir, appKey)
 
-	if req.Action == "update" {
-		// 重建容器
-		_, err := compose.Down(composeFile)
-		if err != nil {
-			log.Debug("Error docker compose operate")
-			return err
-		}
-
-		_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.Stop)
-
-		name, exsit := req.Params["name"]
-		containerName := config.EnvConfig.APP_PREFIX + appInstalled.Key + "-"
-		if exsit && name != "" {
-			containerName += fmt.Sprintf("%s", name)
-		} else {
-			containerName += appInstalled.Name
-		}
-		_, envJson, err := docker.GenEnv(appKey, containerName, req.Params, true)
-		if err != nil {
-			return err
-		}
-		_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Env, envJson)
-		_, err = compose.Up(composeFile)
-		if err != nil {
-			_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
-			log.Debug("Error docker compose operate")
-			return err
-		}
-		_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.Running)
-		return nil
+	supportActions := []string{"start", "stop"}
+	if !common.InArray(req.Action, supportActions) {
+		return errors.New("不支持的action")
 	}
+
 	if req.Action == "stop" {
 		err := appStop(appInstalled)
 		return err
@@ -253,7 +227,7 @@ func (*AppService) AppInstallOperate(ctx dto.ServiceContext, req request.AppInst
 
 	stdout, err := compose.Operate(composeFile, req.Action)
 	if err != nil {
-		log.Debug("Error docker compose operate")
+		log.Info("Error docker compose operate")
 		return err
 	}
 	fmt.Println(stdout)
@@ -267,26 +241,29 @@ func (*AppService) AppUnInstall(ctx dto.ServiceContext, req request.AppUnInstall
 		return err
 	}
 	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
-	composeFile := fmt.Sprintf("%s/%s/docker-compose.yml", constant.AppInstallDir, appKey)
+	composeFile := docker.GetComposeFile(appKey)
 	err = repo.DB.Transaction(func(tx *gorm.DB) error {
 		_, err = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Delete()
 		if err != nil {
+			log.Info("删除插件失败", err)
 			return err
 		}
 		_, err = repo.Use(tx).App.Where(repo.App.ID.Eq(appInstalled.AppID)).Update(repo.App.Status, constant.AppUnused)
 		if err != nil {
+			log.Info("更新插件状态失败", err)
 			return err
 		}
 		stdout, err := compose.Down(composeFile)
 		if err != nil {
-			log.Debug("Error docker compose down")
+			log.Info("Error docker compose down")
 			return err
 		}
 		fmt.Println(stdout)
 		return err
 	})
 	if err != nil {
-		return err
+		log.Info("插件卸载失败", err)
+		return errors.New("插件卸载失败")
 	}
 
 	nginx.RemoveLocation(appInstalled.Key)
@@ -306,7 +283,14 @@ func (*AppService) AppInstalledPage(ctx dto.ServiceContext, req request.AppInsta
 	count, err := query.Select(repo.AppInstalled.ALL, repo.App.Icon, repo.App.Description, repo.App.Name).ScanByPage(&result, (req.Page-1)*req.PageSize, req.PageSize)
 
 	if err != nil {
-		return nil, err
+		if err == gorm.ErrRecordNotFound {
+			return &dto.PageResult{
+				Total: 0,
+				Items: []interface{}{},
+			}, nil
+		}
+		log.Info("查询已安装插件失败", err)
+		return nil, errors.New("查询已安装插件失败")
 	}
 
 	pageResult := &dto.PageResult{
@@ -319,22 +303,26 @@ func (*AppService) AppInstalledPage(ctx dto.ServiceContext, req request.AppInsta
 func (*AppService) Params(ctx dto.ServiceContext, id int64) (any, error) {
 	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(id)).First()
 	if err != nil {
-		return nil, err
+		log.Info("Error query app installed", err)
+		return nil, errors.New("获取安装插件信息失败")
 	}
 	appDetail, err := repo.AppDetail.Where(repo.AppDetail.ID.Eq(appInstalled.AppDetailID)).First()
 	if err != nil {
-		return nil, err
+		log.Info("Error query app detail", err)
+		return nil, errors.New("获取安装插件信息失败")
 	}
 	// appDetail.Params
 	// 解析原始参数
 	params := response.AppParams{}
 	err = common.StrToStruct(appDetail.Params, &params)
 	if err != nil {
+		log.Info("错误解析Json", err)
 		return nil, err
 	}
 	env := map[string]string{}
 	err = json.Unmarshal([]byte(appInstalled.Env), &env)
 	if err != nil {
+		log.Info("解析环境变量失败", err)
 		return nil, err
 	}
 	for _, formField := range params.FormFields {
@@ -354,17 +342,20 @@ func (*AppService) Params(ctx dto.ServiceContext, id int64) (any, error) {
 func (*AppService) UpdateParams(ctx dto.ServiceContext, req request.AppInstall) error {
 	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(req.InstalledId)).First()
 	if err != nil {
-		return err
+		log.Info("Error query app installed", err)
+		return errors.New("获取安装插件信息失败")
 	}
 	appDetail, err := repo.AppDetail.Where(repo.AppDetail.ID.Eq(appInstalled.AppDetailID)).First()
 	if err != nil {
-		return err
+		log.Info("Error query app detail", err)
+		return errors.New("获取安装插件信息失败")
 	}
 	// appDetail.Params
 	// 解析原始参数
 	params := response.AppParams{}
 	err = common.StrToStruct(appDetail.Params, &params)
 	if err != nil {
+		log.Info("错误解析Json", err)
 		return err
 	}
 	// TODO 参数校验
@@ -376,13 +367,14 @@ func (*AppService) UpdateParams(ctx dto.ServiceContext, req request.AppInstall) 
 
 	envContent, envJson, err := docker.GenEnv(appKey, containerName, req.Params, false)
 	if err != nil {
-		return err
+		log.Info("错误生成环境变量文件", err)
+		return errors.New("修改参数失败")
 	}
 	appInstalled.Env = envJson
 	err = appRe(appInstalled, envContent)
 	if err != nil {
-		log.Debug("重启失败", err)
-		return err
+		log.Info("重启失败", err)
+		return errors.New("插件重启失败")
 	}
 	return nil
 }
@@ -398,48 +390,62 @@ func (*AppService) AppTags(ctx dto.ServiceContext) ([]*model.Tag, error) {
 	return tags, nil
 }
 
-func (*AppService) GetLogs(ctx dto.ServiceContext, conn *websocket.Conn, req request.AppLogsSearch) (any, error) {
-	log.Debug("获取日志")
+func (*AppService) GetLogs(ctx dto.ServiceContext, req request.AppLogsSearch) (any, error) {
+	log.Info("获取日志")
 	client, err := docker.NewDockerClient()
 	if err != nil {
+		log.Info("获取Docker失败", err)
 		return nil, err
 	}
 	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(req.Id)).First()
 	if err != nil {
-		return nil, err
+		log.Info("Error query app installed", err)
+		return nil, errors.New("获取安装插件信息失败")
 	}
+
+	if appInstalled.Status != constant.Running {
+		return nil, errors.New("插件未运行")
+	}
+
 	containerName := config.EnvConfig.APP_PREFIX + appInstalled.Key + "-" + appInstalled.Name
 	reader, err := client.ContainerLogs(context.Background(), containerName, container.LogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
-		// Follow:     true,
-		Since: req.Since,
-		Until: req.Until,
-		// Timestamps: true,
-		Tail: req.Tail,
+		Follow:     true,
+		Since:      req.Since,
+		Until:      req.Until,
+		Tail:       req.Tail,
 	})
+	if err != nil {
+		log.Info("Error query container log", err)
+		return nil, errors.New("获取日志失败")
+	}
+	// scanner := bufio.NewScanner(reader)
+	// for scanner.Scan() {
+	// 	line := scanner.Text()
+	// 	// 检查是否是有效的 UTF-8 编码
+	// 	if !utf8.ValidString(line) {
+	// 		fmt.Println("非UTF8 ")
+	// 		convertedLine, err := ConvertToUTF8([]byte(line))
+	// 		if err != nil {
+	// 			log.Println("转换非 UTF-8 数据错误:", err)
+	// 			continue
+	// 		}
+	// 		line = convertedLine
+	// 	}
+	// 	// log.Info("读取到的日志", line)
+	// 	conn.WriteMessage(websocket.TextMessage, []byte(line))
+	// }
+	// for scanner.Scan() {
+	// 	fmt.Println(scanner.Text())
+	// }
+	fmt.Println("日志读取完成")
+	byteData, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}
-	scanner := bufio.NewScanner(reader)
-	for scanner.Scan() {
-		line := scanner.Text()
-		// 检查是否是有效的 UTF-8 编码
-		if !utf8.ValidString(line) {
-			fmt.Println("非UTF8 ")
-			convertedLine, err := ConvertToUTF8([]byte(line))
-			if err != nil {
-				log.Println("转换非 UTF-8 数据错误:", err)
-				continue
-			}
-			line = convertedLine
-		}
-		// log.Debug("读取到的日志", line)
-		conn.WriteMessage(websocket.TextMessage, []byte(line))
-	}
-	fmt.Println("日志读取完成")
 
-	return nil, nil
+	return string(byteData), nil
 }
 
 func appRe(appInstalled *model.AppInstalled, envContent string) error {
@@ -447,24 +453,24 @@ func appRe(appInstalled *model.AppInstalled, envContent string) error {
 	composeFile := docker.GetComposeFile(appKey)
 	_, err := compose.Down(composeFile)
 	if err != nil {
-		log.Debug("Error docker compose down", err)
+		log.Info("Error docker compose down", err)
 		return err
 	}
 	_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.Installing)
 	// 写入docker-compose.yaml和环境文件
 	composeFile, err = docker.WriteComposeFile(appKey, appInstalled.DockerCompose)
 	if err != nil {
-		log.Debug("Error WriteFile", err)
+		log.Info("Error WriteFile", err)
 		return err
 	}
 	_, err = docker.WrietEnvFile(appKey, envContent)
 	if err != nil {
-		log.Debug("Error WriteFile", err)
+		log.Info("Error WriteFile", err)
 		return err
 	}
 	stdout, err := compose.Up(composeFile)
 	if err != nil {
-		log.Debug("Error docker compose up", stdout)
+		log.Info("Error docker compose up", stdout)
 		_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
 		return err
 	}
@@ -487,19 +493,19 @@ func appUp(appInstalled *model.AppInstalled, envContent string) error {
 			return err
 		}
 		composeFile, err := docker.WriteComposeFile(appKey, appInstalled.DockerCompose)
-		log.Debug("Docker容器UP,", composeFile)
+		log.Info("Docker容器UP,", composeFile)
 		if err != nil {
-			log.Debug("Error WriteFile", err)
+			log.Info("Error WriteFile", err)
 			return err
 		}
 		_, err = docker.WrietEnvFile(appKey, envContent)
 		if err != nil {
-			log.Debug("Error WriteFile", err)
+			log.Info("Error WriteFile", err)
 			return err
 		}
 		stdout, err := compose.Up(composeFile)
 		if err != nil {
-			log.Debug("Error docker compose up", stdout, err)
+			log.Info("Error docker compose up", stdout, err)
 			_, _ = repo.Use(tx).AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
 			return err
 		}
@@ -546,7 +552,7 @@ func createDir(dirPath string) error {
 
 func insertLog(appInstalledId int64, content string) {
 	if content == "" {
-		log.Debug("log content is empty")
+		log.Info("log content is empty")
 		return
 	}
 	err := repo.AppLog.Create(&model.AppLog{
@@ -554,7 +560,7 @@ func insertLog(appInstalledId int64, content string) {
 		Content:        content,
 	})
 	if err != nil {
-		log.Debug("Error create app log")
+		log.Info("Error create app log")
 	}
 }
 

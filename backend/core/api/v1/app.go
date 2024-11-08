@@ -328,14 +328,15 @@ func (*BaseApi) AppLogs(c *gin.Context) {
 		return
 	}
 	req.Id = int64(id)
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	re := regexp.MustCompile(`^(?:[1-9]\d{0,3}|10000)$`)
+	// 处理查询条数，1-10000，默认1000
+	if !re.MatchString(req.Tail) {
+		req.Tail = "1000"
+	}
+	data, err := appService.GetLogs(dto.ServiceContext{C: c}, req)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	defer conn.Close()
-	_, err = appService.GetLogs(dto.ServiceContext{C: c}, conn, req)
-	if err != nil {
-		helper.ErrorWith(c, err.Error(), nil)
-	}
+	helper.SuccessWith(c, data)
 }
