@@ -1,6 +1,7 @@
 package app
 
 import (
+	"doo-store/backend/config"
 	"doo-store/backend/constant"
 	"doo-store/backend/core/dto/response"
 	"doo-store/backend/core/model"
@@ -48,8 +49,11 @@ type Volume struct {
 
 func LoadData() error {
 	logrus.Info("Loading data...")
-	var config Welcome
+	var pluginConfig Welcome
 	filename := "./docker/init/data.json"
+	if config.EnvConfig.ENV == "prod" {
+		filename = "./init/data.json"
+	}
 	data, err := os.ReadFile(filename)
 	if os.IsNotExist(err) {
 		logrus.Debug("File not exist:", filename)
@@ -61,7 +65,7 @@ func LoadData() error {
 		return err
 	}
 
-	err = json.Unmarshal(data, &config)
+	err = json.Unmarshal(data, &pluginConfig)
 	if err != nil {
 		logrus.Debug(err.Error())
 		return err
@@ -86,7 +90,7 @@ func LoadData() error {
 		oldTagMap[tag.Name] = tag
 	}
 	err = repo.DB.Transaction(func(tx *gorm.DB) error {
-		for _, p := range config.Plugins {
+		for _, p := range pluginConfig.Plugins {
 			tagMap[p.Class] = "true"
 			// 对于key存在，忽略
 			if _, exist := appKeyMap[p.Key]; exist {

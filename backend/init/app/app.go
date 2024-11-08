@@ -75,7 +75,6 @@ func createDir(dirPath string) {
 
 func InitNginxProxy() {
 	ImageNginxName := "nginx:alpine"
-	containerNginxName := "nginx-core-proxy"
 	client, err := docker.NewDockerClient()
 	if err != nil {
 		return
@@ -145,7 +144,7 @@ func InitNginxProxy() {
 	// 添加外部网络
 	if config.EnvConfig.EXTERNAL_NETWORK_NAME != "" {
 		endpointsConfig[config.EnvConfig.EXTERNAL_NETWORK_NAME] = &network.EndpointSettings{
-			Aliases:   []string{containerNginxName}, // 添加别名
+			Aliases:   []string{constant.NginxContainerName}, // 添加别名
 			IPAddress: config.EnvConfig.EXTERNAL_NETWORK_IP,
 			Gateway:   config.EnvConfig.EXTERNAL_NETWORK_GATEWAY,
 			IPAMConfig: &network.EndpointIPAMConfig{
@@ -157,7 +156,7 @@ func InitNginxProxy() {
 		EndpointsConfig: endpointsConfig,
 	}
 
-	resp, err := client.ContainerCreate(ctx, containerConfig, hostConfig, networkConfig, nil, containerNginxName)
+	resp, err := client.ContainerCreate(ctx, containerConfig, hostConfig, networkConfig, nil, constant.NginxContainerName)
 	if err != nil {
 		fmt.Println("创建容器失败", err)
 		return
