@@ -130,6 +130,78 @@
                         "description": "分类",
                         "name": "class",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "name",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "description",
+                        "name": "description",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/installed/{id}/logs": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app"
+                ],
+                "summary": "获取插件日志信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "zh",
+                        "description": "i18n",
+                        "name": "language",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "开始时间(Unix时间戳)",
+                        "name": "since",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "结束时间(Unix时间戳)",
+                        "name": "until",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1000,
+                        "description": "查询条数",
+                        "name": "tail",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -497,7 +569,8 @@
             "required": [
                 "cpus",
                 "docker_compose",
-                "memory_limit"
+                "memory_limit",
+                "params"
             ],
             "properties": {
                 "cpus": {

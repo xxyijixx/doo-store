@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bufio"
 	"context"
 	"doo-store/backend/config"
 	"doo-store/backend/constant"
@@ -20,7 +21,9 @@ import (
 	"io"
 	"os"
 	"path"
+	"regexp"
 	"strings"
+	"time"
 
 	"github.com/docker/docker/api/types/container"
 	log "github.com/sirupsen/logrus"
@@ -279,6 +282,13 @@ func (*AppService) AppInstalledPage(ctx dto.ServiceContext, req request.AppInsta
 	if req.Class != "" {
 		query = query.Where(repo.AppInstalled.Class.Eq(req.Class))
 	}
+	if req.Name != "" {
+		query = query.Where(repo.App.Name.Like(fmt.Sprintf("%%%s%%", req.Name)))
+	}
+	if req.Description != "" {
+		query = query.Where(repo.App.Description.Like(fmt.Sprintf("%%%s%%", req.Description)))
+	}
+
 	result := []map[string]any{}
 	count, err := query.Select(repo.AppInstalled.ALL, repo.App.Icon, repo.App.Description, repo.App.Name).ScanByPage(&result, (req.Page-1)*req.PageSize, req.PageSize)
 
@@ -411,41 +421,50 @@ func (*AppService) GetLogs(ctx dto.ServiceContext, req request.AppLogsSearch) (a
 	reader, err := client.ContainerLogs(context.Background(), containerName, container.LogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
-		Follow:     true,
-		Since:      req.Since,
-		Until:      req.Until,
-		Tail:       req.Tail,
+		// Follow:     true,
+		Since: req.Since,
+		Until: req.Until,
+		Tail:  fmt.Sprintf("%d", req.Tail),
 	})
 	if err != nil {
 		log.Info("Error query container log", err)
 		return nil, errors.New("获取日志失败")
 	}
-	// scanner := bufio.NewScanner(reader)
-	// for scanner.Scan() {
-	// 	line := scanner.Text()
-	// 	// 检查是否是有效的 UTF-8 编码
-	// 	if !utf8.ValidString(line) {
-	// 		fmt.Println("非UTF8 ")
-	// 		convertedLine, err := ConvertToUTF8([]byte(line))
-	// 		if err != nil {
-	// 			log.Println("转换非 UTF-8 数据错误:", err)
-	// 			continue
-	// 		}
-	// 		line = convertedLine
-	// 	}
-	// 	// log.Info("读取到的日志", line)
-	// 	conn.WriteMessage(websocket.TextMessage, []byte(line))
-	// }
-	// for scanner.Scan() {
-	// 	fmt.Println(scanner.Text())
-	// }
-	fmt.Println("日志读取完成")
-	byteData, err := io.ReadAll(reader)
-	if err != nil {
-		return nil, err
-	}
+	sb := strings.Builder{}
 
-	return string(byteData), nil
+	scanner := bufio.NewScanner(reader)
+
+	cleanText := func(input string) string {
+		// 去除所有不可见的控制字符 (ASCII 0-31 和 127)
+		reControlChars := regexp.MustCompile(`[\x00-\x1F\x7F]`)
+		return reControlChars.ReplaceAllString(input, "")
+	}
+	date := time.Now()
+	go func() {
+
+		for scanner.Scan() {
+			fmt.Println(scanner.Text())
+			_, err = sb.WriteString(cleanText(scanner.Text()) + "\n")
+			if err != nil {
+				log.Info("写入字符串时失败", err)
+			}
+			date = time.Now()
+		}
+
+		if err := scanner.Err(); err != nil {
+			log.Info("Error scan container log", err)
+			return
+		}
+
+	}()
+	for {
+		time.Sleep(time.Microsecond * 500)
+		if time.Since(date) > time.Second {
+			log.Info("距离上次读取时间超过1秒，读取结束")
+			break
+		}
+	}
+	return sb.String(), nil
 }
 
 func appRe(appInstalled *model.AppInstalled, envContent string) error {

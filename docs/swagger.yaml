@@ -24,6 +24,7 @@ definitions:
     - cpus
     - docker_compose
     - memory_limit
+    - params
     type: object
   request.AppInstalledOperate:
     properties:
@@ -240,6 +241,14 @@ paths:
         in: query
         name: class
         type: string
+      - description: name
+        in: query
+        name: name
+        type: string
+      - description: description
+        in: query
+        name: description
+        type: string
       produces:
       - application/json
       responses:
@@ -250,6 +259,45 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取已安装插件列表
+      tags:
+      - app
+  /apps/installed/{id}/logs:
+    get:
+      parameters:
+      - default: zh
+        description: i18n
+        in: header
+        name: language
+        type: string
+      - description: 开始时间(Unix时间戳)
+        in: query
+        name: since
+        type: integer
+      - description: 结束时间(Unix时间戳)
+        in: query
+        name: until
+        type: integer
+      - default: 1000
+        description: 查询条数
+        in: query
+        name: tail
+        required: true
+        type: integer
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取插件日志信息
       tags:
       - app
   /apps/installed/{id}/params:

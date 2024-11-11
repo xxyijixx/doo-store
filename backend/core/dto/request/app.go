@@ -17,7 +17,7 @@ type AppInstall struct {
 	DockerCompose string                 `json:"docker_compose" binding:"required"`
 	CPUS          string                 `json:"cpus" binding:"required"`
 	MemoryLimit   string                 `json:"memory_limit" binding:"required"`
-	Params        map[string]interface{} `json:"params"`
+	Params        map[string]interface{} `json:"params" binding:"required"`
 }
 
 type AppUnInstall struct {
@@ -32,12 +32,14 @@ type AppInstalledOperate struct {
 
 type AppInstalledSearch struct {
 	dto.PageInfo
-	Class string `form:"class" json:"class"`
+	Name        string `form:"name" json:"name"`
+	Class       string `form:"class" json:"class"`
+	Description string `form:"description" json:"description"`
 }
 
 type AppLogsSearch struct {
 	Id    int64  `json:"-"`
 	Since string `form:"since"`
 	Until string `form:"until"`
-	Tail  string `form:"tail"`
+	Tail  int    `form:"tail"`
 }

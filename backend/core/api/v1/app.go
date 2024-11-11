@@ -198,6 +198,8 @@ func (*BaseApi) AppUnInstall(c *gin.Context) {
 // @Param page query integer true "page" default(1)
 // @Param page_size query integer true "page_size" default(10)
 // @Param class query string false "分类"
+// @Param name query string false "name"
+// @Param description query string false "description"
 // @Success 200 {object} dto.Response "success"
 // @Router /apps/installed [get]
 func (*BaseApi) AppInstalledPage(c *gin.Context) {
@@ -314,6 +316,19 @@ func (*BaseApi) AppTags(c *gin.Context) {
 	helper.SuccessWith(c, data)
 }
 
+// @Summary 获取插件日志信息
+// @Schemes
+// @Description
+// @Security BearerAuth
+// @Tags app
+// @Produce json
+// @Param language header string false "i18n" default(zh)
+// @Param since query integer false "开始时间(Unix时间戳)"
+// @Param until query integer false "结束时间(Unix时间戳)"
+// @Param tail query integer true "查询条数" default(1000)
+// @Param id path integer true "id"
+// @Success 200 {object} dto.Response "success"
+// @Router /apps/installed/{id}/logs [get]
 func (*BaseApi) AppLogs(c *gin.Context) {
 	err := checkAuth(c, true)
 	if err != nil {
@@ -328,12 +343,11 @@ func (*BaseApi) AppLogs(c *gin.Context) {
 		return
 	}
 	req.Id = int64(id)
-	re := regexp.MustCompile(`^(?:[1-9]\d{0,3}|10000)$`)
-	// 处理查询条数，1-10000，默认1000
-	if !re.MatchString(req.Tail) {
-		req.Tail = "1000"
+	if req.Tail <= 0 || req.Tail >= 10000 {
+		req.Tail = 1000
 	}
 	data, err := appService.GetLogs(dto.ServiceContext{C: c}, req)
+	fmt.Println("调取返回值", data)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
