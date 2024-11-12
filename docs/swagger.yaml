@@ -1,4 +1,10 @@
 definitions:
+  dto.PageResult:
+    properties:
+      items: {}
+      total:
+        type: integer
+    type: object
   dto.Response:
     properties:
       code:
@@ -7,6 +13,48 @@ definitions:
       data: {}
       msg:
         example: success
+        type: string
+    type: object
+  model.App:
+    properties:
+      class:
+        type: string
+      created_at:
+        type: string
+      depends_version:
+        type: string
+      description:
+        type: string
+      github:
+        type: string
+      icon:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      name:
+        type: string
+      sort:
+        type: integer
+      status:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  model.Tag:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      name:
+        type: string
+      sort:
+        type: integer
+      updated_at:
         type: string
     type: object
   request.AppInstall:
@@ -35,6 +83,69 @@ definitions:
         type: object
     type: object
   request.AppUnInstall:
+    type: object
+  response.AppDetail:
+    properties:
+      app_id:
+        type: integer
+      created_at:
+        type: string
+      depends_version:
+        type: string
+      docker_compose:
+        type: string
+      id:
+        type: integer
+      params:
+        $ref: '#/definitions/response.AppParams'
+      repo:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+      version:
+        type: string
+    type: object
+  response.AppInstalledParamsResp:
+    properties:
+      cpus:
+        type: string
+      docker_compose:
+        type: string
+      memory_limit:
+        type: string
+      params:
+        items:
+          $ref: '#/definitions/response.FormField'
+        type: array
+    type: object
+  response.AppParams:
+    properties:
+      form_fields:
+        items:
+          $ref: '#/definitions/response.FormField'
+        type: array
+    type: object
+  response.FormField:
+    properties:
+      default:
+        type: string
+      env_key:
+        type: string
+      key:
+        type: string
+      label:
+        type: string
+      required:
+        type: boolean
+      rule:
+        type: string
+      type:
+        type: string
+      value:
+        type: string
+      values: {}
     type: object
 info:
   contact:
@@ -89,7 +200,19 @@ paths:
         "200":
           description: success
           schema:
-            $ref: '#/definitions/dto.Response'
+            allOf:
+            - $ref: '#/definitions/dto.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/dto.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/model.App'
+                        type: array
+                    type: object
+              type: object
       security:
       - BearerAuth: []
       summary: 获取插件列表
@@ -211,7 +334,12 @@ paths:
         "200":
           description: success
           schema:
-            $ref: '#/definitions/dto.Response'
+            allOf:
+            - $ref: '#/definitions/dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.AppDetail'
+              type: object
       security:
       - BearerAuth: []
       summary: 获取插件详情
@@ -255,7 +383,19 @@ paths:
         "200":
           description: success
           schema:
-            $ref: '#/definitions/dto.Response'
+            allOf:
+            - $ref: '#/definitions/dto.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/dto.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          type: object
+                        type: array
+                    type: object
+              type: object
       security:
       - BearerAuth: []
       summary: 获取已安装插件列表
@@ -319,7 +459,12 @@ paths:
         "200":
           description: success
           schema:
-            $ref: '#/definitions/dto.Response'
+            allOf:
+            - $ref: '#/definitions/dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.AppInstalledParamsResp'
+              type: object
       security:
       - BearerAuth: []
       summary: 获取插件参数信息
@@ -369,7 +514,14 @@ paths:
         "200":
           description: success
           schema:
-            $ref: '#/definitions/dto.Response'
+            allOf:
+            - $ref: '#/definitions/dto.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.Tag'
+                  type: array
+              type: object
       security:
       - BearerAuth: []
       summary: 获取插件分类信息

@@ -25,7 +25,7 @@ import (
 // @Param name query string false "name"
 // @Param id query integer false "id"
 // @Param description query string false "description"
-// @Success 200 {object} dto.Response "success"
+// @Success 200 {object} dto.Response{data=dto.PageResult{items=[]model.App}} "success"
 // @Router /apps [get]
 func (*BaseApi) AppPage(c *gin.Context) {
 	err := checkAuth(c, true)
@@ -39,7 +39,6 @@ func (*BaseApi) AppPage(c *gin.Context) {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	fmt.Println("req", req)
 	data, err := appService.AppPage(dto.ServiceContext{C: c}, req)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
@@ -56,7 +55,7 @@ func (*BaseApi) AppPage(c *gin.Context) {
 // @Produce json
 // @Param language header string false "i18n" default(zh)
 // @Param key path string true "key"
-// @Success 200 {object} dto.Response "success"
+// @Success 200 {object} dto.Response{data=response.AppDetail} "success"
 // @Router /apps/{key}/detail [get]
 func (*BaseApi) AppDetailByKey(c *gin.Context) {
 	err := checkAuth(c, true)
@@ -200,7 +199,7 @@ func (*BaseApi) AppUnInstall(c *gin.Context) {
 // @Param class query string false "分类"
 // @Param name query string false "name"
 // @Param description query string false "description"
-// @Success 200 {object} dto.Response "success"
+// @Success 200 {object} dto.Response{data=dto.PageResult{items=[]object}} "success"
 // @Router /apps/installed [get]
 func (*BaseApi) AppInstalledPage(c *gin.Context) {
 	err := checkAuth(c, true)
@@ -230,7 +229,7 @@ func (*BaseApi) AppInstalledPage(c *gin.Context) {
 // @Produce json
 // @Param language header string false "i18n" default(zh)
 // @Param id path integer true "id"
-// @Success 200 {object} dto.Response "success"
+// @Success 200 {object} dto.Response{data=response.AppInstalledParamsResp} "success"
 // @Router /apps/installed/{id}/params [get]
 func (*BaseApi) AppInstalledParams(c *gin.Context) {
 	err := checkAuth(c, true)
@@ -300,7 +299,7 @@ func (*BaseApi) AppInstalledUpdateParams(c *gin.Context) {
 // @Tags app
 // @Produce json
 // @Param language header string false "i18n" default(zh)
-// @Success 200 {object} dto.Response "success"
+// @Success 200 {object} dto.Response{data=[]model.Tag} "success"
 // @Router /apps/tags [get]
 func (*BaseApi) AppTags(c *gin.Context) {
 	err := checkAuth(c, false)

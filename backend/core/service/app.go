@@ -216,7 +216,7 @@ func (*AppService) AppInstallOperate(ctx dto.ServiceContext, req request.AppInst
 		return err
 	}
 	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
-	composeFile := fmt.Sprintf("%s/%s/docker-compose.yml", constant.AppInstallDir, appKey)
+	composeFile := docker.GetComposeFile(appKey)
 
 	supportActions := []string{"start", "stop"}
 	if !common.InArray(req.Action, supportActions) {
@@ -381,6 +381,12 @@ func (*AppService) UpdateParams(ctx dto.ServiceContext, req request.AppInstall) 
 		return errors.New("修改参数失败")
 	}
 	appInstalled.Env = envJson
+	paramJson, err := json.Marshal(req.Params)
+	if err != nil {
+		return errors.New("解析参数失败")
+	}
+	appInstalled.Params = string(paramJson)
+	_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Updates(appInstalled)
 	err = appRe(appInstalled, envContent)
 	if err != nil {
 		log.Info("重启失败", err)
@@ -544,7 +550,7 @@ func appUp(appInstalled *model.AppInstalled, envContent string) error {
 
 func appStop(appInstalled *model.AppInstalled) error {
 	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
-	composeFile := fmt.Sprintf("%s/%s/docker-compose.yml", constant.AppInstallDir, appKey)
+	composeFile := docker.GetComposeFile(appKey)
 	_, err := repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.Stopped)
 	if err != nil {
 		return err
