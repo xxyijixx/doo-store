@@ -44,7 +44,7 @@ type IAppService interface {
 	AppUnInstall(ctx dto.ServiceContext, req request.AppUnInstall) error
 	AppInstalledPage(ctx dto.ServiceContext, req request.AppInstalledSearch) (*dto.PageResult, error)
 	Params(ctx dto.ServiceContext, id int64) (any, error)
-	UpdateParams(ctx dto.ServiceContext, req request.AppInstall) error
+	UpdateParams(ctx dto.ServiceContext, req request.AppInstall) (any, error)
 	AppTags(ctx dto.ServiceContext) ([]*model.Tag, error)
 	GetLogs(ctx dto.ServiceContext, req request.AppLogsSearch) (any, error)
 }
@@ -349,16 +349,16 @@ func (*AppService) Params(ctx dto.ServiceContext, id int64) (any, error) {
 	return aParams, nil
 }
 
-func (*AppService) UpdateParams(ctx dto.ServiceContext, req request.AppInstall) error {
+func (*AppService) UpdateParams(ctx dto.ServiceContext, req request.AppInstall) (any, error) {
 	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(req.InstalledId)).First()
 	if err != nil {
 		log.Info("Error query app installed", err)
-		return errors.New("获取安装插件信息失败")
+		return nil, errors.New("获取安装插件信息失败")
 	}
 	appDetail, err := repo.AppDetail.Where(repo.AppDetail.ID.Eq(appInstalled.AppDetailID)).First()
 	if err != nil {
 		log.Info("Error query app detail", err)
-		return errors.New("获取安装插件信息失败")
+		return nil, errors.New("获取安装插件信息失败")
 	}
 	// appDetail.Params
 	// 解析原始参数
@@ -366,7 +366,7 @@ func (*AppService) UpdateParams(ctx dto.ServiceContext, req request.AppInstall) 
 	err = common.StrToStruct(appDetail.Params, &params)
 	if err != nil {
 		log.Info("错误解析Json", err)
-		return err
+		return nil, err
 	}
 	// TODO 参数校验
 	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
@@ -378,21 +378,38 @@ func (*AppService) UpdateParams(ctx dto.ServiceContext, req request.AppInstall) 
 	envContent, envJson, err := docker.GenEnv(appKey, containerName, req.Params, false)
 	if err != nil {
 		log.Info("错误生成环境变量文件", err)
-		return errors.New("修改参数失败")
+		return nil, errors.New("修改参数失败")
 	}
 	appInstalled.Env = envJson
 	paramJson, err := json.Marshal(req.Params)
 	if err != nil {
-		return errors.New("解析参数失败")
+		return nil, errors.New("解析参数失败")
 	}
 	appInstalled.Params = string(paramJson)
 	_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Updates(appInstalled)
 	err = appRe(appInstalled, envContent)
 	if err != nil {
 		log.Info("重启失败", err)
-		return errors.New("插件重启失败")
+		return nil, errors.New("插件重启失败")
 	}
-	return nil
+	// 返回修改后的参数
+	env := map[string]string{}
+	err = json.Unmarshal([]byte(appInstalled.Env), &env)
+	if err != nil {
+		log.Info("解析环境变量失败", err)
+		return nil, err
+	}
+	for _, formField := range params.FormFields {
+		formField.Value = env[formField.EnvKey]
+		formField.Key = formField.EnvKey
+	}
+	aParams := response.AppInstalledParamsResp{
+		Params:        params.FormFields,
+		DockerCompose: appInstalled.DockerCompose,
+		CPUS:          req.CPUS,
+		MemoryLimit:   req.MemoryLimit,
+	}
+	return aParams, nil
 }
 
 func (*AppService) AppTags(ctx dto.ServiceContext) ([]*model.Tag, error) {
@@ -530,7 +547,8 @@ func appUp(appInstalled *model.AppInstalled, envContent string) error {
 		}
 		stdout, err := compose.Up(composeFile)
 		if err != nil {
-			log.Info("Error docker compose up", stdout, err)
+			stdout, err = docker.ParseError(stdout, err)
+			log.Info("Error docker compose up:", stdout, err)
 			_, _ = repo.Use(tx).AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
 			return err
 		}

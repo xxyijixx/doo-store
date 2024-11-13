@@ -105,6 +105,7 @@ func (*BaseApi) AppInstall(c *gin.Context) {
 		helper.ErrorWith(c, constant.ErrInvalidParameter, nil)
 		return
 	}
+
 	re = regexp.MustCompile(`^\d+(\.\d{1,2})?$`)
 	if !re.MatchString(req.CPUS) {
 		helper.ErrorWith(c, constant.ErrInvalidParameter, nil)
@@ -284,12 +285,12 @@ func (*BaseApi) AppInstalledUpdateParams(c *gin.Context) {
 		return
 	}
 
-	err = appService.UpdateParams(dto.ServiceContext{C: c}, req)
+	data, err := appService.UpdateParams(dto.ServiceContext{C: c}, req)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	helper.SuccessWith(c, nil)
+	helper.SuccessWith(c, data)
 }
 
 // @Summary 获取插件分类信息
