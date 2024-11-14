@@ -98,6 +98,96 @@
       "command": ""
     },
     {
+      "name": "DooTxCOS",
+      "key": "dootxcos",
+      "description": "DooTxCOS is a plugin for DooTask to support AliOSS storage. Note: This is a local image",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "0.0.1",
+      "github": "",
+      "class": "oss",
+      "depends_version": "0.37.21",
+      "repo": "xxyijixx/dootxcos",
+      "volume": [],
+      "env": [
+        {
+          "name": "COS_REGION",
+          "key": "COS_REGION",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "COS_ENDPOINT",
+          "key": "COS_ENDPOINT",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "COS_BUCKET",
+          "key": "COS_BUCKET",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "COS_SECRETID",
+          "key": "COS_SECRETID",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "COS_SECRETKEY",
+          "key": "COS_SECRETKEY",
+          "value": "",
+          "required": true
+        }
+      ],
+      "command": ""
+    },
+    {
+      "name": "DooQiNiu",
+      "key": "dooqiniu",
+      "description": "DooQiNiu is a plugin for DooTask to support AliOSS storage. Note: This is a local image",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "0.0.1",
+      "github": "",
+      "class": "oss",
+      "depends_version": "0.37.21",
+      "repo": "xxyijixx/dooqiniu",
+      "volume": [],
+      "env": [
+        {
+          "name": "QINIU_REGION",
+          "key": "QINIU_REGION",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "QINIU_ENDPOINT",
+          "key": "QINIU_ENDPOINT",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "QINIU_BUCKET",
+          "key": "QINIU_BUCKET",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "QINIU_ACCESSKEY",
+          "key": "QINIU_ACCESSKEY",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "QINIU_SECRETKEY",
+          "key": "QINIU_SECRETKEY",
+          "value": "",
+          "required": true
+        }
+      ],
+      "command": ""
+    },
+    {
       "name": "Nginx2",
       "key": "nginx2",
       "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",

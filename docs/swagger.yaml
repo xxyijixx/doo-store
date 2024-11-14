@@ -409,11 +409,11 @@ paths:
         in: header
         name: language
         type: string
-      - description: 开始时间(Unix时间戳)
+      - description: 开始时间(Unix时间戳，秒)
         in: query
         name: since
         type: integer
-      - description: 结束时间(Unix时间戳)
+      - description: 结束时间(Unix时间戳，秒)
         in: query
         name: until
         type: integer

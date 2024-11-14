@@ -323,8 +323,8 @@ func (*BaseApi) AppTags(c *gin.Context) {
 // @Tags app
 // @Produce json
 // @Param language header string false "i18n" default(zh)
-// @Param since query integer false "开始时间(Unix时间戳)"
-// @Param until query integer false "结束时间(Unix时间戳)"
+// @Param since query integer false "开始时间(Unix时间戳，秒)"
+// @Param until query integer false "结束时间(Unix时间戳，秒)"
 // @Param tail query integer true "查询条数" default(1000)
 // @Param id path integer true "id"
 // @Success 200 {object} dto.Response "success"

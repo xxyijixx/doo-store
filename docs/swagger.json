@@ -232,13 +232,13 @@
                     },
                     {
                         "type": "integer",
-                        "description": "开始时间(Unix时间戳)",
+                        "description": "开始时间(Unix时间戳，秒)",
                         "name": "since",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "结束时间(Unix时间戳)",
+                        "description": "结束时间(Unix时间戳，秒)",
                         "name": "until",
                         "in": "query"
                     },
