@@ -460,7 +460,11 @@ func (*AppService) GetLogs(ctx dto.ServiceContext, req request.AppLogsSearch) (a
 	cleanText := func(input string) string {
 		// 去除所有不可见的控制字符 (ASCII 0-31 和 127)
 		reControlChars := regexp.MustCompile(`[\x00-\x1F\x7F]`)
-		return reControlChars.ReplaceAllString(input, "")
+		str := reControlChars.ReplaceAllString(input, "")
+		if len(str) > 2 {
+			return str[1:]
+		}
+		return str
 	}
 	date := time.Now()
 	go func() {

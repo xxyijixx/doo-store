@@ -3,7 +3,7 @@ package constant
 var (
 	AppNetwork = "doo-store-app-network"
 
-	DooTaskUrl = "http://127.0.0.1:80"
+	DooTaskUrl = "https://www.dootask.com"
 
 	NginxContainerName = "nginx-core-proxy"
 )
