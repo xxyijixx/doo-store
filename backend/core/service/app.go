@@ -234,7 +234,7 @@ func (*AppService) AppInstallOperate(ctx dto.ServiceContext, req request.AppInst
 		return err
 	}
 	fmt.Println(stdout)
-	insertLog(appInstalled.ID, stdout)
+	insertLog(appInstalled.ID, fmt.Sprintf("插件操作[%s]", req.Action), stdout)
 	return nil
 }
 
@@ -390,6 +390,7 @@ func (*AppService) UpdateParams(ctx dto.ServiceContext, req request.AppInstall) 
 	err = appRe(appInstalled, envContent)
 	if err != nil {
 		log.Info("重启失败", err)
+		insertLog(appInstalled.ID, "插件重启", err.Error())
 		return nil, errors.New("插件重启失败")
 	}
 	// 返回修改后的参数
@@ -409,6 +410,7 @@ func (*AppService) UpdateParams(ctx dto.ServiceContext, req request.AppInstall) 
 		CPUS:          req.CPUS,
 		MemoryLimit:   req.MemoryLimit,
 	}
+	insertLog(appInstalled.ID, "插件参数修改", "")
 	return aParams, nil
 }
 
@@ -559,13 +561,13 @@ func appUp(appInstalled *model.AppInstalled, envContent string) error {
 		_, _ = repo.Use(tx).AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.Running)
 		fmt.Println(stdout)
 
-		insertLog(appInstalled.ID, stdout)
+		insertLog(appInstalled.ID, "插件启动", stdout)
 		return nil
 	})
 	if err != nil {
-		insertLog(appInstalled.ID, err.Error())
+		insertLog(appInstalled.ID, "插件启动", err.Error())
 	} else {
-		insertLog(appInstalled.ID, "插件启动")
+		insertLog(appInstalled.ID, "插件启动", "")
 	}
 	return err
 }
@@ -581,7 +583,7 @@ func appStop(appInstalled *model.AppInstalled) error {
 	if err != nil {
 		return fmt.Errorf("error docker compose stop: %s", err.Error())
 	}
-	insertLog(appInstalled.ID, stdout)
+	insertLog(appInstalled.ID, "插件停止", stdout)
 	return nil
 }
 
@@ -597,14 +599,14 @@ func createDir(dirPath string) error {
 	return nil
 }
 
-func insertLog(appInstalledId int64, content string) {
-	if content == "" {
+func insertLog(appInstalledId int64, prefix, content string) {
+	if prefix == "" && content == "" {
 		log.Info("log content is empty")
 		return
 	}
 	err := repo.AppLog.Create(&model.AppLog{
 		AppInstalledId: appInstalledId,
-		Content:        content,
+		Content:        fmt.Sprintf("%s-%s", prefix, content),
 	})
 	if err != nil {
 		log.Info("Error create app log")
