@@ -16,9 +16,11 @@
           "name": "port",
           "key": "NGINX_PORT",
           "value": "80",
+          "type": "number",
           "required": true
         }
-      ]
+      ],
+      "command": ""
     },
     {
       "name": "Redis",
@@ -47,7 +49,333 @@
           "value": "6379",
           "required": false
         }
-      ]
+      ],
+      "command": ""
+    },
+    {
+      "name": "DooAliOSS",
+      "key": "dooalioss",
+      "description": "DooAliOSS is a plugin for DooTask to support AliOSS storage. Note: This is a local image",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "0.0.1",
+      "github": "",
+      "class": "oss",
+      "depends_version": "0.37.21",
+      "repo": "xxyijixx/dooalioss",
+      "volume": [],
+      "env": [
+        {
+          "name": "OSS_REGION",
+          "key": "OSS_REGION",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "OSS_ENDPOINT",
+          "key": "OSS_ENDPOINT",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "OSS_BUCKET",
+          "key": "OSS_BUCKET",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "OSS_ACCESS_KEY_ID",
+          "key": "OSS_ACCESS_KEY_ID",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "OSS_ACCESS_KEY_SECRET",
+          "key": "OSS_ACCESS_KEY_SECRET",
+          "value": "",
+          "required": true
+        }
+      ],
+      "command": ""
+    },
+    {
+      "name": "DooTxCOS",
+      "key": "dootxcos",
+      "description": "DooTxCOS is a plugin for DooTask to support AliOSS storage. Note: This is a local image",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "0.0.1",
+      "github": "",
+      "class": "oss",
+      "depends_version": "0.37.21",
+      "repo": "xxyijixx/dootxcos",
+      "volume": [],
+      "env": [
+        {
+          "name": "COS_REGION",
+          "key": "COS_REGION",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "COS_ENDPOINT",
+          "key": "COS_ENDPOINT",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "COS_BUCKET",
+          "key": "COS_BUCKET",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "COS_SECRETID",
+          "key": "COS_SECRETID",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "COS_SECRETKEY",
+          "key": "COS_SECRETKEY",
+          "value": "",
+          "required": true
+        }
+      ],
+      "command": ""
+    },
+    {
+      "name": "DooQiNiu",
+      "key": "dooqiniu",
+      "description": "DooQiNiu is a plugin for DooTask to support AliOSS storage. Note: This is a local image",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "0.0.1",
+      "github": "",
+      "class": "oss",
+      "depends_version": "0.37.21",
+      "repo": "xxyijixx/dooqiniu",
+      "volume": [],
+      "env": [
+        {
+          "name": "QINIU_REGION",
+          "key": "QINIU_REGION",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "QINIU_ENDPOINT",
+          "key": "QINIU_ENDPOINT",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "QINIU_BUCKET",
+          "key": "QINIU_BUCKET",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "QINIU_ACCESSKEY",
+          "key": "QINIU_ACCESSKEY",
+          "value": "",
+          "required": true
+        },
+        {
+          "name": "QINIU_SECRETKEY",
+          "key": "QINIU_SECRETKEY",
+          "value": "",
+          "required": true
+        }
+      ],
+      "command": ""
+    },
+    {
+      "name": "Nginx2",
+      "key": "nginx2",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "required": true
+        }
+      ],
+      "command": ""
+    },
+    {
+      "name": "Nginx3",
+      "key": "nginx3",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "required": true
+        }
+      ],
+      "command": ""
+    },
+    {
+      "name": "Nginx4",
+      "key": "nginx4",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "required": true
+        }
+      ],
+      "command": ""
+    },
+    {
+      "name": "Nginx5",
+      "key": "nginx5",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "required": true
+        }
+      ],
+      "command": ""
+    },
+    {
+      "name": "Nginx6",
+      "key": "nginx6",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "required": true
+        }
+      ],
+      "command": ""
+    },
+    {
+      "name": "Nginx7",
+      "key": "nginx7",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "required": true
+        }
+      ],
+      "command": ""
+    },
+    {
+      "name": "Nginx8",
+      "key": "nginx8",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "required": true
+        }
+      ],
+      "command": ""
+    },
+    {
+      "name": "Nginx9",
+      "key": "nginx9",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "type": "number",
+          "required": true
+        }
+      ],
+      "command": ""
+    },
+    {
+      "name": "Nginx10",
+      "key": "nginx10",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "port",
+          "key": "NGINX_PORT",
+          "value": "80",
+          "required": true
+        }
+      ],
+      "command": ""
     }
   ]
 }

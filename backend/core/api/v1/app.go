@@ -1,28 +1,31 @@
 package v1
 
 import (
+	"doo-store/backend/constant"
 	"doo-store/backend/core/api/v1/helper"
 	"doo-store/backend/core/dto"
 	"doo-store/backend/core/dto/request"
 	"fmt"
+	"regexp"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-// @Summary app page
+// @Summary 获取插件列表
 // @Schemes
 // @Description
 // @Security BearerAuth
 // @Tags app
 // @Produce json
-// @Param Language header string false "i18n" default("zh")
+// @Param language header string false "i18n" default(zh)
 // @Param page query integer true "page" default(1)
 // @Param page_size query integer true "page_size" default(10)
 // @Param class query string false "class"
 // @Param name query string false "name"
 // @Param id query integer false "id"
 // @Param description query string false "description"
-// @Success 200 {object} dto.Response "success"
+// @Success 200 {object} dto.Response{data=dto.PageResult{items=[]model.App}} "success"
 // @Router /apps [get]
 func (*BaseApi) AppPage(c *gin.Context) {
 	err := checkAuth(c, true)
@@ -36,7 +39,6 @@ func (*BaseApi) AppPage(c *gin.Context) {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	fmt.Println("req", req)
 	data, err := appService.AppPage(dto.ServiceContext{C: c}, req)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
@@ -45,15 +47,15 @@ func (*BaseApi) AppPage(c *gin.Context) {
 	helper.SuccessWith(c, data)
 }
 
-// @Summary app detail
+// @Summary 获取插件详情
 // @Schemes
 // @Description
 // @Security BearerAuth
 // @Tags app
 // @Produce json
-// @Param Language header string false "i18n" default("zh")
+// @Param language header string false "i18n" default(zh)
 // @Param key path string true "key"
-// @Success 200 {object} dto.Response "success"
+// @Success 200 {object} dto.Response{data=response.AppDetail} "success"
 // @Router /apps/{key}/detail [get]
 func (*BaseApi) AppDetailByKey(c *gin.Context) {
 	err := checkAuth(c, true)
@@ -70,14 +72,14 @@ func (*BaseApi) AppDetailByKey(c *gin.Context) {
 	helper.SuccessWith(c, data)
 }
 
-// @Summary app install
+// @Summary 插件安装
 // @Schemes
 // @Description
 // @Security BearerAuth
 // @Tags app
 // @Accept json
 // @Produce json
-// @Param Language header string false "i18n" default("zh")
+// @Param language header string false "i18n" default(zh)
 // @Param key path string true "key"
 // @Param data body request.AppInstall true "RequestBody"
 // @Success 200 {object} dto.Response "success"
@@ -96,6 +98,20 @@ func (*BaseApi) AppInstall(c *gin.Context) {
 		return
 	}
 	req.Key = key
+
+	// 校验CPUS和MemoryLimit
+	re := regexp.MustCompile(`^(\d+(\.\d+)?(B|b|K|k|M|m|G|g|T|t)?)$|^\d+(\.\d+)?$`)
+	if !re.MatchString(req.MemoryLimit) {
+		helper.ErrorWith(c, constant.ErrInvalidParameter, nil)
+		return
+	}
+
+	re = regexp.MustCompile(`^\d+(\.\d{1,2})?$`)
+	if !re.MatchString(req.CPUS) {
+		helper.ErrorWith(c, constant.ErrInvalidParameter, nil)
+		return
+	}
+
 	err = appService.AppInstall(dto.ServiceContext{C: c}, req)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
@@ -111,7 +127,7 @@ func (*BaseApi) AppInstall(c *gin.Context) {
 // @Tags app
 // @Accept json
 // @Produce json
-// @Param Language header string false "i18n" default("zh")
+// @Param language header string false "i18n" default(zh)
 // @Param key path string true "key"
 // @Param data body request.AppInstalledOperate true "RequestBody"
 // @Success 200 {object} dto.Response "success"
@@ -138,14 +154,14 @@ func (*BaseApi) AppInstallOperate(c *gin.Context) {
 	helper.SuccessWith(c, "操作成功")
 }
 
-// @Summary app uninstall
+// @Summary 插件卸载
 // @Schemes
 // @Description
 // @Security BearerAuth
 // @Tags app
 // @Accept json
 // @Produce json
-// @Param Language header string false "i18n" default("zh")
+// @Param language header string false "i18n" default(zh)
 // @Param key path string true "key"
 // @Param data body request.AppUnInstall true "RequestBody"
 // @Success 200 {object} dto.Response "success"
@@ -172,17 +188,19 @@ func (*BaseApi) AppUnInstall(c *gin.Context) {
 	helper.SuccessWith(c, "卸载成功")
 }
 
-// @Summary installed app page
+// @Summary 获取已安装插件列表
 // @Schemes
 // @Description
 // @Security BearerAuth
 // @Tags app
 // @Produce json
-// @Param Language header string false "i18n" default("zh")
+// @Param language header string false "i18n" default(zh)
 // @Param page query integer true "page" default(1)
 // @Param page_size query integer true "page_size" default(10)
-// @Param class query string false "class"
-// @Success 200 {object} dto.Response "success"
+// @Param class query string false "分类"
+// @Param name query string false "name"
+// @Param description query string false "description"
+// @Success 200 {object} dto.Response{data=dto.PageResult{items=[]object}} "success"
 // @Router /apps/installed [get]
 func (*BaseApi) AppInstalledPage(c *gin.Context) {
 	err := checkAuth(c, true)
@@ -204,14 +222,85 @@ func (*BaseApi) AppInstalledPage(c *gin.Context) {
 	helper.SuccessWith(c, data)
 }
 
-// @Summary app tags
+// @Summary 获取插件参数信息
 // @Schemes
 // @Description
 // @Security BearerAuth
 // @Tags app
 // @Produce json
-// @Param Language header string false "i18n" default("zh")
+// @Param language header string false "i18n" default(zh)
+// @Param id path integer true "id"
+// @Success 200 {object} dto.Response{data=response.AppInstalledParamsResp} "success"
+// @Router /apps/installed/{id}/params [get]
+func (*BaseApi) AppInstalledParams(c *gin.Context) {
+	err := checkAuth(c, true)
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	id, _ := strconv.Atoi(c.Param("id"))
+	data, err := appService.Params(dto.ServiceContext{C: c}, int64(id))
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	helper.SuccessWith(c, data)
+}
+
+// @Summary 修改插件参数信息
+// @Schemes
+// @Description
+// @Security BearerAuth
+// @Tags app
+// @Produce json
+// @Param language header string false "i18n" default(zh)
+// @Param id path integer true "id"
+// @Param data body request.AppInstall true "RequestBody"
 // @Success 200 {object} dto.Response "success"
+// @Router /apps/installed/{id}/params [put]
+func (*BaseApi) AppInstalledUpdateParams(c *gin.Context) {
+	err := checkAuth(c, true)
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	id, _ := strconv.Atoi(c.Param("id"))
+	var req request.AppInstall
+	err = helper.CheckBindAndValidate(&req, c)
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	req.InstalledId = int64(id)
+
+	// 校验CPUS和MemoryLimit
+	re := regexp.MustCompile(`^(\d+(\.\d+)?(B|b|K|k|M|m|G|g|T|t)?)$|^\d+(\.\d+)?$`)
+	if !re.MatchString(req.MemoryLimit) {
+		helper.ErrorWith(c, constant.ErrInvalidParameter, nil)
+		return
+	}
+	re = regexp.MustCompile(`^\d+(\.\d{1,2})?$`)
+	if !re.MatchString(req.CPUS) {
+		helper.ErrorWith(c, constant.ErrInvalidParameter, nil)
+		return
+	}
+
+	data, err := appService.UpdateParams(dto.ServiceContext{C: c}, req)
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	helper.SuccessWith(c, data)
+}
+
+// @Summary 获取插件分类信息
+// @Schemes
+// @Description
+// @Security BearerAuth
+// @Tags app
+// @Produce json
+// @Param language header string false "i18n" default(zh)
+// @Success 200 {object} dto.Response{data=[]model.Tag} "success"
 // @Router /apps/tags [get]
 func (*BaseApi) AppTags(c *gin.Context) {
 	err := checkAuth(c, false)
@@ -220,6 +309,45 @@ func (*BaseApi) AppTags(c *gin.Context) {
 		return
 	}
 	data, err := appService.AppTags(dto.ServiceContext{C: c})
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	helper.SuccessWith(c, data)
+}
+
+// @Summary 获取插件日志信息
+// @Schemes
+// @Description
+// @Security BearerAuth
+// @Tags app
+// @Produce json
+// @Param language header string false "i18n" default(zh)
+// @Param since query integer false "开始时间(Unix时间戳，秒)"
+// @Param until query integer false "结束时间(Unix时间戳，秒)"
+// @Param tail query integer true "查询条数" default(1000)
+// @Param id path integer true "id"
+// @Success 200 {object} dto.Response "success"
+// @Router /apps/installed/{id}/logs [get]
+func (*BaseApi) AppLogs(c *gin.Context) {
+	err := checkAuth(c, true)
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	id, _ := strconv.Atoi(c.Param("id"))
+	var req request.AppLogsSearch
+	err = helper.CheckBindQueryAndValidate(&req, c)
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	req.Id = int64(id)
+	if req.Tail <= 0 || req.Tail >= 10000 {
+		req.Tail = 1000
+	}
+	data, err := appService.GetLogs(dto.ServiceContext{C: c}, req)
+	fmt.Println("调取返回值", data)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return

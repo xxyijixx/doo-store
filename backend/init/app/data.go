@@ -1,6 +1,7 @@
 package app
 
 import (
+	"doo-store/backend/config"
 	"doo-store/backend/constant"
 	"doo-store/backend/core/dto/response"
 	"doo-store/backend/core/model"
@@ -30,12 +31,14 @@ type Plugin struct {
 	Repo           string       `json:"repo"`
 	Volume         []Volume     `json:"volume"`
 	Env            []EnvElement `json:"env"`
+	Command        string       `json:"command"`
 }
 
 type EnvElement struct {
 	Name     string `json:"name"`
 	Key      string `json:"key"`
 	Value    string `json:"value"`
+	Type     string `json:"type"`
 	Required bool   `json:"required"`
 }
 
@@ -46,8 +49,11 @@ type Volume struct {
 
 func LoadData() error {
 	logrus.Info("Loading data...")
-	var config Welcome
+	var pluginConfig Welcome
 	filename := "./docker/init/data.json"
+	if config.EnvConfig.ENV == "prod" {
+		filename = "./init/data.json"
+	}
 	data, err := os.ReadFile(filename)
 	if os.IsNotExist(err) {
 		logrus.Debug("File not exist:", filename)
@@ -59,7 +65,7 @@ func LoadData() error {
 		return err
 	}
 
-	err = json.Unmarshal(data, &config)
+	err = json.Unmarshal(data, &pluginConfig)
 	if err != nil {
 		logrus.Debug(err.Error())
 		return err
@@ -84,7 +90,7 @@ func LoadData() error {
 		oldTagMap[tag.Name] = tag
 	}
 	err = repo.DB.Transaction(func(tx *gorm.DB) error {
-		for _, p := range config.Plugins {
+		for _, p := range pluginConfig.Plugins {
 			tagMap[p.Class] = "true"
 			// 对于key存在，忽略
 			if _, exist := appKeyMap[p.Key]; exist {
@@ -137,8 +143,10 @@ func LoadData() error {
 				unneedTags = append(unneedTags, tag)
 			}
 		}
+		if len(unneedTags) != 0 {
+			repo.Use(tx).Tag.Delete(unneedTags...)
+		}
 		repo.Use(tx).Tag.Create(needTags...)
-		repo.Use(tx).Tag.Delete(unneedTags...)
 		return nil
 	})
 	//
@@ -180,9 +188,22 @@ func (p *Plugin) GenService() string {
 			serviceContent = append(serviceContent, fmt.Sprintf("%s- %s:%s", getSpaces(3), v.Local, v.Target))
 		}
 	}
+	if len(p.Env) != 0 {
+		serviceContent = append(serviceContent, fmt.Sprintf("%senvironment:", getSpaces(2)))
+		for _, env := range p.Env {
+			serviceContent = append(serviceContent, fmt.Sprintf("%s- %s=\"${%s}\"", getSpaces(3), env.Key, env.Key))
+		}
+	}
+
+	serviceContent = append(serviceContent, fmt.Sprintf("%scpus: \"${CPUS}\"", getSpaces(2)))
+	serviceContent = append(serviceContent, fmt.Sprintf("%smem_limit: \"${MEMORY_LIMIT}\"", getSpaces(2)))
 
 	serviceContent = append(serviceContent, fmt.Sprintf("%slabels:", getSpaces(2)))
 	serviceContent = append(serviceContent, fmt.Sprintf("%screatedBy: \"Apps\"", getSpaces(3)))
+
+	if p.Command != "" {
+		serviceContent = append(serviceContent, fmt.Sprintf("%scommand: %s", getSpaces(2), p.Command))
+	}
 
 	serviceContent = append(serviceContent, "\n")
 
@@ -196,6 +217,7 @@ func (p *Plugin) GenParams() string {
 			Label:    env.Name,
 			Default:  fmt.Sprintf("%v", env.Value),
 			EnvKey:   env.Key,
+			Type:     env.Type,
 			Required: env.Required,
 		}
 		formFields = append(formFields, formField)

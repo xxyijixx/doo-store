@@ -34,6 +34,8 @@ RUN apk add --no-cache bash
 # 设置工作目录
 WORKDIR /app
 
+ENV ENV=prod
+
 # 复制构建好的二进制文件
 COPY --from=builder /app/main .
 

@@ -14,8 +14,19 @@ services:
       STORAGE: sqlite
       SQLITE_PATH: "./db/app.db"
       DATA_DIR: "${PWD}/docker/dood"
+      EXTERNAL_NETWORK_NAME: "dootask-networks-${APP_ID}"
+      EXTERNAL_NETWORK_IP: "${APP_IPPR}.55"
+      EXTERNAL_NETWORK_GATEWAY: "${APP_IPPR}.1"
     volumes:
       - ./docker/sqlite:/app/db
+      - ./docker/init:/app/init
       - ./docker/dood:${PWD}/docker/dood
       - /var/run/docker.sock:/var/run/docker.sock
-    # /Users/mac-47/Desktop/zeniein/devlop/doo-store
+    networks:
+      extnetwork:
+        ipv4_address: "${APP_IPPR}.54"
+
+networks:
+  extnetwork:
+    name: "dootask-networks-${APP_ID}"
+    external: true

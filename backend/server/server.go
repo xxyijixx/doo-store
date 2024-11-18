@@ -7,6 +7,7 @@ import (
 
 func Start() {
 	app.Init()
+	// validate.Load()
 	rootRouter := router.Routers()
 
 	rootRouter.Run(":8080")

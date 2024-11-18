@@ -75,13 +75,24 @@ func createDir(dirPath string) {
 
 func InitNginxProxy() {
 	ImageNginxName := "nginx:alpine"
-	containerNginxName := "nginx-core-proxy"
 	client, err := docker.NewDockerClient()
 	if err != nil {
 		return
 	}
 
 	ctx := context.Background()
+
+	containers, err := client.ContainerList(ctx, container.ListOptions{
+		Filters: filters.NewArgs(filters.Arg("name", "/"+constant.NginxContainerName)),
+	})
+	if err != nil {
+		log.Debug("获取容器列表失败", err)
+		return
+	}
+	if len(containers) != 0 {
+		log.Debugf("容器%s已存在", constant.NginxContainerName)
+		return
+	}
 
 	nginxImage, err := client.ImageList(ctx, image.ListOptions{
 		Filters: filters.NewArgs(
@@ -145,7 +156,7 @@ func InitNginxProxy() {
 	// 添加外部网络
 	if config.EnvConfig.EXTERNAL_NETWORK_NAME != "" {
 		endpointsConfig[config.EnvConfig.EXTERNAL_NETWORK_NAME] = &network.EndpointSettings{
-			Aliases:   []string{containerNginxName}, // 添加别名
+			Aliases:   []string{constant.NginxContainerName}, // 添加别名
 			IPAddress: config.EnvConfig.EXTERNAL_NETWORK_IP,
 			Gateway:   config.EnvConfig.EXTERNAL_NETWORK_GATEWAY,
 			IPAMConfig: &network.EndpointIPAMConfig{
@@ -157,7 +168,7 @@ func InitNginxProxy() {
 		EndpointsConfig: endpointsConfig,
 	}
 
-	resp, err := client.ContainerCreate(ctx, containerConfig, hostConfig, networkConfig, nil, containerNginxName)
+	resp, err := client.ContainerCreate(ctx, containerConfig, hostConfig, networkConfig, nil, constant.NginxContainerName)
 	if err != nil {
 		fmt.Println("创建容器失败", err)
 		return
@@ -166,7 +177,7 @@ func InitNginxProxy() {
 	log.WithField("container_id", resp.ID).Debug("nginx容器创建成功")
 	err = client.ContainerStart(ctx, resp.ID, container.StartOptions{})
 	if err != nil {
-		log.Debug("Nginx容器启动失败")
+		log.Debug("Nginx容器启动失败", err)
 		return
 	}
 	log.WithField("container_id", resp.ID).Debug("nginx容器启动成功")
