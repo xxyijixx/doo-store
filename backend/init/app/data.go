@@ -163,7 +163,7 @@ func (p *Plugin) GenComposeFile() string {
 func (p *Plugin) GenNetwork() string {
 	networkContent := make([]string, 0)
 	networkContent = append(networkContent, "networks:")
-	networkContent = append(networkContent, fmt.Sprintf("%s%s:", getSpaces(1), constant.AppNetwork))
+	networkContent = append(networkContent, fmt.Sprintf("%s%s:", getSpaces(1), config.EnvConfig.GetNetworkName()))
 	networkContent = append(networkContent, fmt.Sprintf("%sexternal: true", getSpaces(2)))
 
 	networkContent = append(networkContent, "\n")
@@ -180,7 +180,7 @@ func (p *Plugin) GenService() string {
 	serviceContent = append(serviceContent, fmt.Sprintf("%scontainer_name: ${CONTAINER_NAME}", getSpaces(2)))
 	// networks:
 	serviceContent = append(serviceContent, fmt.Sprintf("%snetworks:", getSpaces(2)))
-	serviceContent = append(serviceContent, fmt.Sprintf("%s- %s", getSpaces(3), constant.AppNetwork))
+	serviceContent = append(serviceContent, fmt.Sprintf("%s- %s", getSpaces(3), config.EnvConfig.GetNetworkName()))
 
 	if len(p.Volume) != 0 {
 		serviceContent = append(serviceContent, fmt.Sprintf("%svolumes:", getSpaces(2)))

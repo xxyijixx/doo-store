@@ -159,8 +159,9 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 		return err
 	}
 	// 名称
-	name := fmt.Sprintf("plugin-%s", common.RandString(6))
-	containerName := config.EnvConfig.APP_PREFIX + app.Key + "-" + name
+	// name := fmt.Sprintf("plugin-%s", common.RandString(6))
+	// containerName := config.EnvConfig.APP_PREFIX + app.Key + "-" + name
+	containerName := config.EnvConfig.GetDefaultContainerName(app.Key)
 
 	paramJson, err := json.Marshal(req.Params)
 	if err != nil {
@@ -176,7 +177,7 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 		return err
 	}
 	appInstalled = &model.AppInstalled{
-		Name:          name,
+		Name:          containerName,
 		AppID:         app.ID,
 		AppDetailID:   appDetail.ID,
 		Class:         app.Class,
@@ -370,7 +371,7 @@ func (*AppService) UpdateParams(ctx dto.ServiceContext, req request.AppInstall) 
 	}
 	// TODO 参数校验
 	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
-	containerName := config.EnvConfig.APP_PREFIX + appInstalled.Key + "-" + appInstalled.Name
+	containerName := appInstalled.Name
 
 	req.Params[constant.CPUS] = req.CPUS
 	req.Params[constant.MemoryLimit] = req.MemoryLimit

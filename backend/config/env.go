@@ -32,6 +32,18 @@ func (s *envConfigSchema) GetGormDialector() gorm.Dialector {
 
 }
 
+func (s *envConfigSchema) GetNginxContainerName() string {
+	return fmt.Sprintf("dootask-nginx-%s", s.APP_ID)
+}
+
+func (s *envConfigSchema) GetNetworkName() string {
+	return fmt.Sprintf("dootask-networks-%s", s.APP_ID)
+}
+
+func (s *envConfigSchema) GetDefaultContainerName(key string) string {
+	return fmt.Sprintf("dootask-plugin-%s-%s-%s", key, key, s.APP_ID)
+}
+
 var dsn string
 
 func init() {
@@ -42,6 +54,8 @@ func init() {
 
 var defaultConfig = envConfigSchema{
 	ENV: "dev",
+
+	APP_ID: "",
 
 	STORAGE: "sqlite",
 
@@ -55,7 +69,7 @@ var defaultConfig = envConfigSchema{
 
 	DATA_DIR: "",
 
-	APP_PREFIX: "doo-store-",
+	APP_PREFIX: "dootask-plugin-",
 
 	EXTERNAL_NETWORK_NAME:    "",
 	EXTERNAL_NETWORK_IP:      "",
@@ -66,6 +80,8 @@ var defaultConfig = envConfigSchema{
 
 type envConfigSchema struct {
 	ENV string `env:"ENV,DREAM_ENV"`
+
+	APP_ID string
 
 	STORAGE string
 

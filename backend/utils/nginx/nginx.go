@@ -2,6 +2,7 @@ package nginx
 
 import (
 	"context"
+	"doo-store/backend/config"
 	"doo-store/backend/constant"
 	"doo-store/backend/utils/docker"
 	"fmt"
@@ -10,7 +11,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
 	log "github.com/sirupsen/logrus"
 )
@@ -76,6 +79,21 @@ func AddLocation(locationName, proxyServerName string, port int) {
 		panic(err)
 	}
 
+	nginxContainer, err := getNginxContainer()
+	if err != nil {
+
+		return
+	}
+	dockerClient, err := docker.NewClient()
+	if err != nil {
+
+		return
+	}
+
+	err = dockerClient.CopyFileToContainer(nginxContainer.ID, locationPath, fmt.Sprintf("/etc/nginx/conf.d/site/%s.conf", locationName))
+	if err != nil {
+		log.Debug("复制文件到容器失败", err)
+	}
 	err = reloadNginx()
 	if err != nil {
 		log.Debug("Nginx 重载失败", err)
@@ -84,41 +102,78 @@ func AddLocation(locationName, proxyServerName string, port int) {
 
 func RemoveLocation(locationName string) {
 	locationPath := fmt.Sprintf("%s/%s.conf", constant.NginxAppsConfigDir, locationName)
-	err := os.Remove(locationPath)
+
+	nginxContainer, err := getNginxContainer()
+	if err != nil {
+
+		return
+	}
+	dockerClient, err := docker.NewClient()
+	if err != nil {
+
+		return
+	}
+	dockerClient.RemoveFileFormContainer(nginxContainer.ID, fmt.Sprintf("/etc/nginx/conf.d/site/%s.conf", locationName))
+	err = os.Remove(locationPath)
 	if err != nil {
 		fmt.Printf("删除文件失败: %v\n", err)
 		return
 	}
+	reloadNginx()
+}
+
+func getNginxContainer() (types.Container, error) {
+	client, err := docker.NewClient()
+	if err != nil {
+		log.Debug("获取Docker客户端失败")
+		return types.Container{}, err
+	}
+
+	list, err := client.ListContainersByName([]string{config.EnvConfig.GetNginxContainerName()})
+	if err != nil {
+		log.Debug("查找容器失败", err)
+		return types.Container{}, err
+	}
+	if len(list) < 1 {
+		log.WithField("container_name", config.EnvConfig.GetNginxContainerName()).Debug("Nginx 容器不存在")
+		return types.Container{}, fmt.Errorf("nginx container not found")
+	}
+
+	nginxContainer := list[0]
+	return nginxContainer, nil
 }
 
 // 重载Nginx
 func reloadNginx() error {
-	client, err := docker.NewClient()
+
+	nginxContainer, err := getNginxContainer()
 	if err != nil {
-		log.Debug("获取Docker客户端失败")
 		return err
 	}
-	list, err := client.ListContainersByName([]string{"nginx-core-proxy"})
+	dockerClient, err := docker.NewDockerClient()
 	if err != nil {
-		log.Debug("查找容器失败", err)
 		return err
-	}
-	if len(list) < 1 {
-		log.WithField("container_name", "ContainerNginxName").Debug("Nginx 容器不存在")
-		return fmt.Errorf("nginx container not found")
 	}
 
+	err = testNginxConfig(dockerClient, nginxContainer.ID)
+	if err != nil {
+		log.Info("Nginx 配置未通过检测", err)
+		return err
+	}
+
+	err = reloadNginxConfig(dockerClient, nginxContainer.ID)
+
+	return err
+}
+
+func reloadNginxConfig(dockerClient *client.Client, containerID string) error {
 	execConfig := container.ExecOptions{
 		AttachStdout: true,
 		AttachStderr: true,
 		Cmd:          []string{"nginx", "-s", "reload"},
 	}
 
-	dockerClient, err := docker.NewDockerClient()
-	if err != nil {
-		return err
-	}
-	execIDResp, err := dockerClient.ContainerExecCreate(context.Background(), list[0].ID, execConfig)
+	execIDResp, err := dockerClient.ContainerExecCreate(context.Background(), containerID, execConfig)
 	if err != nil {
 		return fmt.Errorf("error creating exec: %w", err)
 	}
@@ -140,6 +195,43 @@ func reloadNginx() error {
 		fmt.Printf("Error during command execution: %v\n", err)
 	} else {
 		fmt.Println("Nginx configuration reloaded successfully.")
+	}
+	return nil
+}
+
+func testNginxConfig(dockerClient *client.Client, containerID string) error {
+
+	// 创建一个执行命令的配置
+	execConfig := container.ExecOptions{
+		AttachStdout: true,
+		AttachStderr: true,
+		Cmd:          []string{"nginx", "-t"},
+	}
+
+	// 创建执行命令
+	execIDResp, err := dockerClient.ContainerExecCreate(context.Background(), containerID, execConfig)
+	if err != nil {
+		return fmt.Errorf("error creating exec: %v", err)
+	}
+
+	// 执行命令
+	execAttachResp, err := dockerClient.ContainerExecAttach(context.Background(), execIDResp.ID, container.ExecStartOptions{})
+	if err != nil {
+		return fmt.Errorf("error attaching to exec: %v", err)
+	}
+	defer execAttachResp.Close()
+
+	// 读取命令输出
+	outputDone := make(chan error)
+	go func() {
+		_, err := stdcopy.StdCopy(os.Stdout, os.Stderr, execAttachResp.Reader)
+		outputDone <- err
+	}()
+
+	// 等待命令执行完成
+	err = <-outputDone
+	if err != nil && err != io.EOF {
+		return fmt.Errorf("error during command execution: %v", err)
 	}
 
 	return nil

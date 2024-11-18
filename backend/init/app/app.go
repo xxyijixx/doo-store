@@ -45,9 +45,9 @@ func Init() {
 
 	LoadData()
 
-	_ = docker.CreateDefaultDockerNetwork()
+	// _ = docker.CreateDefaultDockerNetwork()
 
-	InitNginxProxy()
+	// InitNginxProxy()
 
 }
 
@@ -83,14 +83,14 @@ func InitNginxProxy() {
 	ctx := context.Background()
 
 	containers, err := client.ContainerList(ctx, container.ListOptions{
-		Filters: filters.NewArgs(filters.Arg("name", "/"+constant.NginxContainerName)),
+		Filters: filters.NewArgs(filters.Arg("name", "/"+config.EnvConfig.GetNginxContainerName())),
 	})
 	if err != nil {
 		log.Debug("获取容器列表失败", err)
 		return
 	}
 	if len(containers) != 0 {
-		log.Debugf("容器%s已存在", constant.NginxContainerName)
+		log.Debugf("容器%s已存在", config.EnvConfig.GetNginxContainerName())
 		return
 	}
 

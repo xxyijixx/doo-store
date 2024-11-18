@@ -3,7 +3,10 @@ package docker
 import (
 	"context"
 	"doo-store/backend/constant"
+	"doo-store/backend/utils/cmd"
+	"fmt"
 	"io"
+	"os"
 	"strconv"
 	"strings"
 
@@ -13,6 +16,7 @@ import (
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/sirupsen/logrus"
 )
 
@@ -189,5 +193,59 @@ func CreateDefaultDockerNetwork() error {
 			return err
 		}
 	}
+	return nil
+}
+
+func (c Client) CopyFileToContainer(containerId, srcFile, dstFile string) error {
+
+	cli, err := NewDockerClient()
+	if err != nil {
+		return nil
+	}
+	defer cli.Close()
+	_, err = os.Open(srcFile)
+	if err != nil {
+		return err
+	}
+
+	_, err = cmd.Execf("docker cp %s %s:%s", srcFile, containerId, dstFile)
+
+	return err
+}
+
+func (c Client) RemoveFileFormContainer(containerId, filePath string) error {
+	// 创建一个执行命令的配置
+	execConfig := container.ExecOptions{
+		AttachStdout: true,
+		AttachStderr: true,
+		Cmd:          []string{"rm", "-f", filePath},
+	}
+
+	// 创建执行命令
+	execIDResp, err := c.cli.ContainerExecCreate(context.Background(), containerId, execConfig)
+	if err != nil {
+		return fmt.Errorf("error creating exec: %v", err)
+	}
+
+	// 执行命令
+	execAttachResp, err := c.cli.ContainerExecAttach(context.Background(), execIDResp.ID, container.ExecStartOptions{})
+	if err != nil {
+		return fmt.Errorf("error attaching to exec: %v", err)
+	}
+	defer execAttachResp.Close()
+
+	// 读取命令输出
+	outputDone := make(chan error)
+	go func() {
+		_, err := stdcopy.StdCopy(os.Stdout, os.Stderr, execAttachResp.Reader)
+		outputDone <- err
+	}()
+
+	// 等待命令执行完成
+	err = <-outputDone
+	if err != nil && err != io.EOF {
+		return fmt.Errorf("error during command execution: %v", err)
+	}
+
 	return nil
 }
