@@ -6,11 +6,10 @@ import (
 	"doo-store/backend/config"
 	"doo-store/backend/constant"
 	"doo-store/backend/utils/docker"
+	"errors"
 	"fmt"
 	"io"
 	"os"
-	"strconv"
-	"strings"
 	"text/template"
 
 	"github.com/docker/docker/api/types"
@@ -20,40 +19,17 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func imageExposedPort(imageName string) (int, error) {
-	ctx := context.Background()
-	client, err := docker.NewDockerClient()
-	if err != nil {
-		return 0, err
-	}
-	imageInspect, _, err := client.ImageInspectWithRaw(ctx, imageName)
-	if err != nil {
-		log.Debugf("Failed to inspect image: %v", err)
-		return 0, err
-	}
-	portNum := 0
-	for port := range imageInspect.Config.ExposedPorts {
-		portStr := strings.Split(string(port), "/")[0]
-		portNum, err = strconv.Atoi(portStr)
-		if err != nil {
-			log.Fatalf("Failed to convert port to number: %v", err)
-		}
-		fmt.Printf("First exposed port (as number): %d\n", portNum)
-		break
-	}
-	return portNum, nil
-}
-
 // AddLocation 添加一个location块
-func AddLocation(tmpl, locationName, proxyServerName string, port int) {
+func AddLocation(tmpl, locationName, proxyServerName string, port int) error {
 	locationPath := fmt.Sprintf("%s/%s.conf", constant.NginxAppsConfigDir, locationName)
 
 	fileInfo, err := os.Stat(locationPath)
 	if err != nil && !os.IsNotExist(err) {
 		log.Debug("写入文件失败", err, fileInfo)
-		return
+		return errors.New("写入文件失败")
 	}
 	fileContent := tmpl
+	// 如果模板为空，使用默认配置
 	if tmpl == "" {
 		fileContent = fmt.Sprintf(`location /plugin/%s/ {
 	proxy_http_version 1.1;
@@ -78,7 +54,8 @@ func AddLocation(tmpl, locationName, proxyServerName string, port int) {
 	} else {
 		t, err := template.New("nginx").Parse(tmpl)
 		if err != nil {
-			return
+			log.Debug("解析模板内容失败:", err)
+			return errors.New("解析内容失败")
 		}
 		var buf bytes.Buffer
 		t.Execute(&buf, map[string]interface{}{
@@ -93,56 +70,80 @@ func AddLocation(tmpl, locationName, proxyServerName string, port int) {
 	err = os.WriteFile(locationPath, []byte(fileContent), 0644)
 	if err != nil {
 		log.Debug("写入文件失败")
-		panic(err)
+		return errors.New("写入文件失败")
 	}
 
 	nginxContainer, err := getNginxContainer()
 	if err != nil {
-
-		return
+		log.Debug("获取Nginx容器失败", err)
+		return errors.New("获取Nginx容器失败")
 	}
 	dockerClient, err := docker.NewClient()
 	if err != nil {
-
-		return
+		log.Debug("创建Docker客户端失败", err)
+		return errors.New(err.Error())
 	}
 
 	err = dockerClient.CopyFileToContainer(nginxContainer.ID, locationPath, fmt.Sprintf("/etc/nginx/conf.d/site/%s.conf", locationName))
 	if err != nil {
 		log.Debug("复制文件到容器失败", err)
+		return errors.New(err.Error())
 	}
+
+	err = testNginxConfig(dockerClient.GetClient(), nginxContainer.ID)
+	if err != nil {
+		// 检测失败需要移除配置文件
+		log.Info("Nginx 配置未通过检测", err)
+		err = dockerClient.RemoveFileFormContainer(nginxContainer.ID, fmt.Sprintf("/etc/nginx/conf.d/site/%s.conf", locationName))
+		if err != nil {
+			log.Debug("从容器中删除文件失败", err)
+			return err
+		}
+		return err
+	}
+
 	err = reloadNginx()
 	if err != nil {
 		log.Debug("Nginx 重载失败", err)
+		return err
 	}
+	return nil
 }
 
-func RemoveLocation(locationName string) {
+func RemoveLocation(locationName string) error {
 	locationPath := fmt.Sprintf("%s/%s.conf", constant.NginxAppsConfigDir, locationName)
 
 	nginxContainer, err := getNginxContainer()
 	if err != nil {
 
-		return
+		return err
 	}
 	dockerClient, err := docker.NewClient()
 	if err != nil {
 
-		return
+		return err
 	}
-	dockerClient.RemoveFileFormContainer(nginxContainer.ID, fmt.Sprintf("/etc/nginx/conf.d/site/%s.conf", locationName))
+	err = dockerClient.RemoveFileFormContainer(nginxContainer.ID, fmt.Sprintf("/etc/nginx/conf.d/site/%s.conf", locationName))
+	if err != nil {
+		log.Debug("从容器中删除文件失败", err)
+		return err
+	}
 	err = os.Remove(locationPath)
 	if err != nil {
 		fmt.Printf("删除文件失败: %v\n", err)
-		return
+		return err
 	}
-	reloadNginx()
+	err = reloadNginx()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func getNginxContainer() (types.Container, error) {
 	client, err := docker.NewClient()
 	if err != nil {
-		log.Debug("获取Docker客户端失败")
+		log.Debug("获取Docker客户端失败", err.Error())
 		return types.Container{}, err
 	}
 
@@ -165,13 +166,14 @@ func reloadNginx() error {
 
 	nginxContainer, err := getNginxContainer()
 	if err != nil {
+		log.Info("获取Nginx容器失败")
 		return err
 	}
 	dockerClient, err := docker.NewDockerClient()
 	if err != nil {
+		log.Info("获取Docker Client失败", err)
 		return err
 	}
-
 	err = testNginxConfig(dockerClient, nginxContainer.ID)
 	if err != nil {
 		log.Info("Nginx 配置未通过检测", err)
@@ -210,6 +212,7 @@ func reloadNginxConfig(dockerClient *client.Client, containerID string) error {
 	err = <-outputDone
 	if err != nil && err != io.EOF {
 		fmt.Printf("Error during command execution: %v\n", err)
+		return err
 	} else {
 		fmt.Println("Nginx configuration reloaded successfully.")
 	}

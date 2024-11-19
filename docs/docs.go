@@ -388,7 +388,7 @@ const docTemplate = `{
                 "tags": [
                     "app"
                 ],
-                "summary": "上传插件日志信息",
+                "summary": "上传插件",
                 "parameters": [
                     {
                         "type": "string",

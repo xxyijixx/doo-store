@@ -54,9 +54,89 @@ func NewIAppService() IAppService {
 	return &AppService{}
 }
 
+type AppInstallProcess struct {
+	ctx           dto.ServiceContext
+	app           *model.App
+	appDetail     *model.AppDetail
+	appInstalled  *model.AppInstalled
+	appKey        string
+	containerName string
+	req           request.AppInstall
+}
+
+func (p *AppInstallProcess) New(ctx dto.ServiceContext, req request.AppInstall) *AppInstallProcess {
+	return &AppInstallProcess{
+		ctx: ctx,
+		req: req,
+	}
+}
+
+func (p *AppInstallProcess) Check() error {
+	var err error
+	p.app, err = repo.App.Where(repo.App.Key.Eq(p.req.Key)).First()
+	if err != nil {
+		log.Info("Error query app")
+		return errors.New("获取插件信息失败")
+	}
+	// 检测版本
+	dootaskService := NewIDootaskService()
+	versionInfoResp, err := dootaskService.GetVersoinInfo()
+	if err != nil {
+		return errors.New("获取版本信息失败")
+	}
+	check, err := versionInfoResp.CheckVersion(p.app.DependsVersion)
+	if err != nil {
+		log.Info("检测版本失败", err)
+		return errors.New("检查依赖版本失败")
+	}
+	// 依赖版本不符合要求
+	if !check {
+		return e.WithMap(p.ctx.C, constant.ErrPluginVersionNotSupport, map[string]interface{}{
+			"detail": p.app.DependsVersion,
+		}, nil)
+	}
+
+	// 判断是否已安装
+	p.appInstalled, err = repo.AppInstalled.
+		Select(repo.AppInstalled.ID, repo.AppInstalled.AppID).
+		Where(repo.AppInstalled.AppID.Eq(p.app.ID)).
+		First()
+
+	if err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return errors.New("安装失败")
+		}
+	}
+	if p.appInstalled != nil {
+		return errors.New("无需重复安装")
+	}
+
+	p.appDetail, err = repo.AppDetail.Select(
+		repo.AppDetail.ID,
+		repo.AppDetail.AppID,
+		repo.AppDetail.Repo,
+		repo.AppDetail.Version,
+		repo.AppDetail.DependsVersion,
+		repo.AppDetail.NginxConfig,
+	).Where(repo.AppDetail.AppID.Eq(p.app.ID)).First()
+	if err != nil {
+		log.Info("Error query app detail", err)
+		return errors.New("安装失败")
+	}
+	return nil
+}
+
 func (*AppService) AppPage(ctx dto.ServiceContext, req request.AppSearch) (*dto.PageResult, error) {
 	var query repo.IAppDo
 	query = repo.App.Order(repo.App.Sort.Desc())
+	if req.Page <= 0 {
+		req.Page = 1
+	}
+	if req.PageSize <= 0 {
+		req.PageSize = 9
+	} else if req.PageSize > 1000 {
+		req.PageSize = 1000
+	}
 	if req.Name != "" {
 		query = query.Where(repo.App.Name.Like(fmt.Sprintf("%%%s%%", req.Name)))
 	}
@@ -110,27 +190,32 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 	app, err := repo.App.Where(repo.App.Key.Eq(req.Key)).First()
 	if err != nil {
 		log.Info("Error query app")
-		return err
+		return errors.New("获取插件信息失败")
 	}
 
 	// 检测版本
 	dootaskService := NewIDootaskService()
 	versionInfoResp, err := dootaskService.GetVersoinInfo()
 	if err != nil {
-		return err
+		return errors.New("获取版本信息失败")
 	}
 	check, err := versionInfoResp.CheckVersion(app.DependsVersion)
 	if err != nil {
-		return err
+		log.Info("检测版本失败", err)
+		return errors.New("检查依赖版本失败")
 	}
+	// 依赖版本不符合要求
 	if !check {
-		// return fmt.Errorf("当前版本不满足要求，需要版本%s以上", app.DependsVersion)
 		return e.WithMap(ctx.C, constant.ErrPluginVersionNotSupport, map[string]interface{}{
 			"detail": app.DependsVersion,
 		}, nil)
 	}
+	// 判断是否已安装
+	appInstalled, err := repo.AppInstalled.
+		Select(repo.AppInstalled.ID, repo.AppInstalled.AppID).
+		Where(repo.AppInstalled.AppID.Eq(app.ID)).
+		First()
 
-	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.AppID.Eq(app.ID)).First()
 	if err != nil {
 		if err != gorm.ErrRecordNotFound {
 			return errors.New("安装失败")
@@ -139,10 +224,18 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 	if appInstalled != nil {
 		return errors.New("无需重复安装")
 	}
-	appDetail, err := repo.AppDetail.Where(repo.AppDetail.AppID.Eq(app.ID)).First()
+
+	appDetail, err := repo.AppDetail.Select(
+		repo.AppDetail.ID,
+		repo.AppDetail.AppID,
+		repo.AppDetail.Repo,
+		repo.AppDetail.Version,
+		repo.AppDetail.DependsVersion,
+		repo.AppDetail.NginxConfig,
+	).Where(repo.AppDetail.AppID.Eq(app.ID)).First()
 	if err != nil {
-		log.Info("Error query app detail")
-		return err
+		log.Info("Error query app detail", err)
+		return errors.New("安装失败")
 	}
 
 	// 检测 docker-compose 文件
@@ -160,9 +253,8 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 		log.Info("Error create dir", err)
 		return err
 	}
-	// 名称
-	// name := fmt.Sprintf("plugin-%s", common.RandString(6))
-	// containerName := config.EnvConfig.APP_PREFIX + app.Key + "-" + name
+
+	// 容器名称
 	containerName := config.EnvConfig.GetDefaultContainerName(app.Key)
 
 	paramJson, err := json.Marshal(req.Params)
@@ -198,16 +290,9 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 	}
 
 	// 添加Nginx配置
-	client, err := docker.NewClient()
+	err = addNginx(appDetail, app, containerName, appKey, appInstalled)
 	if err != nil {
 		return err
-	}
-	port, err := client.GetImageFirstExposedPortByName(fmt.Sprintf("%s:%s", appDetail.Repo, appDetail.Version))
-	if err != nil {
-		return err
-	}
-	if port != 0 {
-		nginx.AddLocation(appDetail.NginxConfig, app.Key, containerName, port)
 	}
 
 	return nil
@@ -445,8 +530,7 @@ func (*AppService) GetLogs(ctx dto.ServiceContext, req request.AppLogsSearch) (a
 		return nil, errors.New("插件未运行")
 	}
 
-	containerName := config.EnvConfig.APP_PREFIX + appInstalled.Key + "-" + appInstalled.Name
-	reader, err := client.ContainerLogs(context.Background(), containerName, container.LogsOptions{
+	reader, err := client.ContainerLogs(context.Background(), appInstalled.Name, container.LogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
 		// Follow:     true,
@@ -638,6 +722,7 @@ func appUp(appInstalled *model.AppInstalled, envContent string) error {
 	return err
 }
 
+// appStop 插件停止
 func appStop(appInstalled *model.AppInstalled) error {
 	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
 	composeFile := docker.GetComposeFile(appKey)
@@ -650,6 +735,34 @@ func appStop(appInstalled *model.AppInstalled) error {
 		return fmt.Errorf("error docker compose stop: %s", err.Error())
 	}
 	insertLog(appInstalled.ID, "插件停止", stdout)
+	return nil
+}
+
+// addNginx 添加Nginx配置
+// 插件安装的时候，需要向Nginx添加一个配置，如果添加配置失败，会将插件停止
+func addNginx(appDetail *model.AppDetail, app *model.App, containerName string, appKey string, appInstalled *model.AppInstalled) error {
+	client, err := docker.NewClient()
+	if err != nil {
+		return err
+	}
+	port, err := client.GetImageFirstExposedPortByName(fmt.Sprintf("%s:%s", appDetail.Repo, appDetail.Version))
+	if err != nil {
+		return err
+	}
+	if appDetail.NginxConfig != "" || port != 0 {
+		err = nginx.AddLocation(appDetail.NginxConfig, app.Key, containerName, port)
+
+		if err != nil {
+			log.Info("添加Nginx配置失败", err)
+
+			std, err := compose.Operate(docker.GetComposeFile(appKey), "stop")
+			if err != nil {
+				log.Info("Error docker compose operate", std)
+			}
+			_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
+			return err
+		}
+	}
 	return nil
 }
 

@@ -40,6 +40,10 @@ func (c Client) Close() {
 	_ = c.cli.Close()
 }
 
+func (c Client) GetClient() *client.Client {
+	return c.cli
+}
+
 func NewDockerClient() (*client.Client, error) {
 	// query Docker sock path
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithHost("unix:///var/run/docker.sock"), client.WithAPIVersionNegotiation())
