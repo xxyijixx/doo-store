@@ -61,10 +61,11 @@ type AppInstallProcess struct {
 	appInstalled  *model.AppInstalled
 	appKey        string
 	containerName string
+	envContent    string
 	req           request.AppInstall
 }
 
-func (p *AppInstallProcess) New(ctx dto.ServiceContext, req request.AppInstall) *AppInstallProcess {
+func NewAppInstallProcess(ctx dto.ServiceContext, req request.AppInstall) *AppInstallProcess {
 	return &AppInstallProcess{
 		ctx: ctx,
 		req: req,
@@ -116,12 +117,120 @@ func (p *AppInstallProcess) Check() error {
 		repo.AppDetail.AppID,
 		repo.AppDetail.Repo,
 		repo.AppDetail.Version,
+		repo.AppDetail.Params,
 		repo.AppDetail.DependsVersion,
 		repo.AppDetail.NginxConfig,
 	).Where(repo.AppDetail.AppID.Eq(p.app.ID)).First()
 	if err != nil {
 		log.Info("Error query app detail", err)
 		return errors.New("安装失败")
+	}
+	return nil
+}
+
+// ValidateParam 验证参数
+func (p *AppInstallProcess) ValidateParam() error {
+	var err error
+	// 检测 docker-compose 文件
+	err = compose.Check(p.req.DockerCompose)
+	if err != nil {
+		log.Info("DockerCompose 内容未通过检测", err)
+		return err
+	}
+
+	p.appKey = config.EnvConfig.APP_PREFIX + p.app.Key
+	// 创建工作目录
+	workspaceDir := path.Join(constant.AppInstallDir, p.appKey)
+	err = createDir(workspaceDir)
+	if err != nil {
+		log.Info("Error create dir", err)
+		return err
+	}
+
+	// 容器名称
+	p.containerName = config.EnvConfig.GetDefaultContainerName(p.app.Key)
+
+	paramJson, err := json.Marshal(p.req.Params)
+	if err != nil {
+		return err
+	}
+
+	params := response.AppParams{}
+	err = common.StrToStruct(p.appDetail.Params, &params)
+	if err != nil {
+		log.Debug("解析参数失败", err)
+		return errors.New("解析插件参数失败")
+	}
+	for _, param := range params.FormFields {
+		if param.Required {
+			if _, exists := p.req.Params[param.EnvKey]; !exists {
+				return errors.New("缺少必填参数 " + param.EnvKey)
+			}
+		}
+	}
+
+	// 资源限制
+	p.req.Params[constant.CPUS] = p.req.CPUS
+	p.req.Params[constant.MemoryLimit] = p.req.MemoryLimit
+	var envJson string
+	p.envContent, envJson, err = docker.GenEnv(p.appKey, p.containerName, p.req.Params, false)
+	if err != nil {
+		return err
+	}
+	p.appInstalled = &model.AppInstalled{
+		Name:          p.containerName,
+		AppID:         p.app.ID,
+		AppDetailID:   p.appDetail.ID,
+		Class:         p.app.Class,
+		Repo:          p.appDetail.Repo,
+		Version:       p.appDetail.Version,
+		Params:        string(paramJson),
+		Env:           envJson,
+		DockerCompose: p.req.DockerCompose,
+		Key:           p.app.Key,
+		Status:        constant.Installing,
+	}
+
+	return nil
+}
+
+func (p *AppInstallProcess) Install() error {
+	var err error
+	if p.appInstalled == nil {
+		return errors.New("安装失败")
+	}
+	err = appUp(p.appInstalled, p.envContent)
+	if err != nil {
+		log.Info("启动失败", err)
+		return err
+	}
+	return nil
+}
+
+// AddNginx 添加Nginx配置
+// 插件安装的时候，需要向Nginx添加一个配置，如果添加配置失败，会将插件停止
+func (p *AppInstallProcess) AddNginx() error {
+	client, err := docker.NewClient()
+	if err != nil {
+		return err
+	}
+	port, err := client.GetImageFirstExposedPortByName(fmt.Sprintf("%s:%s", p.appDetail.Repo, p.appDetail.Version))
+	if err != nil {
+		return err
+	}
+	if p.appDetail.NginxConfig != "" || port != 0 {
+		err = nginx.AddLocation(p.appDetail.NginxConfig, p.app.Key, p.containerName, port)
+
+		if err != nil {
+			log.Info("添加Nginx配置失败", err)
+
+			std, err := compose.Operate(docker.GetComposeFile(p.appKey), "stop")
+			if err != nil {
+				log.Info("Error docker compose operate", std)
+			}
+			_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(p.appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
+			return err
+		}
 	}
 	return nil
 }
@@ -187,114 +296,19 @@ func (*AppService) AppDetailByKey(ctx dto.ServiceContext, key string) (*response
 
 // AppInstall 插件安装
 func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) error {
-	app, err := repo.App.Where(repo.App.Key.Eq(req.Key)).First()
-	if err != nil {
-		log.Info("Error query app")
-		return errors.New("获取插件信息失败")
-	}
-
-	// 检测版本
-	dootaskService := NewIDootaskService()
-	versionInfoResp, err := dootaskService.GetVersoinInfo()
-	if err != nil {
-		return errors.New("获取版本信息失败")
-	}
-	check, err := versionInfoResp.CheckVersion(app.DependsVersion)
-	if err != nil {
-		log.Info("检测版本失败", err)
-		return errors.New("检查依赖版本失败")
-	}
-	// 依赖版本不符合要求
-	if !check {
-		return e.WithMap(ctx.C, constant.ErrPluginVersionNotSupport, map[string]interface{}{
-			"detail": app.DependsVersion,
-		}, nil)
-	}
-	// 判断是否已安装
-	appInstalled, err := repo.AppInstalled.
-		Select(repo.AppInstalled.ID, repo.AppInstalled.AppID).
-		Where(repo.AppInstalled.AppID.Eq(app.ID)).
-		First()
-
-	if err != nil {
-		if err != gorm.ErrRecordNotFound {
-			return errors.New("安装失败")
-		}
-	}
-	if appInstalled != nil {
-		return errors.New("无需重复安装")
-	}
-
-	appDetail, err := repo.AppDetail.Select(
-		repo.AppDetail.ID,
-		repo.AppDetail.AppID,
-		repo.AppDetail.Repo,
-		repo.AppDetail.Version,
-		repo.AppDetail.DependsVersion,
-		repo.AppDetail.NginxConfig,
-	).Where(repo.AppDetail.AppID.Eq(app.ID)).First()
-	if err != nil {
-		log.Info("Error query app detail", err)
-		return errors.New("安装失败")
-	}
-
-	// 检测 docker-compose 文件
-	err = compose.Check(req.DockerCompose)
-	if err != nil {
-		log.Info("DockerCompose 内容未通过检测", err)
+	appInstallProcess := NewAppInstallProcess(ctx, req)
+	if err := appInstallProcess.Check(); err != nil {
 		return err
 	}
-
-	appKey := config.EnvConfig.APP_PREFIX + app.Key
-	// 创建工作目录
-	workspaceDir := path.Join(constant.AppInstallDir, appKey)
-	err = createDir(workspaceDir)
-	if err != nil {
-		log.Info("Error create dir", err)
+	if err := appInstallProcess.ValidateParam(); err != nil {
 		return err
 	}
-
-	// 容器名称
-	containerName := config.EnvConfig.GetDefaultContainerName(app.Key)
-
-	paramJson, err := json.Marshal(req.Params)
-	if err != nil {
+	if err := appInstallProcess.Install(); err != nil {
 		return err
 	}
-
-	// 资源限制
-	req.Params[constant.CPUS] = req.CPUS
-	req.Params[constant.MemoryLimit] = req.MemoryLimit
-
-	envContent, envJson, err := docker.GenEnv(appKey, containerName, req.Params, false)
-	if err != nil {
+	if err := appInstallProcess.AddNginx(); err != nil {
 		return err
 	}
-	appInstalled = &model.AppInstalled{
-		Name:          containerName,
-		AppID:         app.ID,
-		AppDetailID:   appDetail.ID,
-		Class:         app.Class,
-		Repo:          appDetail.Repo,
-		Version:       appDetail.Version,
-		Params:        string(paramJson),
-		Env:           envJson,
-		DockerCompose: req.DockerCompose,
-		Key:           app.Key,
-		Status:        constant.Installing,
-	}
-	err = appUp(appInstalled, envContent)
-	if err != nil {
-		log.Info("启动失败", err)
-		return err
-	}
-
-	// 添加Nginx配置
-	err = addNginx(appDetail, app, containerName, appKey, appInstalled)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -735,34 +749,6 @@ func appStop(appInstalled *model.AppInstalled) error {
 		return fmt.Errorf("error docker compose stop: %s", err.Error())
 	}
 	insertLog(appInstalled.ID, "插件停止", stdout)
-	return nil
-}
-
-// addNginx 添加Nginx配置
-// 插件安装的时候，需要向Nginx添加一个配置，如果添加配置失败，会将插件停止
-func addNginx(appDetail *model.AppDetail, app *model.App, containerName string, appKey string, appInstalled *model.AppInstalled) error {
-	client, err := docker.NewClient()
-	if err != nil {
-		return err
-	}
-	port, err := client.GetImageFirstExposedPortByName(fmt.Sprintf("%s:%s", appDetail.Repo, appDetail.Version))
-	if err != nil {
-		return err
-	}
-	if appDetail.NginxConfig != "" || port != 0 {
-		err = nginx.AddLocation(appDetail.NginxConfig, app.Key, containerName, port)
-
-		if err != nil {
-			log.Info("添加Nginx配置失败", err)
-
-			std, err := compose.Operate(docker.GetComposeFile(appKey), "stop")
-			if err != nil {
-				log.Info("Error docker compose operate", std)
-			}
-			_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
-			return err
-		}
-	}
 	return nil
 }
 
