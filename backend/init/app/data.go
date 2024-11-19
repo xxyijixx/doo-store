@@ -3,53 +3,23 @@ package app
 import (
 	"doo-store/backend/config"
 	"doo-store/backend/constant"
-	"doo-store/backend/core/dto/response"
+	"doo-store/backend/core/dto"
 	"doo-store/backend/core/model"
 	"doo-store/backend/core/repo"
 	"encoding/json"
-	"fmt"
 	"os"
-	"strings"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
-type Welcome struct {
-	Plugins []Plugin `json:"plugins"`
-}
-
-type Plugin struct {
-	Name           string       `json:"name"`
-	Key            string       `json:"key"`
-	Description    string       `json:"description"`
-	Icon           string       `json:"icon"`
-	Version        string       `json:"version"`
-	Github         string       `json:"github"`
-	Class          string       `json:"class"`
-	DependsVersion string       `json:"depends_version"`
-	Repo           string       `json:"repo"`
-	Volume         []Volume     `json:"volume"`
-	Env            []EnvElement `json:"env"`
-	Command        string       `json:"command"`
-}
-
-type EnvElement struct {
-	Name     string `json:"name"`
-	Key      string `json:"key"`
-	Value    string `json:"value"`
-	Type     string `json:"type"`
-	Required bool   `json:"required"`
-}
-
-type Volume struct {
-	Local  string `json:"local"`
-	Target string `json:"target"`
+type PluginConfig struct {
+	Plugins []dto.Plugin `json:"plugins"`
 }
 
 func LoadData() error {
 	logrus.Info("Loading data...")
-	var pluginConfig Welcome
+	var pluginConfig PluginConfig
 	filename := "./docker/init/data.json"
 	if config.EnvConfig.ENV == "prod" {
 		filename = "./init/data.json"
@@ -119,6 +89,7 @@ func LoadData() error {
 				DependsVersion: p.DependsVersion,
 				Params:         p.GenParams(),
 				DockerCompose:  p.GenComposeFile(),
+				NginxConfig:    p.GenNginxConfig(),
 				Status:         constant.AppNormal,
 			}
 			err = repo.Use(tx).AppDetail.Create(appDetail)
@@ -152,87 +123,4 @@ func LoadData() error {
 	//
 
 	return err
-}
-
-func (p *Plugin) GenComposeFile() string {
-	composeContent := p.GenService()
-	composeContent += p.GenNetwork()
-	return composeContent
-}
-
-func (p *Plugin) GenNetwork() string {
-	networkContent := make([]string, 0)
-	networkContent = append(networkContent, "networks:")
-	networkContent = append(networkContent, fmt.Sprintf("%s%s:", getSpaces(1), config.EnvConfig.GetNetworkName()))
-	networkContent = append(networkContent, fmt.Sprintf("%sexternal: true", getSpaces(2)))
-
-	networkContent = append(networkContent, "\n")
-
-	return strings.Join(networkContent, "\n")
-}
-
-func (p *Plugin) GenService() string {
-	serviceContent := make([]string, 0)
-	serviceContent = append(serviceContent, "services:")
-	serviceContent = append(serviceContent, fmt.Sprintf("%s%s:", getSpaces(1), p.Key))
-	serviceContent = append(serviceContent, fmt.Sprintf("%simage: %s:%s", getSpaces(2), p.Repo, p.Version))
-	serviceContent = append(serviceContent, fmt.Sprintf("%srestart: always", getSpaces(2)))
-	serviceContent = append(serviceContent, fmt.Sprintf("%scontainer_name: ${CONTAINER_NAME}", getSpaces(2)))
-	// networks:
-	serviceContent = append(serviceContent, fmt.Sprintf("%snetworks:", getSpaces(2)))
-	serviceContent = append(serviceContent, fmt.Sprintf("%s- %s", getSpaces(3), config.EnvConfig.GetNetworkName()))
-
-	if len(p.Volume) != 0 {
-		serviceContent = append(serviceContent, fmt.Sprintf("%svolumes:", getSpaces(2)))
-		for _, v := range p.Volume {
-			serviceContent = append(serviceContent, fmt.Sprintf("%s- %s:%s", getSpaces(3), v.Local, v.Target))
-		}
-	}
-	if len(p.Env) != 0 {
-		serviceContent = append(serviceContent, fmt.Sprintf("%senvironment:", getSpaces(2)))
-		for _, env := range p.Env {
-			serviceContent = append(serviceContent, fmt.Sprintf("%s- %s=\"${%s}\"", getSpaces(3), env.Key, env.Key))
-		}
-	}
-
-	serviceContent = append(serviceContent, fmt.Sprintf("%scpus: \"${CPUS}\"", getSpaces(2)))
-	serviceContent = append(serviceContent, fmt.Sprintf("%smem_limit: \"${MEMORY_LIMIT}\"", getSpaces(2)))
-
-	serviceContent = append(serviceContent, fmt.Sprintf("%slabels:", getSpaces(2)))
-	serviceContent = append(serviceContent, fmt.Sprintf("%screatedBy: \"Apps\"", getSpaces(3)))
-
-	if p.Command != "" {
-		serviceContent = append(serviceContent, fmt.Sprintf("%scommand: %s", getSpaces(2), p.Command))
-	}
-
-	serviceContent = append(serviceContent, "\n")
-
-	return strings.Join(serviceContent, "\n")
-}
-
-func (p *Plugin) GenParams() string {
-	formFields := make([]response.FormField, 0)
-	for _, env := range p.Env {
-		formField := response.FormField{
-			Label:    env.Name,
-			Default:  fmt.Sprintf("%v", env.Value),
-			EnvKey:   env.Key,
-			Type:     env.Type,
-			Required: env.Required,
-		}
-		formFields = append(formFields, formField)
-	}
-	params := map[string]interface{}{
-		"form_fields": formFields,
-	}
-	jsonData, err := json.Marshal(params)
-	if err != nil {
-		return ""
-	}
-	return string(jsonData)
-}
-
-func getSpaces(num int) string {
-	spaces := strings.Repeat(" ", 2*num)
-	return spaces
 }

@@ -43,3 +43,8 @@ type AppLogsSearch struct {
 	Until string `form:"until"`
 	Tail  int    `form:"tail"`
 }
+
+type PluginUpload struct {
+	dto.Plugin
+	DockerCompose string `json:"docker_compose"`
+}

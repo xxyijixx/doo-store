@@ -354,3 +354,35 @@ func (*BaseApi) AppLogs(c *gin.Context) {
 	}
 	helper.SuccessWith(c, data)
 }
+
+// @Summary 上传插件
+// @Schemes
+// @Description
+// @Security BearerAuth
+// @Tags app
+// @Produce json
+// @Param language header string false "i18n" default(zh)
+// @Param data body request.PluginUpload true "RequestBody"
+// @Success 200 {object} dto.Response "success"
+// @Router /apps/manage/upload [post]
+func (*BaseApi) AppUpload(c *gin.Context) {
+	err := checkAuth(c, true)
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+
+	var req request.PluginUpload
+	err = helper.CheckBindAndValidate(&req, c)
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	fmt.Printf("请求参数：\n%+v\n", req)
+	err = appService.Upload(dto.ServiceContext{C: c}, req)
+	if err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+	helper.SuccessWith(c, nil)
+}

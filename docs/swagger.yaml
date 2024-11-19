@@ -1,4 +1,17 @@
 definitions:
+  dto.EnvElement:
+    properties:
+      key:
+        type: string
+      name:
+        type: string
+      required:
+        type: boolean
+      type:
+        type: string
+      value:
+        type: string
+    type: object
   dto.PageResult:
     properties:
       items: {}
@@ -13,6 +26,13 @@ definitions:
       data: {}
       msg:
         example: success
+        type: string
+    type: object
+  dto.Volume:
+    properties:
+      local:
+        type: string
+      target:
         type: string
     type: object
   model.App:
@@ -84,6 +104,41 @@ definitions:
     type: object
   request.AppUnInstall:
     type: object
+  request.PluginUpload:
+    properties:
+      class:
+        type: string
+      command:
+        type: string
+      depends_version:
+        type: string
+      description:
+        type: string
+      docker_compose:
+        type: string
+      env:
+        items:
+          $ref: '#/definitions/dto.EnvElement'
+        type: array
+      github:
+        type: string
+      icon:
+        type: string
+      key:
+        type: string
+      name:
+        type: string
+      nginx_config:
+        type: string
+      repo:
+        type: string
+      version:
+        type: string
+      volume:
+        items:
+          $ref: '#/definitions/dto.Volume'
+        type: array
+    type: object
   response.AppDetail:
     properties:
       app_id:
@@ -96,6 +151,8 @@ definitions:
         type: string
       id:
         type: integer
+      nginx_config:
+        type: string
       params:
         $ref: '#/definitions/response.AppParams'
       repo:
@@ -498,6 +555,32 @@ paths:
       security:
       - BearerAuth: []
       summary: 修改插件参数信息
+      tags:
+      - app
+  /apps/manage/upload:
+    post:
+      parameters:
+      - default: zh
+        description: i18n
+        in: header
+        name: language
+        type: string
+      - description: RequestBody
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.PluginUpload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/dto.Response'
+      security:
+      - BearerAuth: []
+      summary: 上传插件日志信息
       tags:
       - app
   /apps/tags:

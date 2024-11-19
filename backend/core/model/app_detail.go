@@ -8,6 +8,7 @@ type AppDetail struct {
 	DependsVersion string `json:"depends_version"`
 	Params         string `json:"-" gorm:"type:text"`
 	DockerCompose  string `json:"docker_compose" gorm:"type:text"`
+	NginxConfig    string `json:"nginx_config"`
 	Status         string `json:"status" gorm:"size:200;not null;default:''"`
 }
 

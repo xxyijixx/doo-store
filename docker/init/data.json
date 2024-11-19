@@ -20,7 +20,8 @@
           "required": true
         }
       ],
-      "command": ""
+      "command": "",
+      "nginx_config": ""
     },
     {
       "name": "Redis",
@@ -51,7 +52,8 @@
         }
       ],
       "command": ""
-    },
+,
+      "nginx_config": ""    },
     {
       "name": "DooAliOSS",
       "key": "dooalioss",
@@ -96,7 +98,8 @@
         }
       ],
       "command": ""
-    },
+,
+      "nginx_config": ""    },
     {
       "name": "DooTxCOS",
       "key": "dootxcos",
@@ -141,7 +144,8 @@
         }
       ],
       "command": ""
-    },
+,
+      "nginx_config": ""    },
     {
       "name": "DooQiNiu",
       "key": "dooqiniu",
@@ -186,7 +190,8 @@
         }
       ],
       "command": ""
-    },
+,
+      "nginx_config": ""    },
     {
       "name": "Nginx2",
       "key": "nginx2",
@@ -207,7 +212,8 @@
         }
       ],
       "command": ""
-    },
+,
+      "nginx_config": ""    },
     {
       "name": "Nginx3",
       "key": "nginx3",
@@ -228,7 +234,8 @@
         }
       ],
       "command": ""
-    },
+,
+      "nginx_config": ""    },
     {
       "name": "Nginx4",
       "key": "nginx4",
@@ -249,7 +256,8 @@
         }
       ],
       "command": ""
-    },
+,
+      "nginx_config": ""    },
     {
       "name": "Nginx5",
       "key": "nginx5",
@@ -270,7 +278,8 @@
         }
       ],
       "command": ""
-    },
+,
+      "nginx_config": ""    },
     {
       "name": "Nginx6",
       "key": "nginx6",
@@ -291,7 +300,8 @@
         }
       ],
       "command": ""
-    },
+,
+      "nginx_config": ""    },
     {
       "name": "Nginx7",
       "key": "nginx7",
@@ -312,7 +322,8 @@
         }
       ],
       "command": ""
-    },
+,
+      "nginx_config": ""    },
     {
       "name": "Nginx8",
       "key": "nginx8",
@@ -333,7 +344,8 @@
         }
       ],
       "command": ""
-    },
+,
+      "nginx_config": ""    },
     {
       "name": "Nginx9",
       "key": "nginx9",
@@ -355,7 +367,8 @@
         }
       ],
       "command": ""
-    },
+,
+      "nginx_config": ""    },
     {
       "name": "Nginx10",
       "key": "nginx10",
@@ -376,6 +389,7 @@
         }
       ],
       "command": ""
-    }
+,
+      "nginx_config": ""    }
   ]
 }

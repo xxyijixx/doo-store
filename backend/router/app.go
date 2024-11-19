@@ -24,5 +24,7 @@ func (a *AppRouter) InitRouter(Router *gin.RouterGroup) {
 		appRouter.PUT("/installed/:id/params", baseApi.AppInstalledUpdateParams)
 		appRouter.GET("/installed/:id/logs", baseApi.AppLogs)
 		appRouter.GET("/tags", baseApi.AppTags)
+
+		appRouter.POST("/manage/upload", baseApi.AppUpload)
 	}
 }

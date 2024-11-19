@@ -1,6 +1,7 @@
 package nginx
 
 import (
+	"bytes"
 	"context"
 	"doo-store/backend/config"
 	"doo-store/backend/constant"
@@ -10,6 +11,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"text/template"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -43,7 +45,7 @@ func imageExposedPort(imageName string) (int, error) {
 }
 
 // AddLocation 添加一个location块
-func AddLocation(locationName, proxyServerName string, port int) {
+func AddLocation(tmpl, locationName, proxyServerName string, port int) {
 	locationPath := fmt.Sprintf("%s/%s.conf", constant.NginxAppsConfigDir, locationName)
 
 	fileInfo, err := os.Stat(locationPath)
@@ -51,8 +53,9 @@ func AddLocation(locationName, proxyServerName string, port int) {
 		log.Debug("写入文件失败", err, fileInfo)
 		return
 	}
-
-	fileContent := fmt.Sprintf(`location /%s/ {
+	fileContent := tmpl
+	if tmpl == "" {
+		fileContent = fmt.Sprintf(`location /plugin/%s/ {
 	proxy_http_version 1.1;
 	proxy_set_header X-Real-IP $remote_addr;
 	proxy_set_header X-Real-PORT $remote_port;
@@ -72,6 +75,20 @@ func AddLocation(locationName, proxyServerName string, port int) {
 	proxy_connect_timeout 3600s;
 	proxy_pass http://%s:%d/;
 }`, locationName, proxyServerName, port)
+	} else {
+		t, err := template.New("nginx").Parse(tmpl)
+		if err != nil {
+			return
+		}
+		var buf bytes.Buffer
+		t.Execute(&buf, map[string]interface{}{
+			"Key":           locationName,
+			"ContainerName": proxyServerName,
+			"Port":          port,
+		})
+
+		fileContent = buf.String()
+	}
 
 	err = os.WriteFile(locationPath, []byte(fileContent), 0644)
 	if err != nil {

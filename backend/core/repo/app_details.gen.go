@@ -36,6 +36,7 @@ func newAppDetail(db *gorm.DB, opts ...gen.DOOption) appDetail {
 	_appDetail.DependsVersion = field.NewString(tableName, "depends_version")
 	_appDetail.Params = field.NewString(tableName, "params")
 	_appDetail.DockerCompose = field.NewString(tableName, "docker_compose")
+	_appDetail.NginxConfig = field.NewString(tableName, "nginx_config")
 	_appDetail.Status = field.NewString(tableName, "status")
 
 	_appDetail.fillFieldMap()
@@ -56,6 +57,7 @@ type appDetail struct {
 	DependsVersion field.String
 	Params         field.String
 	DockerCompose  field.String
+	NginxConfig    field.String
 	Status         field.String
 
 	fieldMap map[string]field.Expr
@@ -82,6 +84,7 @@ func (a *appDetail) updateTableName(table string) *appDetail {
 	a.DependsVersion = field.NewString(table, "depends_version")
 	a.Params = field.NewString(table, "params")
 	a.DockerCompose = field.NewString(table, "docker_compose")
+	a.NginxConfig = field.NewString(table, "nginx_config")
 	a.Status = field.NewString(table, "status")
 
 	a.fillFieldMap()
@@ -99,7 +102,7 @@ func (a *appDetail) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *appDetail) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 10)
+	a.fieldMap = make(map[string]field.Expr, 11)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
@@ -109,6 +112,7 @@ func (a *appDetail) fillFieldMap() {
 	a.fieldMap["depends_version"] = a.DependsVersion
 	a.fieldMap["params"] = a.Params
 	a.fieldMap["docker_compose"] = a.DockerCompose
+	a.fieldMap["nginx_config"] = a.NginxConfig
 	a.fieldMap["status"] = a.Status
 }
 

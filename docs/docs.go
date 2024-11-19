@@ -375,6 +375,48 @@ const docTemplate = `{
                 }
             }
         },
+        "/apps/manage/upload": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app"
+                ],
+                "summary": "上传插件日志信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "zh",
+                        "description": "i18n",
+                        "name": "language",
+                        "in": "header"
+                    },
+                    {
+                        "description": "RequestBody",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.PluginUpload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/apps/tags": {
             "get": {
                 "security": [
@@ -651,6 +693,26 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.EnvElement": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "required": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.PageResult": {
             "type": "object",
             "properties": {
@@ -671,6 +733,17 @@ const docTemplate = `{
                 "msg": {
                     "type": "string",
                     "example": "success"
+                }
+            }
+        },
+        "dto.Volume": {
+            "type": "object",
+            "properties": {
+                "local": {
+                    "type": "string"
+                },
+                "target": {
+                    "type": "string"
                 }
             }
         },
@@ -777,6 +850,59 @@ const docTemplate = `{
         "request.AppUnInstall": {
             "type": "object"
         },
+        "request.PluginUpload": {
+            "type": "object",
+            "properties": {
+                "class": {
+                    "type": "string"
+                },
+                "command": {
+                    "type": "string"
+                },
+                "depends_version": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "docker_compose": {
+                    "type": "string"
+                },
+                "env": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.EnvElement"
+                    }
+                },
+                "github": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "nginx_config": {
+                    "type": "string"
+                },
+                "repo": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                },
+                "volume": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Volume"
+                    }
+                }
+            }
+        },
         "response.AppDetail": {
             "type": "object",
             "properties": {
@@ -794,6 +920,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "nginx_config": {
+                    "type": "string"
                 },
                 "params": {
                     "$ref": "#/definitions/response.AppParams"

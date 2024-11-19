@@ -47,6 +47,7 @@ type IAppService interface {
 	UpdateParams(ctx dto.ServiceContext, req request.AppInstall) (any, error)
 	AppTags(ctx dto.ServiceContext) ([]*model.Tag, error)
 	GetLogs(ctx dto.ServiceContext, req request.AppLogsSearch) (any, error)
+	Upload(ctx dto.ServiceContext, req request.PluginUpload) error
 }
 
 func NewIAppService() IAppService {
@@ -104,6 +105,7 @@ func (*AppService) AppDetailByKey(ctx dto.ServiceContext, key string) (*response
 	return resp, nil
 }
 
+// AppInstall 插件安装
 func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) error {
 	app, err := repo.App.Where(repo.App.Key.Eq(req.Key)).First()
 	if err != nil {
@@ -205,7 +207,7 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 		return err
 	}
 	if port != 0 {
-		nginx.AddLocation(app.Key, containerName, port)
+		nginx.AddLocation(appDetail.NginxConfig, app.Key, containerName, port)
 	}
 
 	return nil
@@ -495,6 +497,69 @@ func (*AppService) GetLogs(ctx dto.ServiceContext, req request.AppLogsSearch) (a
 		}
 	}
 	return sb.String(), nil
+}
+
+// Upload 插件上传
+func (AppService) Upload(ctx dto.ServiceContext, req request.PluginUpload) error {
+	key := req.Plugin.Key
+	count, err := repo.App.Where(repo.App.Key.Eq(key)).Count()
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		return errors.New("key已经存在")
+	}
+	err = repo.DB.Transaction(func(tx *gorm.DB) error {
+
+		app := &model.App{
+			Name:           req.Plugin.Name,
+			Key:            req.Plugin.Key,
+			Icon:           req.Plugin.Icon,
+			Class:          req.Plugin.Class,
+			Description:    req.Plugin.Description,
+			DependsVersion: req.Plugin.DependsVersion,
+			Status:         constant.AppUnused,
+		}
+		err := repo.Use(tx).App.Create(app)
+		if err != nil {
+			log.Debug(err.Error())
+			return err
+		}
+		dockerCompose := req.DockerCompose
+		if dockerCompose == "" {
+			dockerCompose = req.Plugin.GenComposeFile()
+		}
+		fmt.Println("DockerCompose\n", dockerCompose)
+		err = compose.Check(dockerCompose)
+		if err != nil {
+			return err
+		}
+		nginxConfig := req.NginxConfig
+		if nginxConfig == "" {
+			nginxConfig = req.Plugin.GenNginxConfig()
+		}
+
+		appDetail := &model.AppDetail{
+			AppID:          app.ID,
+			Repo:           req.Plugin.Repo,
+			Version:        req.Plugin.Version,
+			DependsVersion: req.Plugin.DependsVersion,
+			Params:         req.Plugin.GenParams(),
+			DockerCompose:  dockerCompose,
+			NginxConfig:    nginxConfig,
+			Status:         constant.AppNormal,
+		}
+		err = repo.Use(tx).AppDetail.Create(appDetail)
+		if err != nil {
+			log.Debug(err.Error())
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func appRe(appInstalled *model.AppInstalled, envContent string) error {
