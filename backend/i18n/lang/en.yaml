@@ -1,5 +1,3 @@
-ErrCaptchaCode: Verification code error
-ErrCmdTimeout: Command execution timeout
 ErrDooTaskDataFormat: Data format error
 ErrDooTaskRequestFailed: Request failed
 ErrDooTaskRequestFailedWithErr: 'Request failed: {{.detail}}'
@@ -7,16 +5,13 @@ ErrDooTaskResponseFormat: Response format error
 ErrDooTaskUnmarshalResponse: 'Parsing response failed: {{.detail}}'
 ErrEnvProhibition: This operation is prohibited in the current environment
 ErrInvalidParameter: Parameter error
-ErrMailContentReject: The email content is rejected. Please check whether the receiving function is enabled
-ErrMailNotConfig: The sending mailbox is not configured
-ErrMailToInvalid: Please enter the correct recipient address
 ErrNoPermission: Insufficient authority
 ErrPluginAdminNotCancel: Administrators only
-ErrPluginVersionNotSupport: The current version does not meet the requirements, requires the version {{.detail}} or above
-ErrPluginUnmarshalDockerCompose: Unable to parse Docker Compose file
+ErrPluginEnvVarInVolumeMount: Environment variables are not allowed on the mount path
+ErrPluginInvalidLocalVolumeMount: Invalid local volume mount path
 ErrPluginNetworkModeHost: The host network mode is used
 ErrPluginNotAllowedPrivileged: Privileged mode is not allowed
-ErrPluginInvalidLocalVolumeMount: Invalid local volume mount path
-ErrPluginEnvVarInVolumeMount: Environment variables are not allowed on the mount path
+ErrPluginUnmarshalDockerCompose: Unable to parse Docker Compose file
+ErrPluginVersionNotSupport: The current version does not meet the requirements, requires the version {{.detail}} or above
 ErrRequestTimeout: Request timeout
 ErrTypeNotLogin: Not logged in

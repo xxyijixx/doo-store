@@ -1,5 +1,3 @@
-ErrCaptchaCode: 验证码错误
-ErrCmdTimeout: 命令执行超时
 ErrDooTaskDataFormat: 数据格式错误
 ErrDooTaskRequestFailed: 请求失败
 ErrDooTaskRequestFailedWithErr: 请求失败：{{.detail}}
@@ -9,10 +7,11 @@ ErrEnvProhibition: 当前环境禁止此操作
 ErrInvalidParameter: 参数错误
 ErrNoPermission: 权限不足
 ErrPluginAdminNotCancel: 仅限管理员操作
-ErrPluginVersionNotSupport: 当前版本不满足要求，需要版本 {{.detail}} 或以上
-ErrPluginUnmarshalDockerCompose: 无法解析 Docker Compose 文件
+ErrPluginEnvVarInVolumeMount: 不允许在挂载路径使用环境变量
+ErrPluginInvalidLocalVolumeMount: 本地卷挂载路径无效
 ErrPluginNetworkModeHost: 使用了host网络模式
 ErrPluginNotAllowedPrivileged: 不允许使用特权模式
-ErrPluginInvalidLocalVolumeMount: 本地卷挂载路径无效
-ErrPluginEnvVarInVolumeMount: 不允许在挂载路径使用环境变量
+ErrPluginUnmarshalDockerCompose: 无法解析 Docker Compose 文件
+ErrPluginVersionNotSupport: 当前版本不满足要求，需要版本 {{.detail}} 或以上
+ErrRequestTimeout: 请求超时
 ErrTypeNotLogin: 未登录

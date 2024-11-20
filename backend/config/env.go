@@ -75,6 +75,9 @@ var defaultConfig = envConfigSchema{
 	EXTERNAL_NETWORK_IP:      "",
 	EXTERNAL_NETWORK_GATEWAY: "",
 
+	YoudaoAppKey:    "",
+	YoudaoAppSecret: "",
+
 	DB_PREFIX: "",
 }
 
@@ -100,6 +103,9 @@ type envConfigSchema struct {
 	EXTERNAL_NETWORK_NAME    string
 	EXTERNAL_NETWORK_IP      string
 	EXTERNAL_NETWORK_GATEWAY string
+
+	YoudaoAppKey    string
+	YoudaoAppSecret string
 
 	DB_PREFIX string
 }

@@ -12,7 +12,7 @@ import (
 var System SystemConfig
 
 var (
-	Language = []string{language.Chinese.String(), language.English.String()}
+	Language = []string{language.Chinese.String(), language.TraditionalChinese.String(), language.English.String(), language.Korean.String(), language.Japanese.String(), language.German.String(), language.French.String(), language.Indonesian.String()}
 )
 
 type SystemConfig struct {
