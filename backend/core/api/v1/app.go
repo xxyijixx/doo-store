@@ -174,11 +174,11 @@ func (*BaseApi) AppUnInstall(c *gin.Context) {
 	}
 	key := c.Param("key")
 	var req request.AppUnInstall
-	err = helper.CheckBindAndValidate(&req, c)
-	if err != nil {
-		helper.ErrorWith(c, err.Error(), nil)
-		return
-	}
+	// err = helper.CheckBindAndValidate(&req, c)
+	// if err != nil {
+	// 	helper.ErrorWith(c, err.Error(), nil)
+	// 	return
+	// }
 	req.Key = key
 	err = appService.AppUnInstall(dto.ServiceContext{C: c}, req)
 	if err != nil {

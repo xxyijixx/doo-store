@@ -78,6 +78,9 @@ var defaultConfig = envConfigSchema{
 	YoudaoAppKey:    "",
 	YoudaoAppSecret: "",
 
+	IP_START: "",
+	IP_COUNT: 0,
+
 	DB_PREFIX: "",
 }
 
@@ -106,6 +109,9 @@ type envConfigSchema struct {
 
 	YoudaoAppKey    string
 	YoudaoAppSecret string
+
+	IP_START string
+	IP_COUNT int
 
 	DB_PREFIX string
 }

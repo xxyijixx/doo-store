@@ -10,9 +10,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func GenEnv(appKey, containerName string, envs map[string]any, writeFile bool) (envContent, envJson string, err error) {
+func GenEnv(appKey, containerName, ipAddress string, envs map[string]any, writeFile bool) (envContent, envJson string, err error) {
 	envFile := fmt.Sprintf("%s/%s/.env", constant.AppInstallDir, appKey)
 	envContent = fmt.Sprintf("%s=%s\n", "CONTAINER_NAME", containerName)
+	envContent += fmt.Sprintf("%s=%s\n", "IP_ADDRESS", ipAddress)
 	for key, value := range envs {
 		var envValue string
 		switch v := value.(type) {

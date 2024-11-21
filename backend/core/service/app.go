@@ -22,10 +22,12 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/network"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
@@ -63,6 +65,8 @@ type AppInstallProcess struct {
 	containerName string
 	envContent    string
 	req           request.AppInstall
+	ipAddress     string
+	client        docker.Client
 }
 
 func NewAppInstallProcess(ctx dto.ServiceContext, req request.AppInstall) *AppInstallProcess {
@@ -128,6 +132,79 @@ func (p *AppInstallProcess) Check() error {
 	return nil
 }
 
+func (p *AppInstallProcess) DHCP() error {
+	var err error
+	p.client, err = docker.NewClient()
+	if err != nil {
+		return err
+	}
+	client := p.client.GetClient()
+
+	containers, err := client.ContainerList(context.Background(), container.ListOptions{
+		All: true,
+	})
+	if err != nil {
+		log.Info("获取容器列表失败")
+		return err
+	}
+	networks, err := client.NetworkList(context.Background(), network.ListOptions{})
+	if err != nil {
+		log.Info("获取容器网络列表失败")
+		return err
+	}
+	networkID := ""
+	for _, network := range networks {
+		if network.Name == config.EnvConfig.GetNetworkName() {
+			networkID = network.ID
+			break
+		}
+	}
+	if networkID == "" {
+		return errors.New("网络不存在")
+	}
+	var usedIPs []string
+	fmt.Println("容器数量", len(containers))
+	for _, container := range containers {
+		// 获取容器的网络设置
+		for _, network := range container.NetworkSettings.Networks {
+			fmt.Println("容器使用的网络:", network.NetworkID)
+			if network.NetworkID == networkID {
+				// dootask-networks-5d2bc8
+				usedIPs = append(usedIPs, network.IPAddress)
+			}
+		}
+	}
+
+	// 获取一个未使用的 IP 地址
+	getAvailableIP := func(usedIPs []string) (string, error) {
+		// 将子网解析成一个 IP 地址池
+		// 这里简单实现，可以使用更复杂的 IP 地址池库（如 `github.com/yl2chen/cidranger`）来处理
+		ipParts := strings.Split(config.EnvConfig.IP_START, ".")
+		if len(ipParts) != 4 {
+			return "", errors.New("IP 地址格式不正确")
+		}
+		// 分配50-254之间的IP
+		ip, err := strconv.Atoi(ipParts[3])
+		if err != nil {
+			return "", err
+		}
+		for i := ip; i < ip+config.EnvConfig.IP_COUNT; i++ {
+			ip := fmt.Sprintf("%s.%s.%s.%d", ipParts[0], ipParts[1], ipParts[2], i)
+			if !common.InArray(ip, usedIPs) {
+				return ip, nil
+			}
+		}
+
+		return "", errors.New("没有可用的 IP 地址")
+	}
+
+	p.ipAddress, err = getAvailableIP(usedIPs)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // ValidateParam 验证参数
 func (p *AppInstallProcess) ValidateParam() error {
 	var err error
@@ -173,7 +250,7 @@ func (p *AppInstallProcess) ValidateParam() error {
 	p.req.Params[constant.CPUS] = p.req.CPUS
 	p.req.Params[constant.MemoryLimit] = p.req.MemoryLimit
 	var envJson string
-	p.envContent, envJson, err = docker.GenEnv(p.appKey, p.containerName, p.req.Params, false)
+	p.envContent, envJson, err = docker.GenEnv(p.appKey, p.containerName, p.ipAddress, p.req.Params, false)
 	if err != nil {
 		return err
 	}
@@ -189,6 +266,7 @@ func (p *AppInstallProcess) ValidateParam() error {
 		DockerCompose: p.req.DockerCompose,
 		Key:           p.app.Key,
 		Status:        constant.Installing,
+		IpAddress:     p.ipAddress,
 	}
 
 	return nil
@@ -298,6 +376,9 @@ func (*AppService) AppDetailByKey(ctx dto.ServiceContext, key string) (*response
 func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) error {
 	appInstallProcess := NewAppInstallProcess(ctx, req)
 	if err := appInstallProcess.Check(); err != nil {
+		return err
+	}
+	if err := appInstallProcess.DHCP(); err != nil {
 		return err
 	}
 	if err := appInstallProcess.ValidateParam(); err != nil {
@@ -473,11 +554,12 @@ func (*AppService) UpdateParams(ctx dto.ServiceContext, req request.AppInstall) 
 	// TODO 参数校验
 	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
 	containerName := appInstalled.Name
+	ipAddress := appInstalled.IpAddress
 
 	req.Params[constant.CPUS] = req.CPUS
 	req.Params[constant.MemoryLimit] = req.MemoryLimit
 
-	envContent, envJson, err := docker.GenEnv(appKey, containerName, req.Params, false)
+	envContent, envJson, err := docker.GenEnv(appKey, containerName, ipAddress, req.Params, false)
 	if err != nil {
 		log.Info("错误生成环境变量文件", err)
 		return nil, errors.New("修改参数失败")
