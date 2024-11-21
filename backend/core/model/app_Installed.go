@@ -3,6 +3,7 @@ package model
 type AppInstalled struct {
 	BaseModel
 	Name          string `json:"name" gorm:"size:60;not null;default:''"`
+	IpAddress     string `json:"ip_address" gorm:"size:60;not null;default:''"`
 	AppID         int64  `json:"app_id"`
 	AppDetailID   int64  `json:"app_detail_id"`
 	Key           string `json:"key" gorm:"size:60"`

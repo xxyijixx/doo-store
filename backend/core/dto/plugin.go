@@ -63,7 +63,8 @@ func (p *Plugin) GenService() string {
 	serviceContent = append(serviceContent, fmt.Sprintf("%scontainer_name: ${CONTAINER_NAME}", p.getSpaces(2)))
 	// networks:
 	serviceContent = append(serviceContent, fmt.Sprintf("%snetworks:", p.getSpaces(2)))
-	serviceContent = append(serviceContent, fmt.Sprintf("%s- %s", p.getSpaces(3), config.EnvConfig.GetNetworkName()))
+	serviceContent = append(serviceContent, fmt.Sprintf("%s%s:", p.getSpaces(3), config.EnvConfig.GetNetworkName()))
+	serviceContent = append(serviceContent, fmt.Sprintf("%sipv4_address: ${IP_ADDRESS}", p.getSpaces(4)))
 
 	if len(p.Volume) != 0 {
 		serviceContent = append(serviceContent, fmt.Sprintf("%svolumes:", p.getSpaces(2)))
