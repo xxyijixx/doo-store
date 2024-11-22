@@ -93,7 +93,7 @@ export function ProfileForm({
                     setLoading(false); // 请求完成
                 })
                 .catch((_error) => {
-                    setError("请求失败，请稍后重试"); // 错误处理
+                    setError(t("请求失败，请稍后重试")); // 错误处理
                     setLoading(false);
                 });
         }
@@ -108,8 +108,8 @@ export function ProfileForm({
         // 校验表单，确保字段不为空
         const isValid = await form.trigger(); // 校验所有表单字段
         if (!isValid) {
-            console.log("表单校验失败！");
-            setError("请填完整的字段信息！"); // 提示用户填写完整字段
+            console.log(t("表单校验失败！"));
+            setError(t("请填完整的字段信息！")); // 提示用户填写完整字段
             setLoading(false);
             return;
         }
@@ -142,7 +142,7 @@ export function ProfileForm({
             }
         } catch (error) {
             // 捕获网络错误
-            setError("网络错误，请检查网络连接");
+            setError(t("网络错误，请检查网络连接"));
             onFalse(); // 失败时调用回调函数回到drawer组件显示
         } finally {
             setLoading(false); // 请求完成，无论成功或失败都需要关闭加载状态
@@ -164,9 +164,9 @@ export function ProfileForm({
                                 <div className="w-full">
                                 <Input
                                     id={fieldName}
-                                    placeholder="请输入..."
+                                    placeholder={t("请输入...")}
                                     {...form.register(fieldName, {
-                                        required: `${field.label} 不能为空`,
+                                        required: t(`${field.label} 不能为空`),
                                         onChange: (_error) => {
                                             // 触发 onChange 时重新校验（即时校验）
                                             form.trigger(fieldName);

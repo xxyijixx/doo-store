@@ -81,7 +81,7 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
                 })
                 .catch((error ) => {
                     console.log(error);
-                    setError("请求失败，请稍后重试");
+                    setError(t("请求失败，请稍后重试"));
                     
                 });
                 setLoading(false);
@@ -96,7 +96,7 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
         const isValid = await form.trigger(); // 校验所有表单字段
         if (!isValid) {
             console.log(error)
-            setError("请填完整的字段信息！");
+            setError(t("请填完整的字段信息！"));
             setLoading(false);
             return;
         }
@@ -141,7 +141,7 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
             }
         } catch (error) {
             console.log("来咯", error);
-            setError("网络错误，请检查网络连接");
+            setError(t("网络错误，请检查网络连接"));
             onEditFalse();
         } finally {
             setLoading(false);
@@ -159,9 +159,9 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
                             <FormControl>
                                 <Input
                                     id={fieldName}
-                                    placeholder="请输入..."
+                                    placeholder={t("请输入...")}
                                     {...form.register(fieldName, {
-                                        required: `${field.label} 不能为空`,
+                                        required: t(`${field.label} 不能为空`),
                                         onChange: (_e) => form.trigger(fieldName),
                                         onBlur: () => form.trigger(fieldName),
                                     })}
