@@ -19,9 +19,9 @@ watch:
         lsof -i :$(PORT) | awk 'NR!=1 {print $$2}' | xargs kill; \
     fi
 	$(GOCGO) air
-
+# cd web && npm run build && cd ../
 release:
-	cd web && npm run build && cd ../
+	
 	OCKER_BUILDKIT=1 docker buildx build --push -t hitosea2020/pluginstore:0.0.1 --platform linux/amd64,linux/arm64 .
 
 # cd web && npm run build && cd ../

@@ -24,6 +24,9 @@ func Routers() *gin.Engine {
 	docs.SwaggerInfo.BasePath = "/api/v1"
 
 	Router.Static("/store", "./web/dist")
+	// Router.Use()
+	Router.Use(middleware.Base())
+	Router.Use(i18n.GinI18nLocalize())
 
 	// t, err := template.New("index").Parse(string(web.IndexByte))
 	// if err != nil {
@@ -35,8 +38,7 @@ func Routers() *gin.Engine {
 	swaggerRouter.GET("/*any", gs.WrapHandler(swaggerFiles.Handler))
 
 	PrivateGroup := Router.Group("/api/v1")
-	PrivateGroup.Use(middleware.Base())
-	PrivateGroup.Use(i18n.GinI18nLocalize())
+
 	for _, router := range entryRouter.RouterGroupApp {
 		router.InitRouter(PrivateGroup)
 	}
@@ -50,7 +52,7 @@ func Routers() *gin.Engine {
 			return
 		}
 		if strings.HasPrefix(urlPath, "/src/assets") {
-			assets := strings.Replace(urlPath, "/store/src/assets", "/assets", -1)
+			assets := strings.Replace(urlPath, "/src/assets", "/assets", -1)
 			c.FileFromFS("src"+assets, http.FS(web.SrcAssets))
 			return
 		}
@@ -58,7 +60,8 @@ func Routers() *gin.Engine {
 			c.FileFromFS("/favicon.ico", http.FS(web.Favicon))
 			return
 		}
-		c.JSON(http.StatusNotFound, gin.H{})
+		// c.String(http.StatusNotFound, )
+		http.NotFound(c.Writer, c.Request)
 	})
 
 	// for _, router := range entryRouter.WebRouterApp {

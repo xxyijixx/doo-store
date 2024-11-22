@@ -21,7 +21,7 @@ import i18n from './i18n.ts'
 
 
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById('doo-store')!).render(
   <StrictMode>
     <I18nextProvider i18n={i18n}>
   
