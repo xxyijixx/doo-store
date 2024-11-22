@@ -1,6 +1,7 @@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { EditForm } from "@/components/drawer/editdraform";
 import { Item } from "@/type.d/common";
+import { useTranslation } from "react-i18next";
 
 interface EditDrawerProps {
     isOpen: boolean;
@@ -17,11 +18,13 @@ function EditDrawer ({ isOpen, onClose, app }: EditDrawerProps){
         console.log('editFalse');
     }
 
+    const { t } = useTranslation();
+
     return (
         <Sheet open={isOpen} onOpenChange={onClose}>
             <SheetContent className='lg:overflow-y-hidden md:overflow-hidden overflow-auto'>
                 <SheetHeader>
-                    <SheetTitle className='ml-9 -mt-1.5 text-gray-700'>参数修改</SheetTitle>
+                    <SheetTitle className='ml-9 -mt-1.5 text-gray-700'>{t('参数修改')}</SheetTitle>
                 </SheetHeader>
                 <SheetDescription className='pt-3'>
                 </SheetDescription>

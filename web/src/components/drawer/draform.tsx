@@ -19,6 +19,7 @@ import { HighConfig } from "@/components/drawer/highconfig";
 import { Item } from "@/type.d/common";
 import { useEffect, useState } from "react";
 import * as http from "@/api/modules/fouceinter";
+import { useTranslation } from "react-i18next";
 
 interface ProfileFormProps {
     app: Item; // 接收 app 数据
@@ -45,6 +46,8 @@ export function ProfileForm({
     onInstallSuccess,
     onFalse,
 }: ProfileFormProps) {
+
+    const { t } = useTranslation();
     const [dockerCompose, setDockerCompose] = useState<string>(""); // 存储docker_compose内容
     const [cpuLimit, setCpuLimit] = useState<string>("1"); // 默认值为 1
     const [memoryLimit, setMemoryLimit] = useState<string>("0"); // 默认值为 120M
@@ -184,7 +187,7 @@ export function ProfileForm({
                 <FormItem>
                     <div className="flex items-center space-x-2">
                         <Checkbox id="store" />
-                        <Label htmlFor="store">默认储存</Label>
+                        <Label htmlFor="store">{t('默认储存')}</Label>
                     </div>
                 </FormItem>
 
@@ -208,11 +211,11 @@ export function ProfileForm({
                             onClick={handleRestart}
                             disabled={loading} //防止用户在请求期间重复点击按钮,没有这个条件影响局部加载，会全局加载覆盖出现问题
                         >
-                            重启
+                            {t('安装')}
                         </Button>
 
                         <SheetClose className="cursor-pointer border border-input rounded-md bg-transparent text-sm text-gray-600 shadow-sm hover:bg-white hover:border-theme-color/85 hover:text-theme-color/85 h-9 px-5 py-2">
-                            取消
+                            {t('取消')}
                         </SheetClose>
 
                     

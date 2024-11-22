@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Item } from "@/type.d/common";
+import { useTranslation } from "react-i18next";
 
 interface HighConfigProps {
     app: Item;  // 接收 app 数据
@@ -26,6 +27,8 @@ export function HighConfig(
         setCpuLimit, 
         setMemoryLimit, 
     } : HighConfigProps) {
+    
+    const { t } = useTranslation();
     const [isAdvancedSettingsEnabled, setAdvancedSettingsEnabled] = useState(false);
 
 
@@ -43,7 +46,7 @@ export function HighConfig(
                     onCheckedChange={handleCheckboxChange}  //处理
                     className="mt-1"
                 />
-                <Label>高级设置</Label>
+                <Label>{t('高级设置')}</Label>
             </div>
             {isAdvancedSettingsEnabled && ( // 根据状态显示或隐藏文本区域
                 <>
@@ -55,7 +58,7 @@ export function HighConfig(
                         />
                     <div className="flex justify-around w-full">
                                 <div className="w-1/2 px-2">
-                                    <Label htmlFor='input'>CPU限制：</Label>
+                                    <Label htmlFor='input'>{t('CPU限制：')}</Label>
                                     <Input 
                                         className='sm:w-1/2 lg:w-full'
                                         id="cpuLimit"
@@ -65,7 +68,7 @@ export function HighConfig(
                                         />
                                 </div>
                                 <div className="w-1/2 px-2">
-                                    <Label htmlFor='input'>内存限制：</Label>
+                                    <Label htmlFor='input'>{t('内存限制：')}</Label>
                                     <Input 
                                         className='sm:w-1/2 lg:w-full'
                                         id="memoryLimit"

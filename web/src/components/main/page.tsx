@@ -15,6 +15,7 @@ import { Item } from "@/type.d/common";
 import { motion, AnimatePresence } from "framer-motion"; // 引入 framer-motion
 import * as http from '@/api/modules/fouceinter'
 import { useTokenStore } from "@/store/ TokenContext";
+import { useTranslation } from "react-i18next";
 
 const fetchAppsData = async (tab: string, className = '', currentPage: number, pageSize = 9, query: string = '') => {
 
@@ -105,6 +106,7 @@ handleMicroData();
 
 function MainPage() {
 
+    const { t } = useTranslation();
 
     const [apps, setApps] = useState<Item[]>([]);
     const [installedApps, setInstalledApps] = useState<Item[]>([]);  // 存储已安装的应用
@@ -191,14 +193,14 @@ function MainPage() {
                                     variant={activeTab === "all" ? "common" : "default"}
                                     onClick={() => handleTabChange("all")}
                                 >
-                                    ALL
+                                    {t('全部')}
                                 </Button>
                                 <Button
                                     className="text-md"
                                     variant={activeTab === "installed" ? "common" : "default"}
                                     onClick={() => handleTabChange("installed")}
                                 >
-                                    Installed
+                                    {t('已安装')}
                                 </Button>
                             </motion.div>
                         </>
@@ -231,31 +233,31 @@ function MainPage() {
                                             variant={selectedClass === "allson" ? "common" : "default"}
                                             onClick={() => setSelectedClass("allson")}
                                         >
-                                            ALL
+                                            {t('全部')}
                                         </Button>
                                         <Button
                                             variant={selectedClass === "database" ? "common" : "default"}
                                             onClick={() => setSelectedClass("database")}
                                         >
-                                            database
+                                            {t('数据库')}
                                         </Button>
                                         <Button
                                             variant={selectedClass === "oss" ? "common" : "default"}
                                             onClick={() => setSelectedClass("oss")}
                                         >
-                                            oss
+                                            {t('oss')}
                                         </Button>
                                         <Button
                                             variant={selectedClass === "tool" ? "common" : "default"}
                                             onClick={() => setSelectedClass("tool")}
                                         >
-                                            tool
+                                            {t('tool')}
                                         </Button>
                                         <Button
                                             variant={selectedClass === "note" ? "common" : "default"}
                                             onClick={() => setSelectedClass("note")}
                                         >
-                                            note
+                                            {t('note')}
                                         </Button>
                                     </motion.div>
                                 </div>

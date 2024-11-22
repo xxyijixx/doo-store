@@ -17,6 +17,7 @@ import { Item } from "@/type.d/common";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Label } from '@/components/ui/label';
 import * as http from "@/api/modules/fouceinter";
+import { useTranslation } from "react-i18next";
 
 interface AlertLogDemoProps {
     isLogOpen: boolean;
@@ -31,18 +32,20 @@ interface AlertLogHaveProps {
 }
 
 export function AlertLogDemo({ isOpen, onClose }: AlertLogDemoProps) {
+    const { t } = useTranslation();
+
     return (
         <AlertDialog open={isOpen} onOpenChange={onClose}>
             <AlertDialogContent >
                 <AlertDialogHeader>
-                    <AlertDialogTitle>tips</AlertDialogTitle>
+                    <AlertDialogTitle>{t('提示')}</AlertDialogTitle>
                     <AlertDialogDescription>
-                        You can't click on it until it's activated.<br />
-                        Please run the plugin first！
+                        {t('不能在未启动时点击日志按钮！')}<br />
+                            {t('请先运行插件！')}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel onClick={onClose}>返回</AlertDialogCancel>
+                    <AlertDialogCancel onClick={onClose}>{t('返回')}</AlertDialogCancel>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
@@ -50,6 +53,9 @@ export function AlertLogDemo({ isOpen, onClose }: AlertLogDemoProps) {
 }
 
 export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
+
+    const { t } = useTranslation();
+
     const [logInfo, setLogInfo] = useState('');
     const codemirrorRef = useRef<ReactCodeMirrorRef>(null);  //创建对 Codemirror 编辑器的引用，便于侧边滚动到最后
     const [logSearch, setLogSearch] = useState({
@@ -121,7 +127,7 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                 </SheetDescription>
                 <div className='flex items-center justify-between'>
                     <div>
-                        <Label className='ml-1'>Time Range</Label>
+                        <Label className='ml-1'>{t('时间范围')}</Label>
                         <Select value={logSearch.modeIndex.toString()} onValueChange={(value) => handleModeChange(Number(value))}>
                             <SelectTrigger className="lg:w-52 md:w-52 w-28 ">
                                 <SelectValue>
@@ -141,7 +147,7 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
 
                     <div>
                         {/* 条数选择 */}
-                        <Label className='ml-1'>Lines</Label>
+                        <Label className='ml-1'>{t('条数')}</Label>
                         <Select 
                             value={logSearch.tail.toString()} 
                             onValueChange={(value) => setLogSearch(prev => ({ ...prev, tail: Number(value) }))}
@@ -161,7 +167,7 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                 </div>
 
                 <div className="py-4">
-                    <p className="text-gray-500">Log part</p>
+                    <p className="text-gray-500">{t('日志数据')}</p>
                     {/* 日志显示区域 */}
                     <Codemirror
                         ref={codemirrorRef}

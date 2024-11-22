@@ -13,6 +13,7 @@ import { EditHighConfig } from '@/components/drawer/edithighconfig';
 import { Item} from "@/type.d/common";
 import { useEffect, useState } from "react";
 import * as http from "@/api/modules/fouceinter"
+import { useTranslation } from "react-i18next";
 
 interface EditProps {
     app: Item;  // 接收 app 数据
@@ -35,6 +36,7 @@ type FormValues = {
 };
 
 export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
+    const { t } = useTranslation();
     const [dockerCompose, setDockerCompose] = useState<string>("");  // 存储docker_compose内容
     const [cpuLimit, setCpuLimit] = useState<string>("1");  // 默认值为 1
     const [memoryLimit, setMemoryLimit] = useState<string>("0");  // 默认值为 120M
@@ -173,7 +175,7 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
                 <FormItem>
                     <div className="flex items-center space-x-2">
                         <Checkbox id="store" />
-                        <Label htmlFor="store">默认储存</Label>
+                        <Label htmlFor="store">{t('默认储存')}</Label>
                     </div>
                 </FormItem>
 
@@ -195,10 +197,10 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
                         variant="surely"
                         onClick={handleRestart}
                         disabled={loading}
-                        >重启</Button>
+                        >{t('重启')}</Button>
                     <SheetClose
                         className="cursor-pointer border border-input rounded-md bg-transparent text-sm text-gray-600 shadow-sm hover:bg-white hover:border-theme-color/85 hover:text-theme-color/85 h-9 px-5 py-2"
-                    >取消</SheetClose>
+                    >{t('取消')}</SheetClose>
                 </div>
             </form>
         </Form>

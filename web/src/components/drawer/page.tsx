@@ -11,6 +11,7 @@ import  { useState } from "react";
 import { Item } from "@/type.d/common";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from '../ui/toaster';
+import { useTranslation } from "react-i18next";
 
 interface DrawerProps {
     status: string;
@@ -21,7 +22,7 @@ interface DrawerProps {
 
 function Drawer({ status,app}: DrawerProps) {
 
-
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const [buttonText, setButtonText] = useState(status === 'InUse' ? '已安装' : '安装'); // 用状态管理按钮文字
     const [currentStatus, setCurrentStatus] = useState(status); // 用状态管理当前的安装状态，便于控制按钮样式
@@ -91,7 +92,7 @@ function Drawer({ status,app}: DrawerProps) {
             </SheetTrigger>
             <SheetContent className='lg:overflow-y-hidden md:overflow-hidden overflow-auto '>
                 <SheetHeader>
-                    <SheetTitle className='ml-9 -mt-1.5 text-gray-700'>返回</SheetTitle>
+                    <SheetTitle className='ml-9 -mt-1.5 text-gray-700'>{t('返回')}</SheetTitle>
                     <SheetDescription className='pt-3'>
                     </SheetDescription>
                     <ProfileForm 

@@ -11,6 +11,7 @@ import {
 import { Item } from "@/type.d/common"
 import { useState } from "react"
 import * as http from "@/api/modules/fouceinter"
+import { useTranslation } from "react-i18next"
 
 interface AlertDialogDemoProps {
     app: Item
@@ -20,6 +21,7 @@ interface AlertDialogDemoProps {
 }
 
 export function AlertDialogDemo({ isOpen, onClose, app, onUninstall }: AlertDialogDemoProps) {
+    const { t } = useTranslation()
     const [isLoading, setIsLoading] = useState(false)
 
     // 卸载应用
@@ -59,9 +61,9 @@ export function AlertDialogDemo({ isOpen, onClose, app, onUninstall }: AlertDial
         <AlertDialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>卸载</AlertDialogTitle>
+                    <AlertDialogTitle>{t('卸载')}</AlertDialogTitle>
                     <AlertDialogDescription>
-                        即将执行卸载操作，您是否确定要卸载此 {app.name} 插件吗？
+                        {t('即将执行卸载操作，您是否确定要卸载此')} {app.name} {t('插件吗?')}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -71,7 +73,7 @@ export function AlertDialogDemo({ isOpen, onClose, app, onUninstall }: AlertDial
                     >
                         {isLoading ? "卸载中..." : "确认"}
                     </AlertDialogAction>
-                    <AlertDialogCancel onClick={onClose}>取消</AlertDialogCancel>
+                    <AlertDialogCancel onClick={onClose}>{t('取消')}</AlertDialogCancel>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>

@@ -13,6 +13,7 @@ import { AlertLogDemo, AlertLogHave } from "@/components/tabsnav/logalert"
 import EditDrawer from "@/components/drawer/editpage"
 import { Item } from "@/type.d/common"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useTranslation } from "react-i18next"
 
 interface InStalledBtnProps {
     app: Item;
@@ -20,6 +21,9 @@ interface InStalledBtnProps {
 }
 
 export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
+
+    const { t } = useTranslation()
+
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [isLogDemoOpen, setIsLogDemoOpen] = useState(false)
     const [isLogHaveOpen, setIsLogHaveOpen] = useState(false)
@@ -106,7 +110,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                             className={isDisable ? "bg-gray-500 text-white cursor-not-allowed hover:bg-gray-500" : ""}
                             onClick={handleLogClick}
                         >
-                            日志
+                            {t('日志')}
                         </Button>
                         {isLogDemoOpen && <AlertLogDemo isOpen={isLogDemoOpen} onClose={closeLog} isLogOpen={false} />}
                         {isLogHaveOpen && <AlertLogHave isOpen={isLogHaveOpen} onClose={closeLogHave} isLogOpen={false} app={app} />}
@@ -118,7 +122,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                             className={isDisable ? "bg-gray-500 text-white cursor-not-allowed hover:bg-gray-500" : ""}
                             
                             >
-                            参数
+                            {t('参数')}
                         </Button>
 
                         <Button variant="common" onClick={handleToggleStarted} className={isDisable ? "bg-theme-color text-white" : ""}>
@@ -126,7 +130,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                         </Button>
 
                         <Button variant="common" onClick={openDialog}>
-                            卸载
+                            {t('卸载')}
                         </Button>
                         <AlertDialogDemo 
                             isOpen={isDialogOpen} 
