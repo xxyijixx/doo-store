@@ -4,6 +4,7 @@ import { MagnifyingGlassIcon } from "@radix-ui/react-icons"
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button'
 // import { debounce } from "lodash"; 
+import { useTranslation } from "react-i18next";
 
 interface UniSearchProps {
     onSearch: (query: string) => void; // 父组件传递的搜索函数
@@ -11,6 +12,7 @@ interface UniSearchProps {
 }
 
 const UniSearch: React.FC<UniSearchProps> = ({ onSearch }) => {
+    const { t } = useTranslation();
     const [query, setQuery] = useState(""); // 搜索框内容
     const [error, setError] = useState<string>(""); // 错误提示文字
 
@@ -27,7 +29,7 @@ const UniSearch: React.FC<UniSearchProps> = ({ onSearch }) => {
             setQuery(value);
             setError(""); // 如果符合要求，清除错误提示
         } else {
-            setError("请输入中文、英文或数字");
+            setError(t("请输入中文、英文或数字"));
         }
     };
 
@@ -44,7 +46,7 @@ const UniSearch: React.FC<UniSearchProps> = ({ onSearch }) => {
         if (chregex.test(query) && !error) {
             onSearch(query); // 调用父组件传递的搜索函数
         } else {
-            setError("请输入中文、英文或数字"); // 如果不符合 chregex，设置错误信息
+            setError(t("请输入中文、英文或数字")); // 如果不符合 chregex，设置错误信息
         }
     };
 
@@ -55,7 +57,7 @@ const UniSearch: React.FC<UniSearchProps> = ({ onSearch }) => {
                 <div className="w-screen">
                     <Input
                         type="text"
-                        placeholder="请输入中文、英文或数字..."
+                        placeholder={t("请输入中文、英文或数字...")}
                         value={query}
                         onChange={handleChange}
                         onKeyDown={handleKeyDown} // 键盘按下时触发（处理回车提交）

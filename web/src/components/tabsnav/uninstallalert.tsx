@@ -50,8 +50,8 @@ export function AlertDialogDemo({ isOpen, onClose, app, onUninstall }: AlertDial
                 alert(response.msg) // 异常情况，显示错误信息
             }
         } catch (error) {
-            console.error("卸载应用失败:", error)
-            alert("卸载失败")
+            console.error(t("卸载应用失败:"), error)
+            alert(t("卸载失败"))
         } finally {
             setIsLoading(false)
         }
@@ -71,7 +71,7 @@ export function AlertDialogDemo({ isOpen, onClose, app, onUninstall }: AlertDial
                         onClick={handleUninstall} // 在确认按钮上调用 handleUninstall
                         disabled={isLoading} // 如果正在加载，禁用按钮
                     >
-                        {isLoading ? "卸载中..." : "确认"}
+                        {isLoading ? t("卸载中...") : t("确认")}
                     </AlertDialogAction>
                     <AlertDialogCancel onClick={onClose}>{t('取消')}</AlertDialogCancel>
                 </AlertDialogFooter>

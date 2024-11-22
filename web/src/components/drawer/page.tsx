@@ -24,7 +24,7 @@ function Drawer({ status,app}: DrawerProps) {
 
     const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
-    const [buttonText, setButtonText] = useState(status === 'InUse' ? '已安装' : '安装'); // 用状态管理按钮文字
+    const [buttonText, setButtonText] = useState(status === 'InUse' ? t('已安装') : t('安装')); // 用状态管理按钮文字
     const [currentStatus, setCurrentStatus] = useState(status); // 用状态管理当前的安装状态，便于控制按钮样式
     const { toast } = useToast();
 
@@ -49,11 +49,11 @@ function Drawer({ status,app}: DrawerProps) {
     const handleInstallSuccess = () => {
         // alert("安装成功");
         toast({
-            title: "安装成功",
-            description: "应用已成功安装",
+            title: t("安装成功"),
+            description: t("应用已成功安装"),
             variant: "default",
         });
-        setButtonText("已安装"); // 安装成功后更新按钮文字
+        setButtonText(t("已安装")); // 安装成功后更新按钮文字
         setCurrentStatus('InUse'); // 更新状态为 "InUse"（已安装），以改变按钮样式
         setIsOpen(false); // 关闭侧边栏
         
@@ -63,8 +63,8 @@ function Drawer({ status,app}: DrawerProps) {
     const handleInstallFalse = () => {
         // alert("安装失败,请重试~");
         toast({
-            title: "安装失败",
-            description: "安装过程中发生错误，请重试。",
+            title: t("安装失败"),
+            description: t("安装过程中发生错误，请重试。"),
             variant: "destructive", // 失败提示通常使用 "destructive" 样式
         });
         setIsOpen(false); // 关闭侧边栏

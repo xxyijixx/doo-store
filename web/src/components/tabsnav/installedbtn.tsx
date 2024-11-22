@@ -83,7 +83,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                                         : "ml-6  border-2 rounded-full border-theme-color py-1 px-2 text-sm text-theme-color"
                                 }
                             >
-                                {isDisable ? "已停止" : "已运行"}
+                                {isDisable ? t("已停止") : t("已运行")}
                             </span>
                         </div>
                     )}
@@ -126,7 +126,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                         </Button>
 
                         <Button variant="common" onClick={handleToggleStarted} className={isDisable ? "bg-theme-color text-white" : ""}>
-                            {isDisable ? "启用" : "停止"}
+                            {isDisable ? t("启用") : t("停止")}
                         </Button>
 
                         <Button variant="common" onClick={openDialog}>
