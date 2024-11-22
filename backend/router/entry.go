@@ -17,4 +17,8 @@ func RouterGroups() []CommonRouter {
 	return commonGroups()
 }
 
+var WebRouterApp = []CommonRouter{
+	&WebRouter{},
+}
+
 var RouterGroupApp = RouterGroups()
