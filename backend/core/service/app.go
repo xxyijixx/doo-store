@@ -174,16 +174,18 @@ func (p *AppInstallProcess) DHCP() error {
 			}
 		}
 	}
+	allInstalled, _ := repo.AppInstalled.Select(repo.AppInstalled.IpAddress).Find()
+	for _, installed := range allInstalled {
+		usedIPs = append(usedIPs, installed.IpAddress)
+	}
 
 	// 获取一个未使用的 IP 地址
 	getAvailableIP := func(usedIPs []string) (string, error) {
-		// 将子网解析成一个 IP 地址池
-		// 这里简单实现，可以使用更复杂的 IP 地址池库（如 `github.com/yl2chen/cidranger`）来处理
+
 		ipParts := strings.Split(config.EnvConfig.IP_START, ".")
 		if len(ipParts) != 4 {
 			return "", errors.New("IP 地址格式不正确")
 		}
-		// 分配50-254之间的IP
 		ip, err := strconv.Atoi(ipParts[3])
 		if err != nil {
 			return "", err

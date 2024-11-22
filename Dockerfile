@@ -24,7 +24,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -o main main.go
 
 
 # 运行时镜像,基于dind
-FROM docker:latest
+FROM docker:24.0.8-alpine3.19
 
 # 安装 tzdata 包
 RUN apk add --no-cache tzdata
@@ -45,4 +45,3 @@ RUN chmod +x /app/main
 CMD ["sh", "-c", "/app/main -m"]
 
 EXPOSE 8080
-EXPOSE 8081
