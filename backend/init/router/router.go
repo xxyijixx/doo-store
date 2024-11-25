@@ -4,10 +4,13 @@ import (
 	"doo-store/backend/i18n"
 	entryRouter "doo-store/backend/router"
 	"doo-store/backend/router/middleware"
+	"doo-store/backend/utils/common"
 	"doo-store/docs"
 	"doo-store/web"
 	"fmt"
+	"html/template"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -23,17 +26,16 @@ func Routers() *gin.Engine {
 	Router = gin.Default()
 	docs.SwaggerInfo.BasePath = "/api/v1"
 
-	Router.Static("/store", "./web/dist")
 	// Router.Use()
 	Router.Use(middleware.Base())
 	Router.Use(i18n.GinI18nLocalize())
 
-	// t, err := template.New("index").Parse(string(web.IndexByte))
-	// if err != nil {
-	// 	common.PrintError(fmt.Sprintf("模板解析失败: %s", err.Error()))
-	// 	os.Exit(1)
-	// }
-	// Router.SetHTMLTemplate(t)
+	t, err := template.New("index").Parse(string(web.IndexByte))
+	if err != nil {
+		common.PrintError(fmt.Sprintf("模板解析失败: %s", err.Error()))
+		os.Exit(1)
+	}
+	Router.SetHTMLTemplate(t)
 	swaggerRouter := Router.Group("swagger")
 	swaggerRouter.GET("/*any", gs.WrapHandler(swaggerFiles.Handler))
 
@@ -43,16 +45,15 @@ func Routers() *gin.Engine {
 		router.InitRouter(PrivateGroup)
 	}
 
-	Router.NoRoute(func(c *gin.Context) {
+	Router.Any("/store/*path", func(c *gin.Context) {
 		urlPath := c.Request.URL.Path
-		fmt.Println("获取当前的UrlPath", urlPath)
-		if strings.HasPrefix(urlPath, "/assets") {
-			assets := strings.Replace(urlPath, "/assets", "/assets", -1)
+		if strings.HasPrefix(urlPath, "/store/assets") {
+			assets := strings.Replace(urlPath, "/store/assets", "/assets", -1)
 			c.FileFromFS("dist"+assets, http.FS(web.Assets))
 			return
 		}
-		if strings.HasPrefix(urlPath, "/src/assets") {
-			assets := strings.Replace(urlPath, "/src/assets", "/assets", -1)
+		if strings.HasPrefix(urlPath, "/store/src/assets") {
+			assets := strings.Replace(urlPath, "/store/src/assets", "/assets", -1)
 			c.FileFromFS("src"+assets, http.FS(web.SrcAssets))
 			return
 		}
@@ -60,13 +61,12 @@ func Routers() *gin.Engine {
 			c.FileFromFS("/favicon.ico", http.FS(web.Favicon))
 			return
 		}
-		// c.String(http.StatusNotFound, )
-		http.NotFound(c.Writer, c.Request)
+		c.HTML(http.StatusOK, "index", gin.H{
+			"CODE": "",
+			"MSG":  "",
+		})
 	})
 
-	// for _, router := range entryRouter.WebRouterApp {
-	// 	router.InitRouter(Router.Group("/store"))
-	// }
-
+	// 页面输出
 	return Router
 }

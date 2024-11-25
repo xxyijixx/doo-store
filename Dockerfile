@@ -39,8 +39,6 @@ ENV ENV=prod
 # 复制构建好的二进制文件
 COPY --from=builder /app/main .
 
-COPY web/dist ./web/dist
-
 RUN chmod +x /app/main
 
 # 指定默认命令

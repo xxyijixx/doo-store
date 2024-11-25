@@ -91,7 +91,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                     {isLoading ? (
                         <Skeleton className="h-4 w-56" />
                     ) : (
-                        <p className="text-sm line-clamp-3 min-h-[63px] leading-[21px]">{app.description || "No description available"}</p>
+                        <p className="text-sm line-clamp-3 min-h-[63px] leading-[21px]">{app.description || t("No description available")}</p>
                     )}
                 </CardDescription>
             </CardContent>

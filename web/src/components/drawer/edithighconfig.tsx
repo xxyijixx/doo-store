@@ -53,7 +53,7 @@ export function EditHighConfig(
                 <>
                     <Textarea 
                         className="resize-none" 
-                        placeholder="输入高级设置..."
+                        placeholder={t("输入高级设置...")}
                         value={dockerCompose} // 将返回的数据填充到textarea
                         onChange={(e) => setDockerCompose(e.target.value)} // 如果需要编辑
                         />

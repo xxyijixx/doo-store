@@ -11,8 +11,5 @@ var SrcAssets embed.FS
 //go:embed dist/index.html
 var IndexByte []byte
 
-//go:embed dist/index.html
-var Index embed.FS
-
 // go:embed favicon.ico
 var Favicon embed.FS

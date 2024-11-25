@@ -4,6 +4,7 @@ import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  base: "/store",
   server: {
     host: '0.0.0.0',
     hmr:false,
