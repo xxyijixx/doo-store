@@ -1,14 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-    AlertDialog,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import Codemirror, {ReactCodeMirrorRef} from "@uiw/react-codemirror";
 import { javascript } from '@codemirror/lang-javascript';
 import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from "@/components/ui/select";
@@ -19,37 +10,11 @@ import { Label } from '@/components/ui/label';
 import * as http from "@/api/modules/fouceinter";
 import { useTranslation } from "react-i18next";
 
-interface AlertLogDemoProps {
-    isLogOpen: boolean;
-    isOpen: boolean;
-    onClose: () => void;
-}
 interface AlertLogHaveProps {
     isLogOpen: boolean;
     isOpen: boolean;
     onClose: () => void;
     app: Item;
-}
-
-export function AlertLogDemo({ isOpen, onClose }: AlertLogDemoProps) {
-    const { t } = useTranslation();
-
-    return (
-        <AlertDialog open={isOpen} onOpenChange={onClose}>
-            <AlertDialogContent >
-                <AlertDialogHeader>
-                    <AlertDialogTitle>{t('提示')}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        {t('不能在未启动时点击日志按钮！')}<br />
-                            {t('请先运行插件！')}
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel onClick={onClose}>{t('返回')}</AlertDialogCancel>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
-    )
 }
 
 export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {

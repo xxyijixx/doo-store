@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '0.0.0.0',
-    hmr:false,
+    hmr:true,
     proxy: {
       '/api': {
         target: 'http://192.168.31.214:8080',

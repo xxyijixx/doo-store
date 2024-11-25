@@ -17,6 +17,7 @@ import * as http from '@/api/modules/fouceinter'
 import { useTokenStore } from "@/store/ TokenContext";
 import { useTranslation } from "react-i18next";
 
+
 const fetchAppsData = async (tab: string, className = '', currentPage: number, pageSize = 9, query: string = '') => {
 
     const p = {
@@ -173,11 +174,11 @@ function MainPage() {
     return (
         <>
             <AnimatePresence mode="wait">
-                <div key="b1" className="flex lg:-space-x-1 ">
+                <div key="b1" className="flex lg:-space-x-1">
                     {loading ? (
                         <div key="b11" className="flex -space-x-1">
-                            <Skeleton className="h-10 w-24" />
-                            <Skeleton className="h-10 w-24" />
+                            <Skeleton className="h-10 w-24 bg-transparent border-b-2 mb-3" />
+                            <Skeleton className="h-10 w-24 bg-transparent border-b-2 mb-3" />
                         </div>
                     ) : (
                         <>
@@ -190,18 +191,19 @@ function MainPage() {
                             >
                                 <Button
                                     className="text-md"
-                                    variant={activeTab === "all" ? "common" : "default"}
+                                    variant={activeTab === "all" ? "combar" : "defbar"}
                                     onClick={() => handleTabChange("all")}
                                 >
                                     {t('全部')}
                                 </Button>
                                 <Button
                                     className="text-md"
-                                    variant={activeTab === "installed" ? "common" : "default"}
+                                    variant={activeTab === "installed" ? "combar" : "defbar"}
                                     onClick={() => handleTabChange("installed")}
                                 >
                                     {t('已安装')}
                                 </Button>
+    
                             </motion.div>
                         </>
                     )}
@@ -230,34 +232,34 @@ function MainPage() {
                                         transition={{ duration: 1 }}
                                     >
                                         <Button
-                                            variant={selectedClass === "allson" ? "common" : "default"}
+                                            variant={selectedClass === "allson" ? "combarson" : "defbarson"}
                                             onClick={() => setSelectedClass("allson")}
                                         >
                                             {t('全部')}
                                         </Button>
                                         <Button
-                                            variant={selectedClass === "database" ? "common" : "default"}
+                                            variant={selectedClass === "database" ? "combarson" : "defbarson"}
                                             onClick={() => setSelectedClass("database")}
                                         >
                                             {t('数据库')}
                                         </Button>
                                         <Button
-                                            variant={selectedClass === "oss" ? "common" : "default"}
+                                            variant={selectedClass === "oss" ? "combarson" : "defbarson"}
                                             onClick={() => setSelectedClass("oss")}
                                         >
-                                            {t('oss')}
+                                            {t('Oss')}
                                         </Button>
                                         <Button
-                                            variant={selectedClass === "tool" ? "common" : "default"}
+                                            variant={selectedClass === "tool" ? "combarson" : "defbarson"}
                                             onClick={() => setSelectedClass("tool")}
                                         >
-                                            {t('tool')}
+                                            {t('Tool')}
                                         </Button>
                                         <Button
-                                            variant={selectedClass === "note" ? "common" : "default"}
+                                            variant={selectedClass === "note" ? "combarson" : "defbarson"}
                                             onClick={() => setSelectedClass("note")}
                                         >
-                                            {t('note')}
+                                            {t('Note')}
                                         </Button>
                                     </motion.div>
                                 </div>
@@ -315,22 +317,21 @@ function MainPage() {
                                         transition={{ duration: 0.7 }}
                                     >
 
-                                        <Card key={app.id} className="lg:w-auto   md:w-auto w-auto lg:h-[200px] my-2">
-                                            <CardContent className="flex justify-start space-x-4 mt-9">
+                                        <Card key={app.id} className="lg:w-auto   md:w-auto w-auto lg:h-[150px] my-1 mx-1">
+                                            <CardContent className="flex justify-start space-x-5 mt-6">
                                                 <Avatar className="my-auto size-10">
                                                     <AvatarImage src={app.icon} />
                                                     <AvatarFallback>loading</AvatarFallback>
                                                 </Avatar>
                                                 <CardDescription className="space-y-1 text-left">
-                                                    <h1 className="text-lg font-medium text-slate-900 dark:text-white">{app.name}</h1>
-                                                    <p className="text-sm line-clamp-3 min-h-[63px] ">{app.description || "No description available"}</p>
-
-
+                                                    <h1 className="text-xl font-semibold text-slate-900 dark:text-white">{app.name}</h1>
+                                                    <p className="text-base line-clamp-2 min-h-[42px] pt-1">{app.description || "No description available"}</p>
                                                 </CardDescription>
+                                                <CardFooter className="flex justify-end pr-1">
+                                                    <Drawer status={app.status} isOpen={false} app={app} loadData={loadData} />
+                                                </CardFooter>
                                             </CardContent>
-                                            <CardFooter className="flex justify-end">
-                                                <Drawer status={app.status} isOpen={false} app={app} loadData={loadData} />
-                                            </CardFooter>
+                                            
                                         </Card>
                                     </motion.div>
                                 ))
@@ -350,7 +351,7 @@ function MainPage() {
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.5 }}
                         >
-                            <div className=" grid gap-4 m-1 grid-cols-1 md:grid-cols-1 lg:grid-cols-2">
+                            <div className=" grid gap-4 m-1 grid-cols-1 md:grid-cols-1 lg:grid-cols-3">
                                 {loading ? (
                                     <div></div>
                                 ) : (

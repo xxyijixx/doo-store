@@ -9,11 +9,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useState } from "react"
 import { AlertDialogDemo } from "@/components/tabsnav/uninstallalert"
 import { LoadingOverlay } from "@/components/tabsnav/loading"
-import { AlertLogDemo, AlertLogHave } from "@/components/tabsnav/logalert"
+import {  AlertLogHave } from "@/components/tabsnav/logalert"
 import EditDrawer from "@/components/drawer/editpage"
 import { Item } from "@/type.d/common"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslation } from "react-i18next"
+import { FalseToaster } from '@/components/ui/toaster'
+import { useToast } from "@/hooks/use-toast";
 
 interface InStalledBtnProps {
     app: Item;
@@ -23,16 +25,14 @@ interface InStalledBtnProps {
 export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
 
     const { t } = useTranslation()
+    const { toast } = useToast();
 
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const [isLogDemoOpen, setIsLogDemoOpen] = useState(false)
     const [isLogHaveOpen, setIsLogHaveOpen] = useState(false)
     const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-
     const openDialog = () => setIsDialogOpen(true)
     const openDrawer = () => {setIsDrawerOpen(true)}
     const closeDialog = () => setIsDialogOpen(false)
-    const closeLog = () => setIsLogDemoOpen(false)
     const closeLogHave = () => setIsLogHaveOpen(false)
     const closeDrawer = () => setIsDrawerOpen(false)
 
@@ -52,15 +52,22 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
 
     const handleLogClick = () => {
         if (isDisable) {
-            setIsLogDemoOpen(true)
+            // setIsLogDemoOpen(true)
+            toast({
+                title: t("温馨提示"),
+                description: t("请先运行插件再查看日志~~~"),
+            })
+            
         } else {
             setIsLogHaveOpen(true)
         }
     }
 
     return (
-        <Card className="lg:w-auto  md:w-auto w-auto h-[200px] lg:mx-3 my-3  ">
-            <CardContent className="flex justify-start space-x-4 mt-9">
+        <>
+        < FalseToaster/>
+        <Card className="lg:w-auto  md:w-auto w-auto h-[180px] lg:mx-1 my-1 ">
+            <CardContent className="flex justify-start space-x-5 mt-6">
                 {isLoading ? (
                     <Skeleton className="h-12 w-12 rounded-full" />
                 ) : (
@@ -74,13 +81,13 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                     {isLoading ? (
                         <Skeleton className="h-6 w-48" />
                     ) : (
-                        <div className="text-lg font-medium text-slate-950 dark:text-white">
+                        <div className="text-xl font-semibold text-slate-950 dark:text-white flex">
                             {app.name}
                             <span
                                 className={
                                     isDisable
-                                        ? "ml-6  border-2 rounded-full border-red-700 py-1 px-2 text-sm text-red-700"
-                                        : "ml-6  border-2 rounded-full border-theme-color py-1 px-2 text-sm text-theme-color"
+                                        ? "ml-3  border rounded-sm border-red-400 pt-1 px-2 text-sm font-normal text-red-400"
+                                        : "ml-3  border rounded-sm border-theme-color pt-1 px-2 text-sm font-normal text-theme-color"
                                 }
                             >
                                 {isDisable ? t("已停止") : t("已运行")}
@@ -91,11 +98,11 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                     {isLoading ? (
                         <Skeleton className="h-4 w-56" />
                     ) : (
-                        <p className="text-sm line-clamp-3 min-h-[63px] leading-[21px]">{app.description || t("No description available")}</p>
+                        <p className="text-base line-clamp-2 min-h-[42px] leading-[21px] pt-1">{app.description || t("No description available")}</p>
                     )}
                 </CardDescription>
             </CardContent>
-            <CardFooter className="flex justify-end -mt-1">
+            <CardFooter className="flex justify-start space-x-4  -mt-1 ml-14">
                 {isLoading ? (
                     <>
                         <Skeleton className="h-8 w-20 mx-2" />
@@ -106,30 +113,29 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                 ) : (
                     <>
                         <Button
-                            variant="common"
-                            className={isDisable ? "bg-gray-500 text-white cursor-not-allowed hover:bg-gray-500" : ""}
+                            variant="insbtn"
+                            className={isDisable ? "bg-gray-300 text-white cursor-not-allowed border-2 border-gray-300 hover:bg-gray-300 hover:text-white hover:border-2 hover:border-gray-300" : ""}
                             onClick={handleLogClick}
                         >
                             {t('日志')}
                         </Button>
-                        {isLogDemoOpen && <AlertLogDemo isOpen={isLogDemoOpen} onClose={closeLog} isLogOpen={false} />}
                         {isLogHaveOpen && <AlertLogHave isOpen={isLogHaveOpen} onClose={closeLogHave} isLogOpen={false} app={app} />}
 
                         <Button 
-                            variant="common" 
+                            variant="insbtn" 
                             onClick={openDrawer}  
                             disabled={isDisable}  // 禁用按钮
-                            className={isDisable ? "bg-gray-500 text-white cursor-not-allowed hover:bg-gray-500" : ""}
+                            className={isDisable ? "bg-gray-300 text-white cursor-not-allowed border-2 border-gray-300 hover:bg-gray-300 hover:text-white hover:border-2 hover:border-gray-300": ""}
                             
                             >
                             {t('参数')}
                         </Button>
 
-                        <Button variant="common" onClick={handleToggleStarted} className={isDisable ? "bg-theme-color text-white" : ""}>
+                        <Button variant="insbtn" onClick={handleToggleStarted} className={isDisable ? "border-theme-color text-theme-color" : ""}>
                             {isDisable ? t("启用") : t("停止")}
                         </Button>
 
-                        <Button variant="common" onClick={openDialog}>
+                        <Button variant="insbtn" onClick={openDialog}>
                             {t('卸载')}
                         </Button>
                         <AlertDialogDemo 
@@ -148,5 +154,6 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
 
             <EditDrawer isOpen={isDrawerOpen} onClose={closeDrawer} app={app} />
         </Card>
+        </>
     )
 }

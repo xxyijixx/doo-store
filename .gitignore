@@ -2,3 +2,4 @@ app.db
 conf
 
 .env
+.history
