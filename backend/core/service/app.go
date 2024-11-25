@@ -10,6 +10,7 @@ import (
 	"doo-store/backend/core/dto/response"
 	"doo-store/backend/core/model"
 	"doo-store/backend/core/repo"
+	"doo-store/backend/task"
 	"doo-store/backend/utils/common"
 	"doo-store/backend/utils/compose"
 	"doo-store/backend/utils/docker"
@@ -270,7 +271,21 @@ func (p *AppInstallProcess) ValidateParam() error {
 		Status:        constant.Installing,
 		IpAddress:     p.ipAddress,
 	}
-
+	// 更新插件状态
+	err = repo.DB.Transaction(func(tx *gorm.DB) error {
+		_, err = repo.Use(tx).App.Where(repo.App.ID.Eq(p.appInstalled.AppID)).Update(repo.App.Status, constant.AppInUse)
+		if err != nil {
+			return err
+		}
+		err = repo.Use(tx).AppInstalled.Create(p.appInstalled)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -386,12 +401,17 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 	if err := appInstallProcess.ValidateParam(); err != nil {
 		return err
 	}
-	if err := appInstallProcess.Install(); err != nil {
-		return err
-	}
-	if err := appInstallProcess.AddNginx(); err != nil {
-		return err
-	}
+	manager := task.GetGlobalManager()
+	manager.AddTask(func() error {
+		if err := appInstallProcess.Install(); err != nil {
+			return err
+		}
+		if err := appInstallProcess.AddNginx(); err != nil {
+			return err
+		}
+		return nil
+	})
+
 	return nil
 }
 
@@ -780,14 +800,6 @@ func appRe(appInstalled *model.AppInstalled, envContent string) error {
 func appUp(appInstalled *model.AppInstalled, envContent string) error {
 	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
 	err := repo.DB.Transaction(func(tx *gorm.DB) error {
-		_, err := repo.Use(tx).App.Where(repo.App.ID.Eq(appInstalled.AppID)).Update(repo.App.Status, constant.AppInUse)
-		if err != nil {
-			return err
-		}
-		err = repo.Use(tx).AppInstalled.Create(appInstalled)
-		if err != nil {
-			return err
-		}
 		composeFile, err := docker.WriteComposeFile(appKey, appInstalled.DockerCompose)
 		log.Info("Docker容器UP,", composeFile)
 		if err != nil {
@@ -803,16 +815,27 @@ func appUp(appInstalled *model.AppInstalled, envContent string) error {
 		if err != nil {
 			stdout, err = docker.ParseError(stdout, err)
 			log.Info("Error docker compose up:", stdout, err)
-			_, _ = repo.Use(tx).AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
 			return err
 		}
-		_, _ = repo.Use(tx).AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.Running)
 		fmt.Println(stdout)
-
-		insertLog(appInstalled.ID, "插件启动", stdout)
+		_, err = repo.Use(tx).AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Updates(
+			model.AppInstalled{
+				Status:  constant.Running,
+				Message: "",
+			},
+		)
+		if err != nil {
+			return err
+		}
 		return nil
 	})
 	if err != nil {
+		_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Updates(
+			model.AppInstalled{
+				Status:  constant.UpErr,
+				Message: err.Error(),
+			},
+		)
 		insertLog(appInstalled.ID, "插件启动", err.Error())
 	} else {
 		insertLog(appInstalled.ID, "插件启动", "")

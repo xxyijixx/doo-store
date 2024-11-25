@@ -13,6 +13,7 @@ type AppInstalled struct {
 	Params        string `json:"params" gorm:"type:text"`
 	Env           string `json:"env" gorm:"type:text"`
 	DockerCompose string `json:"docker_compose" gorm:"type:text"`
+	Message       string `json:"message" gorm:"default:''"`
 	Status        string `json:"status" gorm:"size:20;not null;default:''"`
 }
 
