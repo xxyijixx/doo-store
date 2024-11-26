@@ -2,7 +2,6 @@ package docker
 
 import (
 	"context"
-	"doo-store/backend/constant"
 	"doo-store/backend/utils/cmd"
 	"fmt"
 	"io"
@@ -17,7 +16,6 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
-	"github.com/sirupsen/logrus"
 )
 
 type Client struct {
@@ -182,22 +180,6 @@ func (c Client) NetworkExist(name string) bool {
 		return false
 	}
 	return len(networks) > 0
-}
-
-func CreateDefaultDockerNetwork() error {
-	cli, err := NewClient()
-	if err != nil {
-		logrus.Errorf("init docker client error %s", err.Error())
-		return err
-	}
-	defer cli.Close()
-	if !cli.NetworkExist(constant.AppNetwork) {
-		if err := cli.CreateNetwork(constant.AppNetwork); err != nil {
-			logrus.Errorf("create default docker network  error %s", err.Error())
-			return err
-		}
-	}
-	return nil
 }
 
 func (c Client) CopyFileToContainer(containerId, srcFile, dstFile string) error {

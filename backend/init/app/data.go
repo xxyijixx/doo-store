@@ -18,7 +18,6 @@ type PluginConfig struct {
 }
 
 func LoadData() error {
-	logrus.Info("Loading data...")
 	var pluginConfig PluginConfig
 	filename := "./docker/init/data.json"
 	if config.EnvConfig.ENV == "prod" {
@@ -120,7 +119,5 @@ func LoadData() error {
 		repo.Use(tx).Tag.Create(needTags...)
 		return nil
 	})
-	//
-
 	return err
 }

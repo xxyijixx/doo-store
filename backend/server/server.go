@@ -9,8 +9,7 @@ import (
 func Start() {
 	app.Init()
 	task.Init()
-	// validate.Load()
-	rootRouter := router.Routers()
+	rootRouter := router.Init()
 
 	rootRouter.Run(":8080")
 }

@@ -8,7 +8,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -38,7 +38,9 @@ type YoudaoResponse struct {
 }
 
 func init() {
-	rootCmd.AddCommand(translateCmd)
+	if config.EnvConfig.ENV == "dev" {
+		rootCmd.AddCommand(translateCmd)
+	}
 }
 
 var translateCmd = &cobra.Command{
@@ -205,7 +207,7 @@ func youdaoTranslateText(text, from string, targetLang string) (string, error) {
 		}
 		defer resp.Body.Close()
 
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return "", err
 		}
@@ -231,7 +233,7 @@ func youdaoTranslateText(text, from string, targetLang string) (string, error) {
 
 // 从文件中提取消息
 func extractMessages(filename string) []Message {
-	source, err := ioutil.ReadFile(filename)
+	source, err := os.ReadFile(filename)
 	if err != nil {
 		fmt.Println(err)
 		return nil

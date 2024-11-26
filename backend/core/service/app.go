@@ -401,6 +401,7 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 	if err := appInstallProcess.ValidateParam(); err != nil {
 		return err
 	}
+	// 异步处理
 	manager := task.GetGlobalManager()
 	manager.AddTask(func() error {
 		if err := appInstallProcess.Install(); err != nil {
@@ -728,14 +729,16 @@ func (AppService) Upload(ctx dto.ServiceContext, req request.PluginUpload) error
 			return err
 		}
 		dockerCompose := req.DockerCompose
+		// 生成默认docker-compose.yml
 		if dockerCompose == "" {
 			dockerCompose = req.Plugin.GenComposeFile()
 		}
-		fmt.Println("DockerCompose\n", dockerCompose)
+
 		err = compose.Check(dockerCompose)
 		if err != nil {
 			return err
 		}
+
 		nginxConfig := req.NginxConfig
 		if nginxConfig == "" {
 			nginxConfig = req.Plugin.GenNginxConfig()
@@ -776,12 +779,12 @@ func appRe(appInstalled *model.AppInstalled, envContent string) error {
 	// 写入docker-compose.yaml和环境文件
 	composeFile, err = docker.WriteComposeFile(appKey, appInstalled.DockerCompose)
 	if err != nil {
-		log.Info("Error WriteFile", err)
+		log.Error("DockerCompose文件写入失败", err)
 		return err
 	}
-	_, err = docker.WrietEnvFile(appKey, envContent)
+	_, err = docker.WriteEnvFile(appKey, envContent)
 	if err != nil {
-		log.Info("Error WriteFile", err)
+		log.Error("环境变量文件写入失败", err)
 		return err
 	}
 	stdout, err := compose.Up(composeFile)
@@ -806,7 +809,7 @@ func appUp(appInstalled *model.AppInstalled, envContent string) error {
 			log.Info("Error WriteFile", err)
 			return err
 		}
-		_, err = docker.WrietEnvFile(appKey, envContent)
+		_, err = docker.WriteEnvFile(appKey, envContent)
 		if err != nil {
 			log.Info("Error WriteFile", err)
 			return err

@@ -51,12 +51,11 @@ func GenEnv(appKey, containerName, ipAddress string, envs map[string]any, writeF
 }
 
 // 写环境变量文件
-func WrietEnvFile(appKey, envContent string) (string, error) {
+func WriteEnvFile(appKey, envContent string) (string, error) {
 	envFile := GetEnvFile(appKey)
 	err := os.WriteFile(envFile, []byte(envContent), 0644)
 	if err != nil {
-		log.Debug("Error WriteFile", err)
-		return "", err
+		return "", fmt.Errorf("failed to write environment file: %w", err)
 	}
 	return envFile, nil
 }
@@ -66,8 +65,7 @@ func WriteComposeFile(appKey, composeContent string) (string, error) {
 	composeFile := GetComposeFile(appKey)
 	err := os.WriteFile(composeFile, []byte(composeContent), 0644)
 	if err != nil {
-		log.Debug("Error WriteFile", err)
-		return "", err
+		return "", fmt.Errorf("failed to write docker-compose file: %w", err)
 	}
 	return composeFile, nil
 }

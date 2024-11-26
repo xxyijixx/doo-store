@@ -8,8 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 // 只需要用户的基础信息
@@ -29,18 +27,16 @@ func NewIDootaskService() IDootaskService {
 	}
 }
 
+// GetUserInfo 获取用户信息
 func (d *DootaskService) GetUserInfo(token string) (*dto.UserInfoResp, error) {
 	if token == "" {
 		return nil, errors.New(constant.ErrNoPermission)
 	}
 	url := fmt.Sprintf("%s%s?token=%s", constant.DooTaskUrl, "/api/users/info", token)
-	logrus.Debugf("dootask get user info url: %s", url)
 	result, err := d.client.Get(url)
 	if err != nil {
 		return nil, err
 	}
-
-	// fmt.Println("DooTask Result", string(result))
 
 	info, err := d.UnmarshalAndCheckResponse(result)
 	if err != nil {
@@ -50,14 +46,12 @@ func (d *DootaskService) GetUserInfo(token string) (*dto.UserInfoResp, error) {
 	if err := common.MapToStruct(info, userInfo); err != nil {
 		return nil, err
 	}
-	// okr普通人员是否拥有管理员有权限
-	// userInfo.OkrAdminOwner = OkrService.GetSettingSuperiorUserId() == userInfo.Userid
 	return userInfo, nil
 }
 
+// GetVersionInfo 获取版本信息
 func (d *DootaskService) GetVersoinInfo() (*dto.VersionInfoResp, error) {
 	url := fmt.Sprintf("%s%s", constant.DooTaskUrl, "/api/system/version")
-	logrus.Debugf("dootask get system info url: %s", url)
 	result, err := d.client.Get(url)
 	if err != nil {
 		return nil, err

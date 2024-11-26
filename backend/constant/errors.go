@@ -15,6 +15,9 @@ var (
 	ErrPluginNotAllowedPrivileged    = "ErrPluginNotAllowedPrivileged"    // 不允许使用特权模式
 	ErrPluginInvalidLocalVolumeMount = "ErrPluginInvalidLocalVolumeMount" // 本地卷挂载路径无效
 	ErrPluginEnvVarInVolumeMount     = "ErrPluginEnvVarInVolumeMount"     // 不允许在挂载路径使用环境变量
+	ErrPluginInstallFailed           = "ErrPluginInstallFailed"           // 插件安装失败
+	ErrPluginUninstallFailed         = "ErrPluginUninstallFailed"         // 插件卸载失败
+	ErrPluginParamInvalid            = "ErrPluginParamInvalid"            // 插件参数无效
 
 	// dootask
 	ErrDooTaskDataFormat           = "ErrDooTaskDataFormat"           //数据格式错误
