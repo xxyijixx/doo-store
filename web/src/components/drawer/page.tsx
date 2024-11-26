@@ -40,7 +40,7 @@ function Drawer({ status, app }: DrawerProps) {
 
     const getButtonStyles = () => {
         if (currentStatus === 'InUse') {
-            return 'border border-input rounded-md bg-gray-300 text-sm text-white shadow-sm h-8 px-3 whitespace-nowrap cursor-not-allowed'; // 在使用状态
+            return 'border-2 border-gray-300 rounded-md bg-gray-300 text-sm text-white shadow-sm h-8 px-3 whitespace-nowrap cursor-not-allowed'; // 在使用状态
         } else if (currentStatus === 'Unused') {
             return 'border-2 border-theme-color text-sm text-theme-color hover:text-theme-color/80 hover:border-theme-color/80 h-8 px-3 whitespace-nowrap cursor-pointer'; // 未使用状态
         }
@@ -96,9 +96,11 @@ function Drawer({ status, app }: DrawerProps) {
                         {buttonText}
                     </div>
                 </SheetTrigger>
+                
                 <SheetContent className='lg:overflow-y-hidden md:overflow-hidden overflow-auto '>
                     <SheetHeader>
                         <SheetTitle className='ml-9 -mt-1.5 text-gray-700'>{t('返回')}</SheetTitle>
+                        <hr />
                         <SheetDescription className='pt-3'>
                         </SheetDescription>
                         <ProfileForm

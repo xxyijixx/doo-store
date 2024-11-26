@@ -18,7 +18,6 @@ const UniSearch: React.FC<UniSearchProps> = ({ onSearch }) => {
 
     // 正则：只允许输入中文、英文、数字(包括')
     const regex = /^[a-zA-Z0-9\u4e00-\u9fa5']*$/;
-    // 正则：只允许输入中文、英文、数字
     const chregex = /^[a-zA-Z0-9\u4e00-\u9fa5]*$/;
 
     // 处理搜索输入变化
@@ -52,28 +51,31 @@ const UniSearch: React.FC<UniSearchProps> = ({ onSearch }) => {
 
     return (
         <div>
-            <div className="relative flex items-center lg:w-[300px] w-[300px]">
+            <div className="relative flex group items-center w-10 h-10 hover:w-[200px] lg:mr-0 md:mr-0 -mr-9">
 
-                <div className="w-screen">
-                    <Input
-                        type="text"
-                        placeholder={t("请输入中文、英文或数字...")}
-                        value={query}
-                        onChange={handleChange}
-                        onKeyDown={handleKeyDown} // 键盘按下时触发（处理回车提交）
-                        className="input-class lg:w-[300px]  sm:w-[230px]"
-                    />
+                <div 
+                    className="relative flex items-center h-10 bg-gray-200/50 rounded-full overflow-hidden transition-all duration-300 w-10 group-hover:w-[200px] focus-within:w-[200px] origin-right"
+                >
+                        <Input
+                            type="text"
+                            // placeholder={t("请输入中文、英文或数字...")}
+                            value={query}
+                            onChange={handleChange}
+                            onKeyDown={handleKeyDown} // 键盘按下时触发（处理回车提交）
+                            className="w-full h-full bg-transparent border-none pl-4 pr-10 focus:outline-none placeholder:text-gray-500"
+                        >
+                        </Input>
+                        <Button
+                                variant="searchbtn"
+                                onClick={handleSearch}
+                                disabled={!!error}
+                                className="absolute lg:-right-0.5 md:-right-6 right-0 top-4 transform -translate-y-1/2 p-2 rounded-full"
+                            >
+                            <MagnifyingGlassIcon className="size-20 shrink-0 font-bold text-gray-800" />
+                        </Button>
                 </div>
 
 
-                <Button
-                    variant="searchbtn"
-                    onClick={handleSearch}
-                    disabled={!!error}
-                    className="absolute right-0 top-0.5  p-2 md:p-2"
-                >
-                    <MagnifyingGlassIcon className="size-10 shrink-0" />
-                </Button>
             </div>
             {/* 错误提示文字 */}
             {error && (

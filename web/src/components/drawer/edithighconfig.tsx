@@ -52,26 +52,26 @@ export function EditHighConfig(
             {isAdvancedSettingsEnabled && ( // 根据状态显示或隐藏文本区域
                 <>
                     <Textarea 
-                        className="resize-none" 
+                        className="resize-none  bg-gray-200/60 border-none" 
                         placeholder={t("输入高级设置...")}
                         value={dockerCompose} // 将返回的数据填充到textarea
                         onChange={(e) => setDockerCompose(e.target.value)} // 如果需要编辑
                         />
-                    <div className="flex justify-around w-full">
-                                <div className="w-1/2 px-2">
-                                    <Label htmlFor='input'>{t('CPU限制：')}</Label>
+                    <div className="w-full">
+                                <div className="flex justify-between py-3 ">
+                                    <Label className="whitespace-nowrap mr-3 mt-1" htmlFor='input'>{t('CPU限制')}</Label>
                                     <Input 
-                                        className='sm:w-1/2 lg:w-full'
+                                        className='sm:w-1/2 lg:w-full bg-gray-200/60 border-gray-200/60'
                                         id="cpuLimit"
                                         value={cpuLimit} // 绑定cpuLimit状态
                                         onChange={(e) => setCpuLimit(e.target.value)} // 更新状态
                                         placeholder="1"
                                         />
                                 </div>
-                                <div className="w-1/2 px-2">
-                                    <Label htmlFor='input'>{t('内存限制：')}</Label>
+                                <div className="flex my-3">
+                                    <Label className="whitespace-nowrap mr-3 mt-1" htmlFor='input'>{t('内存限制')}</Label>
                                     <Input 
-                                        className='sm:w-1/2 lg:w-full'
+                                        className='sm:w-1/2 lg:w-full bg-gray-200/60 border-gray-200/60'
                                         id="memoryLimit"
                                         value={memoryLimit} // 绑定cpuLimit状态
                                         onChange={(e) => setMemoryLimit(e.target.value) } // 更新状态

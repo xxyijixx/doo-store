@@ -15,7 +15,7 @@ function App() {
   return (
     <>
           <RootLayout>
-              <h1 className=" font-normal text-left my-4 text-5xl md:text-5xl lg:text-3xl lg:text-gray-800 ">{t('应用商店')}</h1>
+              <h1 className=" font-normal text-left my-4 text-3xl lg:text-gray-800 ">{t('应用商店')}</h1>
               <div className='w-full'>
                   <MainPage />
               </div>

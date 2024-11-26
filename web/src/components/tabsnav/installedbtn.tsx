@@ -102,7 +102,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                     )}
                 </CardDescription>
             </CardContent>
-            <CardFooter className="flex justify-start space-x-4  -mt-1 ml-14">
+            <CardFooter className="flex justify-start -mt-1 space-x-2 lg:space-x-4 lg:ml-14 md:space-x-4 md:ml-14">
                 {isLoading ? (
                     <>
                         <Skeleton className="h-8 w-20 mx-2" />

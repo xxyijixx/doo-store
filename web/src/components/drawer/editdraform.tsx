@@ -158,6 +158,7 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
                             <FormLabel>{field.label}</FormLabel>
                             <FormControl>
                                 <Input
+                                    className="bg-gray-200/60 border border-gray-200/60"
                                     id={fieldName}
                                     placeholder={t("请输入...")}
                                     {...form.register(fieldName, {
@@ -199,7 +200,7 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
                         disabled={loading}
                         >{t('重启')}</Button>
                     <SheetClose
-                        className="cursor-pointer border border-input rounded-md bg-transparent text-sm text-gray-600 shadow-sm hover:bg-white hover:border-theme-color/85 hover:text-theme-color/85 h-9 px-5 py-2"
+                        className="cursor-pointer border-2 border-gray-200/60 rounded-md bg-gray-200/60 text-sm text-gray-600 shadow-sm hover:bg-white hover:border-theme-color/85 hover:text-theme-color/85 h-9 px-5 py-2"
                     >{t('取消')}</SheetClose>
                 </div>
             </form>

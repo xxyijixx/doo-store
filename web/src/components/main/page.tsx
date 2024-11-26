@@ -173,8 +173,20 @@ function MainPage() {
     const totalPages = Math.ceil(totalItems / pageSize); // 确保分页计算是向上取整
     return (
         <>
+            <div className="flex justify-end">
+                {loading ? (
+                    <div className=" rounded-full">
+                        <Skeleton className="mr-6 -mt-14 w-10 h-10 rounded-full" />
+                    </div>
+                ) : (
+                    <div className="pr-6 -mt-14">
+                        <UniSearch onSearch={handleSearch} />
+                    </div>
+
+                )}
+            </div>
             <AnimatePresence mode="wait">
-                <div key="b1" className="flex lg:-space-x-1">
+                <div key="b1" className="flex lg:-space-x-1 lg:justify-between justify-center">
                     {loading ? (
                         <div key="b11" className="flex -space-x-1">
                             <Skeleton className="h-10 w-24 bg-transparent border-b-2 mb-3" />
@@ -190,20 +202,21 @@ function MainPage() {
                                 transition={{ duration: 1 }}
                             >
                                 <Button
-                                    className="text-md"
+                                    className={`text-md p-2 transition-all duration-300 ${activeTab === 'all' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
+                                        }`}
                                     variant={activeTab === "all" ? "combar" : "defbar"}
                                     onClick={() => handleTabChange("all")}
                                 >
                                     {t('全部')}
                                 </Button>
                                 <Button
-                                    className="text-md"
+                                    className={`text-md p-2 transition-all duration-300 ${activeTab === 'installed' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
+                                        }`}
                                     variant={activeTab === "installed" ? "combar" : "defbar"}
                                     onClick={() => handleTabChange("installed")}
                                 >
                                     {t('已安装')}
                                 </Button>
-    
                             </motion.div>
                         </>
                     )}
@@ -266,16 +279,7 @@ function MainPage() {
                                 <ScrollBar orientation="horizontal" className="bg-transparent display-none " />
                             </ScrollArea>
                         )}
-                        {loading ? (
-                            <div className="w-306 whitespace-nowrap rounded-md">
-                                <Skeleton className="h-8 w-48 mb-3" />
-                            </div>
-                        ) : (
-                            <div className="pr-6">
-                                <UniSearch onSearch={handleSearch} />
-                            </div>
 
-                        )}
                     </div>
                 </AnimatePresence>
 
@@ -317,21 +321,29 @@ function MainPage() {
                                         transition={{ duration: 0.7 }}
                                     >
 
-                                        <Card key={app.id} className="lg:w-auto   md:w-auto w-auto lg:h-[150px] my-1 mx-1">
-                                            <CardContent className="flex justify-start space-x-5 mt-6">
-                                                <Avatar className="my-auto size-10">
-                                                    <AvatarImage src={app.icon} />
-                                                    <AvatarFallback>loading</AvatarFallback>
-                                                </Avatar>
-                                                <CardDescription className="space-y-1 text-left">
-                                                    <h1 className="text-xl font-semibold text-slate-900 dark:text-white">{app.name}</h1>
-                                                    <p className="text-base line-clamp-2 min-h-[42px] pt-1">{app.description || "No description available"}</p>
-                                                </CardDescription>
-                                                <CardFooter className="flex justify-end pr-1">
-                                                    <Drawer status={app.status} isOpen={false} app={app} loadData={loadData} />
-                                                </CardFooter>
+                                        <Card key={app.id} className=" lg:w-auto  md:w-auto w-auto lg:h-[150px] my-1 mx-1">
+                                            <CardContent className="flex justify-between mt-6">
+                                                <div className="flex">
+                                                    <Avatar className="my-auto mr-3 size-10">
+                                                        <AvatarImage src={app.icon} />
+                                                        <AvatarFallback>loading</AvatarFallback>
+                                                    </Avatar>
+                                                    <CardDescription className="space-y-1 text-left">
+                                                        <h1 className="text-xl font-semibold text-slate-900 dark:text-white">{app.name}</h1>
+                                                        <p className="text-base line-clamp-2 min-h-[42px] pt-1">{app.description || "No description available"}</p>
+                                                    </CardDescription>
+                                                </div>
+                                                <div>
+                                                    <CardFooter className="">
+                                                        <Drawer
+                                                            status={app.status}
+                                                            isOpen={false}
+                                                            app={app}
+                                                            loadData={loadData}
+                                                        />
+                                                    </CardFooter>
+                                                </div>
                                             </CardContent>
-                                            
                                         </Card>
                                     </motion.div>
                                 ))
