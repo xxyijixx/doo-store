@@ -97,7 +97,7 @@ function Drawer({ status, app }: DrawerProps) {
                     </div>
                 </SheetTrigger>
                 
-                <SheetContent className='lg:overflow-y-hidden md:overflow-hidden overflow-auto '>
+                <SheetContent className='lg:overflow-y-auto md:overflow-auto overflow-auto '>
                     <SheetHeader>
                         <SheetTitle className='ml-9 -mt-1.5 text-gray-700'>{t('返回')}</SheetTitle>
                         <hr />

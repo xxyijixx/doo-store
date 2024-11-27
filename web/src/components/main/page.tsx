@@ -186,7 +186,7 @@ function MainPage() {
                 )}
             </div>
             <AnimatePresence mode="wait">
-                <div key="b1" className="flex lg:-space-x-1 lg:justify-between justify-center">
+                <div key="b1" className="flex lg:-space-x-1 lg:justify-between justify-center border-b border-gray-200 relative mb-3">
                     {loading ? (
                         <div key="b11" className="flex -space-x-1">
                             <Skeleton className="h-10 w-24 bg-transparent border-b-2 mb-3" />
@@ -201,22 +201,35 @@ function MainPage() {
                                 exit={{ opacity: 0 }}
                                 transition={{ duration: 1 }}
                             >
-                                <Button
-                                    className={`text-md p-2 transition-all duration-300 ${activeTab === 'all' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
+                                <ul className="flex items-center space-x-2">
+                                    <li 
+                                        className={`text-md pt-2 transition-all duration-300 relative z-10 ${
+                                            activeTab === 'all' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
                                         }`}
-                                    variant={activeTab === "all" ? "combar" : "defbar"}
-                                    onClick={() => handleTabChange("all")}
-                                >
-                                    {t('全部')}
-                                </Button>
-                                <Button
-                                    className={`text-md p-2 transition-all duration-300 ${activeTab === 'installed' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
+                                    >
+                                        <Button
+                                            variant={activeTab === "all" ? "combar" : "defbar"}
+                                            onClick={() => handleTabChange("all")}
+                                        >
+                                            {t('全部')}
+                                        </Button>
+                                    </li>
+                                    <li></li>
+                                    <li></li>
+                                    <li></li>
+                                    <li
+                                        className={`text-md pt-2 transition-all duration-300 relative z-10 ${
+                                            activeTab === 'installed' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
                                         }`}
-                                    variant={activeTab === "installed" ? "combar" : "defbar"}
-                                    onClick={() => handleTabChange("installed")}
-                                >
-                                    {t('已安装')}
-                                </Button>
+                                    >
+                                    <Button
+                                        variant={activeTab === "installed" ? "combar" : "defbar"}
+                                        onClick={() => handleTabChange("installed")}
+                                    >
+                                        {t('已安装')}
+                                    </Button>
+                                    </li>
+                                </ul>
                             </motion.div>
                         </>
                     )}

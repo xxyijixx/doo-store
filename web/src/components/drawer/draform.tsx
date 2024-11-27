@@ -150,13 +150,12 @@ export function ProfileForm({
     };
 
     return (
-        <Form {...form} >
-            <form className="space-y-8 " onSubmit={handleSubmit(handleRestart)}>
+        <Form {...form}>
+            <form className="space-y-8" onSubmit={handleSubmit(handleRestart)}>
                 {/* 动态渲染 form_fields */}
                 {formFields.map((field, index) => {
                     // 如果 field 没有 name 属性，生成一个默认的 name
                     const fieldName = field.env_key
-
                     return (
                         <FormItem key={index}>
                             <FormLabel>{field.label}</FormLabel>
@@ -217,9 +216,8 @@ export function ProfileForm({
                         <SheetClose className="cursor-pointer border border-gray-200/60 rounded-md bg-gray-200/60 text-sm text-gray-600 shadow-sm hover:bg-white hover:border-theme-color/85 hover:text-theme-color/85 h-9 px-5 py-2">
                             {t('取消')}
                         </SheetClose>
-
-                    
                 </div>
+                
             </form>
         </Form>
     );

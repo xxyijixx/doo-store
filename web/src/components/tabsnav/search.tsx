@@ -54,7 +54,9 @@ const UniSearch: React.FC<UniSearchProps> = ({ onSearch }) => {
             <div className="relative flex group items-center w-10 h-10 hover:w-[200px] lg:mr-0 md:mr-0 -mr-9">
 
                 <div 
-                    className="relative flex items-center h-10 bg-gray-200/50 rounded-full overflow-hidden transition-all duration-300 w-10 group-hover:w-[200px] focus-within:w-[200px] origin-right"
+                    className={`relative flex items-center h-10 bg-gray-200/50 rounded-full overflow-hidden transition-all duration-300 ${
+                        query ? "w-[200px]" : "w-10 group-hover:w-[200px] focus-within:w-[200px]"
+                    }`}
                 >
                         <Input
                             type="text"
