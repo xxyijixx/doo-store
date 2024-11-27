@@ -161,8 +161,9 @@ export function ProfileForm({
                         <FormItem key={index}>
                             <FormLabel>{field.label}</FormLabel>
                             <FormControl>
-                                <div className="w-full">
+                                
                                 <Input
+                                    className="bg-gray-200/60 border border-gray-200/60"
                                     id={fieldName}
                                     placeholder={t("请输入...")}
                                     {...form.register(fieldName, {
@@ -177,7 +178,6 @@ export function ProfileForm({
                                         },
                                     })}
                                 />
-                                </div>
                             </FormControl>
                             <FormMessage>{errors[fieldName]?.message}</FormMessage>
                         </FormItem>
@@ -214,7 +214,7 @@ export function ProfileForm({
                             {t('安装')}
                         </Button>
 
-                        <SheetClose className="cursor-pointer border border-input rounded-md bg-transparent text-sm text-gray-600 shadow-sm hover:bg-white hover:border-theme-color/85 hover:text-theme-color/85 h-9 px-5 py-2">
+                        <SheetClose className="cursor-pointer border border-gray-200/60 rounded-md bg-gray-200/60 text-sm text-gray-600 shadow-sm hover:bg-white hover:border-theme-color/85 hover:text-theme-color/85 h-9 px-5 py-2">
                             {t('取消')}
                         </SheetClose>
 

@@ -8,10 +8,16 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { 
+    Avatar, 
+    AvatarImage, 
+    AvatarFallback 
+} from '@/components/ui/avatar';
 import { Item } from "@/type.d/common"
 import { useState } from "react"
 import * as http from "@/api/modules/fouceinter"
 import { useTranslation } from "react-i18next"
+
 
 interface AlertDialogDemoProps {
     app: Item
@@ -60,20 +66,27 @@ export function AlertDialogDemo({ isOpen, onClose, app, onUninstall }: AlertDial
     return (
         <AlertDialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
             <AlertDialogContent>
+                <div className="flex items-center space-x-4">
+                <Avatar>
+                    <AvatarImage src="../../../public/警告.png" />
+                    <AvatarFallback>...</AvatarFallback>
+                </Avatar>
+                
                 <AlertDialogHeader>
                     <AlertDialogTitle>{t('卸载')}</AlertDialogTitle>
                     <AlertDialogDescription>
                         {t('即将执行卸载操作，您是否确定要卸载此')} {app.name} {t('插件吗?')}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
+                </div>
                 <AlertDialogFooter>
+                    <AlertDialogCancel onClick={onClose}>{t('取消')}</AlertDialogCancel>
                     <AlertDialogAction
                         onClick={handleUninstall} // 在确认按钮上调用 handleUninstall
                         disabled={isLoading} // 如果正在加载，禁用按钮
                     >
                         {isLoading ? t("卸载中...") : t("确认")}
-                    </AlertDialogAction>
-                    <AlertDialogCancel onClick={onClose}>{t('取消')}</AlertDialogCancel>
+                    </AlertDialogAction>             
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
