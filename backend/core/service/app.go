@@ -28,7 +28,6 @@ import (
 	"time"
 
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/network"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
@@ -55,6 +54,75 @@ type IAppService interface {
 
 func NewIAppService() IAppService {
 	return &AppService{}
+}
+
+type IPAllocator struct {
+	usedIPs map[string]bool
+	startIP string
+	endIP   int
+}
+
+func NewIPAllocator(startIP string, count int) *IPAllocator {
+	return &IPAllocator{
+		usedIPs: make(map[string]bool),
+		startIP: startIP,
+		endIP:   count,
+	}
+}
+
+func (a *IPAllocator) RegisterUsedIP(ip string) {
+	a.usedIPs[ip] = true
+}
+
+func (a *IPAllocator) AllocateIP() (string, error) {
+
+	if err := a.validateIPFormat(a.startIP); err != nil {
+		return "", fmt.Errorf("invalid start IP: %v", err)
+	}
+
+	ipParts := strings.Split(a.startIP, ".")
+	baseIP := strings.Join(ipParts[:3], ".")
+	startIndex, _ := strconv.Atoi(ipParts[3])
+
+	for i := startIndex; i < startIndex+a.endIP || i < 254; i++ {
+		candidateIP := fmt.Sprintf("%s.%d", baseIP, i)
+
+		if err := a.validateIPFormat(candidateIP); err != nil {
+			continue
+		}
+
+		if !a.usedIPs[candidateIP] {
+			a.usedIPs[candidateIP] = true
+			return candidateIP, nil
+		}
+	}
+
+	return "", errors.New("no available IP addresses")
+}
+
+// validateIPFormat checks if the IP address is valid
+func (a *IPAllocator) validateIPFormat(ip string) error {
+
+	parts := strings.Split(ip, ".")
+
+	if len(parts) != 4 {
+		return fmt.Errorf("IP must have 4 octets")
+	}
+
+	// Validate each part
+	for _, part := range parts {
+
+		num, err := strconv.Atoi(part)
+		if err != nil {
+			return fmt.Errorf("invalid octet: %s", part)
+		}
+
+		if num < 0 || num > 255 {
+			return fmt.Errorf("octet must be between 0 and 255: %s", part)
+		}
+	}
+
+	return nil
 }
 
 type AppInstallProcess struct {
@@ -139,69 +207,14 @@ func (p *AppInstallProcess) DHCP() error {
 	if err != nil {
 		return err
 	}
-	client := p.client.GetClient()
+	ipAllocator := NewIPAllocator(config.EnvConfig.IP_START, config.EnvConfig.IP_COUNT)
 
-	containers, err := client.ContainerList(context.Background(), container.ListOptions{
-		All: true,
-	})
-	if err != nil {
-		log.Info("获取容器列表失败")
-		return err
-	}
-	networks, err := client.NetworkList(context.Background(), network.ListOptions{})
-	if err != nil {
-		log.Info("获取容器网络列表失败")
-		return err
-	}
-	networkID := ""
-	for _, network := range networks {
-		if network.Name == config.EnvConfig.GetNetworkName() {
-			networkID = network.ID
-			break
-		}
-	}
-	if networkID == "" {
-		return errors.New("网络不存在")
-	}
-	var usedIPs []string
-	fmt.Println("容器数量", len(containers))
-	for _, container := range containers {
-		// 获取容器的网络设置
-		for _, network := range container.NetworkSettings.Networks {
-			fmt.Println("容器使用的网络:", network.NetworkID)
-			if network.NetworkID == networkID {
-				// dootask-networks-5d2bc8
-				usedIPs = append(usedIPs, network.IPAddress)
-			}
-		}
-	}
 	allInstalled, _ := repo.AppInstalled.Select(repo.AppInstalled.IpAddress).Find()
 	for _, installed := range allInstalled {
-		usedIPs = append(usedIPs, installed.IpAddress)
+		ipAllocator.RegisterUsedIP(installed.IpAddress)
 	}
 
-	// 获取一个未使用的 IP 地址
-	getAvailableIP := func(usedIPs []string) (string, error) {
-
-		ipParts := strings.Split(config.EnvConfig.IP_START, ".")
-		if len(ipParts) != 4 {
-			return "", errors.New("IP 地址格式不正确")
-		}
-		ip, err := strconv.Atoi(ipParts[3])
-		if err != nil {
-			return "", err
-		}
-		for i := ip; i < ip+config.EnvConfig.IP_COUNT; i++ {
-			ip := fmt.Sprintf("%s.%s.%s.%d", ipParts[0], ipParts[1], ipParts[2], i)
-			if !common.InArray(ip, usedIPs) {
-				return ip, nil
-			}
-		}
-
-		return "", errors.New("没有可用的 IP 地址")
-	}
-
-	p.ipAddress, err = getAvailableIP(usedIPs)
+	p.ipAddress, err = ipAllocator.AllocateIP()
 	if err != nil {
 		return err
 	}
