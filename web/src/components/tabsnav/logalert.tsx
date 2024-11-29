@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import Codemirror, {ReactCodeMirrorRef} from "@uiw/react-codemirror";
 import { javascript } from '@codemirror/lang-javascript';
 import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from "@/components/ui/select";

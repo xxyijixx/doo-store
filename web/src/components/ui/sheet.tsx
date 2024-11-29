@@ -11,7 +11,14 @@ const SheetTrigger = SheetPrimitive.Trigger
 
 const SheetClose = SheetPrimitive.Close
 
-const SheetPortal = SheetPrimitive.Portal
+const SheetPortal = ({
+  
+  ...props
+}: SheetPrimitive.DialogPortalProps) => (
+  <SheetPrimitive.Portal 
+    {...props} 
+  />
+)
 
 const SheetOverlay = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Overlay>,
@@ -57,23 +64,23 @@ const SheetContent = React.forwardRef<
   SheetContentProps
 >(({ side = "right", className, children, ...props }, ref) => (
   <SheetPortal>
-   
-      <SheetPrimitive.Close className="absolute left-96 top-5 z-50">
-          <Cross2Icon className="font-bold w-6 h-6 text-gray-500"/>
-          <span className="sr-only">Close</span>
-        </SheetPrimitive.Close>
-    
-    <div>
-      <SheetOverlay />
-      <SheetPrimitive.Content
-        ref={ref}
-        className={cn(sheetVariants({ side }), className)}
-        {...props}
-      >
-        
-        {children}
-      </SheetPrimitive.Content>
-    </div>
+    <SheetOverlay />
+    <SheetPrimitive.Close 
+      className={cn(
+        "fixed top-4 rounded-full shadow-lg p-1.5 z-[100]",
+        side === "right" ? "right-[calc(75%+12px)] sm:right-[calc(666px+12px)]" : "left-4"
+      )}
+    >
+      <Cross2Icon className="h-8 w-8 text-white transform rotate-0 hover:rotate-90 motion-safe:transition-all motion-safe:duration-300" />
+      <span className="sr-only">Close</span>
+    </SheetPrimitive.Close>
+    <SheetPrimitive.Content
+      ref={ref}
+      className={cn(sheetVariants({ side }), className)}
+      {...props}
+    >
+      {children}
+    </SheetPrimitive.Content>
   </SheetPortal>
 ))
 SheetContent.displayName = SheetPrimitive.Content.displayName

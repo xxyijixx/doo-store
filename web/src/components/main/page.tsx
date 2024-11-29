@@ -1,6 +1,6 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -139,10 +139,6 @@ function MainPage() {
 
     // 初次加载数据
     useEffect(() => {
-        // 设置延迟时间（比如 3 秒），延迟一下页面加载会更丝滑
-        // const timer = setTimeout(() => {
-        //     console.log("这个方法延迟了3秒后触发！");
-        // }, 3000);
         loadData(searchQuery, currentPage); /// 根据 currentPage 加载数据
 
 
@@ -175,12 +171,16 @@ function MainPage() {
         <>
             <div className="flex justify-end">
                 {loading ? (
-                    <div className=" rounded-full">
-                        <Skeleton className="mr-6 -mt-14 w-10 h-10 rounded-full" />
+                    <div className="rounded-full">
+                        <Skeleton className="mr-6 -mt-14 w-[200px] h-[40px] rounded-lg" />
                     </div>
                 ) : (
                     <div className="pr-6 -mt-14">
-                        <UniSearch onSearch={handleSearch} />
+                        <UniSearch 
+                            onSearch={handleSearch} 
+                            clearAfterSearch={false}
+                            defaultValue={searchQuery} // 传入当前搜索值
+                        />
                     </div>
 
                 )}
@@ -188,9 +188,9 @@ function MainPage() {
             <AnimatePresence mode="wait">
                 <div key="b1" className="flex lg:-space-x-1 lg:justify-between justify-center border-b border-gray-200 relative mb-3">
                     {loading ? (
-                        <div key="b11" className="flex -space-x-1">
-                            <Skeleton className="h-10 w-24 bg-transparent border-b-2 mb-3" />
-                            <Skeleton className="h-10 w-24 bg-transparent border-b-2 mb-3" />
+                        <div key="b11" className="flex space-x-4">
+                            <Skeleton className="h-[40px] w-[80px] rounded-md" />
+                            <Skeleton className="h-[40px] w-[80px] rounded-md" />
                         </div>
                     ) : (
                         <>
@@ -241,10 +241,12 @@ function MainPage() {
                 <AnimatePresence mode="wait">
                     <div key="b2" className="lg:flex md:flex lg:justify-between md:justify-between sm:justify-between lg:items-center lg:mb-3 ">
                         {loading ? (
-                            <div key="b22" className="flex w-306 whitespace-nowrap rounded-md">
-                                <Skeleton className="h-8 w-20 mb-3" />
-                                <Skeleton className="h-8 w-20 mb-3" />
-                                <Skeleton className="h-8 w-20 mb-3" />
+                            <div key="b22" className="flex space-x-2 whitespace-nowrap rounded-md">
+                                <Skeleton className="h-[32px] w-[60px] rounded-md" />
+                                <Skeleton className="h-[32px] w-[80px] rounded-md" />
+                                <Skeleton className="h-[32px] w-[60px] rounded-md" />
+                                <Skeleton className="h-[32px] w-[60px] rounded-md" />
+                                <Skeleton className="h-[32px] w-[60px] rounded-md" />
                             </div>
                         ) : (
                             <ScrollArea className="lg:w-[606px] md:w-[330px] whitespace-nowrap overflow-x-auto">
@@ -399,9 +401,14 @@ function MainPage() {
                     )}
                 </AnimatePresence>
                 <PaginationCom
-                    currentPage={currentPage} // 当前页数
-                    totalPages={totalPages} // 总页数
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={totalItems}
+                    pageSize={pageSize}
                     onPageChange={handlePageChange}
+                    onPageSizeChange={(_: number) => {
+                        // 如果暂时不需要处理页面大小变化，可以留空
+                    }}
                 />
             </div>
         </>
