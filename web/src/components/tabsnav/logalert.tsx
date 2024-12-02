@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { Label } from '@/components/ui/label';
 import * as http from "@/api/modules/fouceinter";
 import { useTranslation } from "react-i18next";
+import { ChevronLeftIcon } from "@radix-ui/react-icons"
 
 interface AlertLogHaveProps {
     isLogOpen: boolean;
@@ -85,16 +86,22 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
         <Sheet open={isOpen} onOpenChange={onClose}>
             <SheetContent className="overflow-auto lg:overflow-x-hidden">
                 <SheetHeader>
-                    <SheetTitle className=' top-3 my-1 text-gray-700 text-xl'>Log</SheetTitle>
+                    <SheetTitle  className='lg:ml-2 md:ml-2 pl-2 text-gray-700 z-50 lg:bg-transparent md:bg-transparent bg-gray-200/50 lg:py-0 md:py-0 py-3 flex items-center gap-2'>
+                        <ChevronLeftIcon 
+                            className="h-6 w-6 lg:hidden md:hidden block"
+                            onClick={() => onClose()}
+                        />
+                        {t('日志')}
+                    </SheetTitle>
                 </SheetHeader>
-                <hr />
+                <hr  className='lg:block md:block hidden'/>
                 <SheetDescription className='pt-3'>
                 </SheetDescription>
-                <div className='items-center mt-3'>
-                    <div className="flex justify-between w-full ">
-                        <Label className='ml-1 w-1/6' >{t('时间范围')}</Label>
+                <div className='items-center mt-3 px-3'>
+                    <div className="lg:flex md:flex justify-between w-full ">
+                        <Label className='lg:ml-1 md:ml-1 ml-3 w-1/6' >{t('时间范围')}</Label>
                         <Select value={logSearch.modeIndex.toString()} onValueChange={(value) => handleModeChange(Number(value))}>
-                            <SelectTrigger className="lg:w-full md:w-full w-full ml-6 bg-gray-200/60">
+                            <SelectTrigger className="lg:w-full md:w-full w-full lg:ml-6 md:ml-6 bg-gray-200/60">
                                 <SelectValue>
                                     {/* 通过下标渲染选中的时间范围的label */}
                                     {timeOptions[logSearch.modeIndex].label}
@@ -110,14 +117,14 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                         </Select>
                     </div>
 
-                    <div className="flex justify-between w-full mt-6">
+                    <div className="lg:flex md:flex justify-between w-full mt-6">
                         {/* 条数选择 */}
-                        <Label className='ml-1 w-1/6'>{t('条数')}</Label>
+                        <Label className='lg:ml-1 md:ml-1 ml-3 w-1/6'>{t('条数')}</Label>
                         <Select 
                             value={logSearch.tail.toString()} 
                             onValueChange={(value) => setLogSearch(prev => ({ ...prev, tail: Number(value) }))}
                         >
-                            <SelectTrigger className="lg:w-full md:w-full w-full ml-6  bg-gray-200/60">
+                            <SelectTrigger className="lg:w-full md:w-full w-full lg:ml-6 md:ml-6  bg-gray-200/60">
                                 <span>{logSearch.tail === 10000 ? 'All' : logSearch.tail}</span>
                             </SelectTrigger>
                             <SelectContent>
@@ -131,15 +138,15 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                     </div>
                 </div>
 
-                <div className="flex w-full mt-6">
-                    <p className="text-gray-500 ml-1 w-1/6 whitespace-nowrap">{t('日志数据')}</p>
+                <div className="lg:flex md:flex w-full mt-6">
+                    <p className="text-gray-500 lg:ml-3 md:ml-3 ml-6 w-1/6 whitespace-nowrap">{t('日志数据')}</p>
                     {/* 日志显示区域 */}
-                    <div className="lg:w-full md:w-10/12 lg:ml-6 md:ml-8">
+                    <div className="lg:w-10/12 md:w-10/12 w-11/12 lg:ml-6 md:ml-8 ml-3 mb-6">
                         <Codemirror
                             ref={codemirrorRef}
                             value={logInfo}
                             editable={false}
-                            width="85%"
+                            width="100%"
                             height="950px"
                             theme="light"
                             autoFocus={true} // 加载自动聚焦

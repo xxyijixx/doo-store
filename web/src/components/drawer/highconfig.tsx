@@ -57,20 +57,20 @@ export function HighConfig(
                         onChange={(e) => setDockerCompose(e.target.value)} // 如果需要编辑
                         />
                     <div className="w-full">
-                                <div className="flex justify-between py-3 ">
+                                <div className="lg:flex md:flex justify-between py-3 ">
                                     <Label className="mt-2" htmlFor='input'>{t('CPU限制：')}</Label>
                                     <Input 
-                                        className='sm:w-1/2 lg:w-5/6 bg-gray-200/60 border-gray-200/60'
+                                        className='lg:w-5/6 md:w-5/6 bg-gray-200/60 border-gray-200/60'
                                         id="cpuLimit"
                                         value={cpuLimit} // 绑定cpuLimit状态
                                         onChange={(e) => setCpuLimit(e.target.value)} // 更新状态
                                         placeholder="1"
                                         />
                                 </div>
-                                <div className="flex justify-between py-3">
+                                <div className="lg:flex md:flex justify-between py-3">
                                     <Label className="mt-2"  htmlFor='input'>{t('内存限制：')}</Label>
                                     <Input 
-                                        className='sm:w-1/2 lg:w-5/6  bg-gray-200/60 border-gray-200/60'
+                                        className='lg:w-5/6 md:w-5/6 bg-gray-200/60 border-gray-200/60'
                                         id="memoryLimit"
                                         value={memoryLimit} // 绑定cpuLimit状态
                                         onChange={(e) => setMemoryLimit(e.target.value) } // 更新状态

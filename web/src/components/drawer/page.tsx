@@ -56,8 +56,8 @@ function Drawer({ status, app }: DrawerProps) {
             title: t("安装成功"),
             description: t("应用已成功安装"),
             variant: "success",
-            duration: 3000,
-            className: "md:w-auto w-[90%] md:left-auto left-[50%] md:translate-x-0 translate-x-[-50%]"
+            duration: 30000,
+            className: "fixed top-16 left-1/2 -translate-x-1/2 md:static md:translate-x-0 w-[90%] md:w-auto"
         });
         setVariantState("success"); 
         setButtonText(t("安装"));
@@ -73,7 +73,7 @@ function Drawer({ status, app }: DrawerProps) {
             description: t("安装过程中发生错误，请重试。"),
             variant: "destructive",
             duration: 3000,
-            className: "md:w-auto w-[90%] md:left-auto left-[50%] md:translate-x-0 translate-x-[-50%]"
+            className: "fixed top-16 left-1/2 -translate-x-1/2 md:static md:translate-x-0 w-[90%] md:w-auto"
         });
         setVariantState("destructive");
         setIsOpen(false); // 关闭侧边栏
