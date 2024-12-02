@@ -3,7 +3,9 @@ package constant
 const (
 	Running    = "Running"
 	UnHealthy  = "UnHealthy"
+	Restarting = "Restarting"
 	Error      = "Error"
+	Dead       = "Dead"
 	Stopped    = "Stopped"
 	Installing = "Installing"
 	Paused     = "Paused"
