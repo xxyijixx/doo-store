@@ -1,7 +1,6 @@
 package service
 
 import (
-	"bufio"
 	"context"
 	"doo-store/backend/config"
 	"doo-store/backend/constant"
@@ -22,10 +21,8 @@ import (
 	"io"
 	"os"
 	"path"
-	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/docker/docker/api/types/container"
 	log "github.com/sirupsen/logrus"
@@ -647,72 +644,77 @@ func (*AppService) AppTags(ctx dto.ServiceContext) ([]*model.Tag, error) {
 
 func (*AppService) GetLogs(ctx dto.ServiceContext, req request.AppLogsSearch) (any, error) {
 	log.Info("获取日志")
+
+	// 获取 Docker 客户端
 	client, err := docker.NewDockerClient()
 	if err != nil {
-		log.Info("获取Docker失败", err)
+		log.Error("获取 Docker 客户端失败", err)
 		return nil, err
 	}
+	defer client.Close()
+
+	// 查询已安装的插件信息
 	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(req.Id)).First()
 	if err != nil {
-		log.Info("Error query app installed", err)
+		log.Error("查询插件安装信息失败", err)
 		return nil, errors.New("获取安装插件信息失败")
 	}
 
+	// 校验插件状态
 	if appInstalled.Status != constant.Running {
 		return nil, errors.New("插件未运行")
 	}
 
+	// 检查容器是否存在
+	_, err = client.ContainerInspect(context.Background(), appInstalled.Name)
+	if err != nil {
+		log.Error("容器不存在", err)
+		return nil, errors.New("插件未成功安装，请重新安装")
+	}
+
+	// 获取容器日志
 	reader, err := client.ContainerLogs(context.Background(), appInstalled.Name, container.LogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
-		// Follow:     true,
-		Since: req.Since,
-		Until: req.Until,
-		Tail:  fmt.Sprintf("%d", req.Tail),
+		Since:      req.Since,
+		Until:      req.Until,
+		Tail:       fmt.Sprintf("%d", req.Tail),
+		Follow:     false,
 	})
 	if err != nil {
-		log.Info("Error query container log", err)
+		log.Error("获取容器日志失败", err)
 		return nil, errors.New("获取日志失败")
 	}
-	sb := strings.Builder{}
+	defer reader.Close()
 
-	scanner := bufio.NewScanner(reader)
-
-	cleanText := func(input string) string {
-		// 去除所有不可见的控制字符 (ASCII 0-31 和 127)
-		reControlChars := regexp.MustCompile(`[\x00-\x1F\x7F]`)
-		str := reControlChars.ReplaceAllString(input, "")
-		if len(str) > 2 {
-			return str[1:]
-		}
-		return str
+	// 读取所有日志内容
+	logBytes, err := io.ReadAll(reader)
+	if err != nil {
+		log.Error("读取日志内容失败", err)
+		return nil, errors.New("读取日志失败")
 	}
-	date := time.Now()
-	go func() {
 
-		for scanner.Scan() {
-			fmt.Println(scanner.Text())
-			_, err = sb.WriteString(cleanText(scanner.Text()) + "\n")
-			if err != nil {
-				log.Info("写入字符串时失败", err)
+	// 将字节转换为字符串
+	logContent := string(logBytes)
+
+	// 按行分割日志
+	logLines := strings.Split(logContent, "\n")
+
+	// 处理每一行日志
+	var builder strings.Builder
+	for i, line := range logLines {
+		if len(line) > 8 { // docker log格式前8字节为header
+			// 跳过header,直接获取日志内容
+			if i > 0 {
+				builder.WriteString("\n")
 			}
-			date = time.Now()
-		}
-
-		if err := scanner.Err(); err != nil {
-			log.Info("Error scan container log", err)
-			return
-		}
-
-	}()
-	for {
-		time.Sleep(time.Microsecond * 500)
-		if time.Since(date) > time.Second {
-			log.Info("距离上次读取时间超过1秒，读取结束")
-			break
+			builder.WriteString(line[8:])
 		}
 	}
-	return sb.String(), nil
+
+	result := builder.String()
+
+	return result, nil
 }
 
 // Upload 插件上传

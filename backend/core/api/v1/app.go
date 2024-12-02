@@ -347,7 +347,6 @@ func (*BaseApi) AppLogs(c *gin.Context) {
 		req.Tail = 1000
 	}
 	data, err := appService.GetLogs(dto.ServiceContext{C: c}, req)
-	fmt.Println("调取返回值", data)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
