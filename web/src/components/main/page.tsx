@@ -12,6 +12,7 @@ import { InStalledBtn } from "@/components/tabsnav/installedbtn";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Item } from "@/type.d/common";
+import { Tag } from "@/api/interface/common"
 import { motion, AnimatePresence } from "framer-motion"; // 引入 framer-motion
 import * as http from '@/api/modules/fouceinter'
 import { useTokenStore } from "@/store/ TokenContext";
@@ -118,6 +119,7 @@ function MainPage() {
     const [totalItems, setTotalItems] = useState(0); // 保存接口返回的总数
     const [currentPage, setCurrentPage] = useState(1); // 当前页面
     const [searchQuery, setSearchQuery] = useState(""); // 搜索关键词
+    const [tags, setTags] = useState<Tag[]>([]);
     const pageSize = 9; // 每页显示的应用数
     // const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
@@ -138,8 +140,16 @@ function MainPage() {
         setLoading(false);
     };
 
+    const loadTags = async () => {
+        const res = await http.getTags()
+        if(res.data) {
+            setTags(res.data)
+        }
+    }
+
     // 初次加载数据
     useEffect(() => {
+        loadTags()
         loadData(searchQuery, currentPage); /// 根据 currentPage 加载数据
 
 
@@ -276,30 +286,15 @@ function MainPage() {
                                         >
                                             {t('全部')}
                                         </Button>
-                                        <Button
-                                            variant={selectedClass === "database" ? "combarson" : "defbarson"}
-                                            onClick={() => setSelectedClass("database")}
-                                        >
-                                            {t('数据库')}
-                                        </Button>
-                                        <Button
-                                            variant={selectedClass === "oss" ? "combarson" : "defbarson"}
-                                            onClick={() => setSelectedClass("oss")}
-                                        >
-                                            {t('Oss')}
-                                        </Button>
-                                        <Button
-                                            variant={selectedClass === "tool" ? "combarson" : "defbarson"}
-                                            onClick={() => setSelectedClass("tool")}
-                                        >
-                                            {t('Tool')}
-                                        </Button>
-                                        <Button
-                                            variant={selectedClass === "note" ? "combarson" : "defbarson"}
-                                            onClick={() => setSelectedClass("note")}
-                                        >
-                                            {t('Note')}
-                                        </Button>
+                                        {tags.map(tag => (
+                                            <Button 
+                                                key={tag.id}
+                                                variant={selectedClass === tag.key ? "combarson" : "defbarson"}
+                                                onClick={() => setSelectedClass(tag.key)}
+                                            >
+                                                {tag.name}
+                                            </Button>
+                                        ))}
                                     </motion.div>
                                 </div>
                                 <ScrollBar orientation="horizontal" className="bg-transparent display-none " />

@@ -56,6 +56,8 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
         switch(app.status) {
             case "Running":
                 return t("已运行")
+            case "Installing":
+                return t("安装中")
             case "Stopped":
                 return t("已停止")
             case "UpErr":

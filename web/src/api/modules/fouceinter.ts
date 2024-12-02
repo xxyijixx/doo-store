@@ -22,6 +22,10 @@ export const putInsParams = (id: string|number, params: object) =>  {
     return http.put<common.getEdit>(`/api/v1/apps/installed/${id}/params`, params)
 }
 
+export const getTags = () => {
+    return http.get<common.Tag[]>(`/api/v1/apps/tags`)
+}
+
 export const getLogs = (id: string|number, params: object) =>  {
     return http.get<string>(`/api/v1/apps/installed/${id}/logs`,params)
 }
