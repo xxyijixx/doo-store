@@ -49,6 +49,11 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
         return app.status == "Running"
     }, [app.status])
 
+    const isInstalling = useMemo(() => {
+        return app.status == "Installing"
+    },[app.status])
+
+
     const appStatus = useMemo(() => {
         if(!app.status) {
             return t("未知")
@@ -70,19 +75,39 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
     }, [app.status])
     const handleToggleStarted = () => {
         let action = "stop"
-        if(app.status == "Running") {
+        if (app.status == "Running") {
             action = "stop"
+            http.putAppStatus(app.key, {
+                action: action,
+                params: {}
+            }).then(res => {
+                console.log(res)
+                loadData()
+            }).catch(err => {
+                console.error(err)
+            })
         } else {
             action = "start"
+            setIsLoading(true)  // 开启全局 loading 蒙版
+            http.putAppStatus(app.key, {
+                action: action,
+                params: {}
+            }).then(res => {
+                console.log(res)
+                // 设置 1 分钟后刷新
+                setTimeout(() => {
+                    loadData()
+                    setIsLoading(false)  // 关闭 loading 蒙版
+                }, 30000)  // 60000ms = 1分钟
+            }).catch(err => {
+                console.error(err)
+                setIsLoading(false)
+                toast({
+                    title: t("错误提示"),
+                    description: t("启动失败，请重试"),
+                })
+            })
         }
-        http.putAppStatus(app.key, {
-            action: action,
-            params: {}
-        }).then(res => {
-            console.log(res)
-        }).catch(err => {
-            console.error(err)
-        })
     }
 
     const handleLogClick = () => {
@@ -150,11 +175,12 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                         <Button
                             variant="insbtn"
                             className={`w-[56px] min-w-0 ${
-                                !isRunning 
+                                !isRunning || isInstalling || isLoading
                                     ? "bg-gray-300 text-white cursor-not-allowed border-2 border-gray-300 hover:bg-gray-300 hover:text-white hover:border-2 hover:border-gray-300" 
                                     : ""
                             }`}
                             onClick={handleLogClick}
+                            disabled={!isRunning || isInstalling || isLoading}
                         >
                             {t('日志')}
                         </Button>
@@ -163,9 +189,9 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                         <Button 
                             variant="insbtn" 
                             onClick={openDrawer}  
-                            disabled={!isRunning}
+                            disabled={!isRunning || isInstalling || isLoading}
                             className={`w-[56px] min-w-0 ${
-                                !isRunning ? "bg-gray-300 text-white cursor-not-allowed border-2 border-gray-300 hover:bg-gray-300 hover:text-white hover:border-2 hover:border-gray-300": ""
+                                !isRunning || isInstalling || isLoading ? "bg-gray-300 text-white cursor-not-allowed border-2 border-gray-300 hover:bg-gray-300 hover:text-white hover:border-2 hover:border-gray-300": ""
                             }`}
                         >
                             {t('参数')}
@@ -174,8 +200,12 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                         <Button 
                             variant="insbtn" 
                             onClick={handleToggleStarted} 
+                            disabled={isInstalling || isLoading}
                             className={`w-[56px] min-w-0 ${
                                 !isRunning ? "border-theme-color text-theme-color" : ""
+                            }
+                             ${
+                                isInstalling || isLoading ? "bg-gray-300 text-white cursor-not-allowed border-2 border-gray-300 hover:bg-gray-300 hover:text-white hover:border-2 hover:border-gray-300" : ""
                             }`}
                         >
                             {!isRunning ? t("启用") : t("停止")}
@@ -184,7 +214,10 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                         <Button 
                             variant="insbtn"
                             onClick={openDialog}
-                            className="w-[56px] min-w-0"
+                            disabled={isInstalling || isLoading}
+                            className={`w-[56px] min-w-0 ${
+                                isInstalling || isLoading ? "bg-gray-300 text-white cursor-not-allowed border-2 border-gray-300 hover:bg-gray-300 hover:text-white hover:border-2 hover:border-gray-300" : ""
+                            }`}
                         >
                             {t('卸载')}
                         </Button>
@@ -193,6 +226,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                             onClose={closeDialog} 
                             app={app} 
                             onUninstall={handleUninstall} 
+                            
                             />
 
                         {/* <Button variant="common">重启</Button> */}

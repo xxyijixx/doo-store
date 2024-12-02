@@ -68,7 +68,7 @@ export function AlertDialogDemo({ isOpen, onClose, app, onUninstall }: AlertDial
             <AlertDialogContent>
                 <div className="flex items-center space-x-4">
                 <Avatar>
-                    <AvatarImage src="../../../public/警告.png" />
+                    <AvatarImage src="@/assets/警告.png" />
                     <AvatarFallback>...</AvatarFallback>
                 </Avatar>
                 

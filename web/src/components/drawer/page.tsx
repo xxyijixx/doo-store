@@ -56,7 +56,7 @@ function Drawer({ status, app }: DrawerProps) {
             title: t("安装成功"),
             description: t("应用已成功安装"),
             variant: "success",
-            duration: 30000,
+            duration: 3000,
             className: "fixed top-16 left-1/2 -translate-x-1/2 md:static md:translate-x-0 w-[90%] md:w-auto"
         });
         setVariantState("success"); 

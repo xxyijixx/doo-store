@@ -20,13 +20,13 @@ export function SuccessToaster() {
                 <div className="grid gap-1">
                       <div className="flex items-center">
                         <Avatar className="size-5 mr-5">
-                          <AvatarImage src="../../../public/安装成功.png"/>
+                          <AvatarImage src="@/assets/安装成功.png"/>
                           <AvatarFallback />
                         </Avatar>
                         {title && <ToastTitle className="font-bold">{title}</ToastTitle>}
                       </div>
                       {description && (
-                        <ToastDescription className="ml-10">{description}</ToastDescription>
+                        <ToastDescription className="ml-10 ">{description}</ToastDescription>
                       )}
                 
                 {action}
@@ -52,13 +52,13 @@ export function FalseToaster() {
                 <div className="grid gap-1">
                   <div className="flex items-center">
                       <Avatar className="size-6 mr-4">
-                        <AvatarImage src="../../../public/安装失败.png"/>
+                        <AvatarImage src="@/assets/安装失败.png"/>
                         <AvatarFallback />
                       </Avatar>
                         {title && <ToastTitle className="font-bold">{title}</ToastTitle>}
                     </div>
                   {description && (
-                    <ToastDescription className="ml-10 text-red-500">{description}</ToastDescription>
+                    <ToastDescription className="ml-10">{description}</ToastDescription>
                   )}
                 
                 {action}
