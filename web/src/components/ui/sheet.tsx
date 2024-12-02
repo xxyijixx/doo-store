@@ -37,16 +37,16 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 
 const sheetVariants = cva(
-  " fixed z-30 gap-4 bg-background rounded-l-2xl p-6 shadow-lg transition ease-in-out data-[state=closed]:duration-300  data-[state=open]:animate-in data-[state=closed]:animate-out",
+  "fixed z-30 gap-4 bg-background lg:rounded-l-2xl md:rounded-l-2xl  lg:p-6 md:p-6 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out",
   {
     variants: {
       side: {
         top: "inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
         bottom:
           "inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
-        left: "inset-y-0 left-0 h-full w-3/4 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-md",
+        left: "inset-y-0 left-0 h-full w-full border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left md:w-3/4 md:max-w-md",
         right:
-          "inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-2xl",
+          "inset-y-0 right-0 h-full w-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right md:w-3/4 md:max-w-2xl",
       },
     },
     defaultVariants: {
@@ -67,8 +67,10 @@ const SheetContent = React.forwardRef<
     <SheetOverlay />
     <SheetPrimitive.Close 
       className={cn(
-        "fixed top-4 rounded-full shadow-lg p-1.5 z-[100] group hover:bg-white/10",
-        side === "right" ? "right-[calc(75%+12px)] lg:right-[calc(666px+12px)]" : "left-4"
+        "fixed top-4 rounded-full shadow-lg p-1.5 z-[100] group hover:bg-white/10 lg:block md:block hidden",
+        side === "right" 
+          ? "right-4 md:right-[calc(75%+12px)] lg:right-[calc(666px+12px)]" 
+          : "left-4"
       )}
     >
       <Cross2Icon className="h-8 w-8 text-white [transition:transform_500ms_ease-in-out] group-hover:[transform:rotate(90deg)]" />

@@ -12,6 +12,7 @@ import { Item } from "@/type.d/common";
 import { useToast } from "@/hooks/use-toast";
 import { FalseToaster, SuccessToaster } from '../ui/toaster';
 import { useTranslation } from "react-i18next";
+import { ChevronLeftIcon } from "@radix-ui/react-icons"
 
 
 interface DrawerProps {
@@ -56,6 +57,7 @@ function Drawer({ status, app }: DrawerProps) {
             description: t("应用已成功安装"),
             variant: "success",
             duration: 3000,
+            className: "md:w-auto w-[90%] md:left-auto left-[50%] md:translate-x-0 translate-x-[-50%]"
         });
         setVariantState("success"); 
         setButtonText(t("安装"));
@@ -71,6 +73,7 @@ function Drawer({ status, app }: DrawerProps) {
             description: t("安装过程中发生错误，请重试。"),
             variant: "destructive",
             duration: 3000,
+            className: "md:w-auto w-[90%] md:left-auto left-[50%] md:translate-x-0 translate-x-[-50%]"
         });
         setVariantState("destructive");
         setIsOpen(false); // 关闭侧边栏
@@ -93,15 +96,21 @@ function Drawer({ status, app }: DrawerProps) {
                                 handleInstallClick(); // 处理安装逻辑
                             }
                         }}
-                        className={` rounded-md pt-1 ${getButtonStyles()}`}>
+                        className={` rounded-md pt-1.5 ${getButtonStyles()}`}>
                         {buttonText}
                     </div>
                 </SheetTrigger>
                 
                 <SheetContent className='lg:overflow-y-auto md:overflow-auto overflow-auto'>
                     <SheetHeader>
-                        <SheetTitle className='ml-2 mt-1.5 text-gray-700'>{t('返回')}</SheetTitle>
-                        <hr />
+                        <SheetTitle className='lg:ml-2 md:ml-2 pl-2 text-gray-700 z-50 lg:bg-transparent md:bg-transparent bg-gray-200/50 lg:py-0 md:py-0 py-3 flex items-center gap-2'>
+                            <ChevronLeftIcon 
+                                className="h-6 w-6 lg:hidden md:hidden block"
+                                onClick={() => setIsOpen(false)}
+                                />
+                            {t('返回')}
+                        </SheetTitle>
+                        <hr  className='lg:block md:block hidden'/>
                         <SheetDescription className='pt-3'>
                         </SheetDescription>
                         <ProfileForm

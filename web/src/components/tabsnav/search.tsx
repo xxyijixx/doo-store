@@ -11,12 +11,14 @@ interface UniSearchProps {
     onSearch: (query: string) => void; // 父组件传递的搜索函数
     clearAfterSearch?: boolean; // 添加新属性控制搜索后是否清空
     defaultValue?: string; // 添加这一行
+    onExpandChange?: (expanded: boolean) => void;  // 添加这一行
 }
 
 const UniSearch: React.FC<UniSearchProps> = ({ 
     onSearch, 
     clearAfterSearch = false,
-    defaultValue = "" 
+    defaultValue = "",
+    onExpandChange 
 }) => {
     const { t } = useTranslation();
     const [query, setQuery] = useState(defaultValue);
@@ -71,6 +73,8 @@ const UniSearch: React.FC<UniSearchProps> = ({
                         value={query}
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
+                        onFocus={() => onExpandChange?.(true)}
+                        onBlur={() => onExpandChange?.(false)}
                         className="w-full h-full bg-transparent border-none pl-4 pr-10 focus:outline-none placeholder:text-gray-500"
                     />
                     <Button
