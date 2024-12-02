@@ -42,7 +42,7 @@ export function PaginationCom({
     };
 
     return (
-        <div className="flex items-center justify-end gap-4 text-sm mr-6">
+        <div className="flex items-center justify-end gap-4 text-sm mr-6 lg:mt-0 mt-3">
             <span>共 {totalItems || 0} 条</span>
             
             <div className="flex items-center list-none">
@@ -86,7 +86,7 @@ export function PaginationCom({
                 {pageSize}条/页
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 lg:block md:block hidden">
                 <span>跳至</span>
                 <input
                     type="number"
