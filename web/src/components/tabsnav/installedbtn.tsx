@@ -102,7 +102,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                     )}
                 </CardDescription>
             </CardContent>
-            <CardFooter className="flex justify-start -mt-1 space-x-2 lg:space-x-4 lg:ml-14 md:space-x-4 md:ml-14">
+            <CardFooter className="flex justify-start -mt-1 gap-1 lg:gap-3 md:gap-2 lg:ml-14 md:ml-10 ml-8">
                 {isLoading ? (
                     <>
                         <Skeleton className="h-8 w-20 mx-2" />
@@ -114,7 +114,11 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                     <>
                         <Button
                             variant="insbtn"
-                            className={isDisable ? "bg-gray-300 text-white cursor-not-allowed border-2 border-gray-300 hover:bg-gray-300 hover:text-white hover:border-2 hover:border-gray-300" : ""}
+                            className={`w-[56px] min-w-0 ${
+                                isDisable 
+                                    ? "bg-gray-300 text-white cursor-not-allowed border-2 border-gray-300 hover:bg-gray-300 hover:text-white hover:border-2 hover:border-gray-300" 
+                                    : ""
+                            }`}
                             onClick={handleLogClick}
                         >
                             {t('日志')}
@@ -124,18 +128,29 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                         <Button 
                             variant="insbtn" 
                             onClick={openDrawer}  
-                            disabled={isDisable}  // 禁用按钮
-                            className={isDisable ? "bg-gray-300 text-white cursor-not-allowed border-2 border-gray-300 hover:bg-gray-300 hover:text-white hover:border-2 hover:border-gray-300": ""}
-                            
-                            >
+                            disabled={isDisable}
+                            className={`w-[56px] min-w-0 ${
+                                isDisable ? "bg-gray-300 text-white cursor-not-allowed border-2 border-gray-300 hover:bg-gray-300 hover:text-white hover:border-2 hover:border-gray-300": ""
+                            }`}
+                        >
                             {t('参数')}
                         </Button>
 
-                        <Button variant="insbtn" onClick={handleToggleStarted} className={isDisable ? "border-theme-color text-theme-color" : ""}>
+                        <Button 
+                            variant="insbtn" 
+                            onClick={handleToggleStarted} 
+                            className={`w-[56px] min-w-0 ${
+                                isDisable ? "border-theme-color text-theme-color" : ""
+                            }`}
+                        >
                             {isDisable ? t("启用") : t("停止")}
                         </Button>
 
-                        <Button variant="insbtn" onClick={openDialog}>
+                        <Button 
+                            variant="insbtn"
+                            onClick={openDialog}
+                            className="w-[56px] min-w-0"
+                        >
                             {t('卸载')}
                         </Button>
                         <AlertDialogDemo 
