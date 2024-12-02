@@ -119,7 +119,7 @@ function MainPage() {
     const [currentPage, setCurrentPage] = useState(1); // 当前页面
     const [searchQuery, setSearchQuery] = useState(""); // 搜索关键词
     const pageSize = 9; // 每页显示的应用数
-    const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+    // const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
 
     // 请求数据
@@ -169,10 +169,10 @@ function MainPage() {
 
     const totalPages = Math.ceil(totalItems / pageSize); // 确保分页计算是向上取整
 
-    // 添加搜索框展开/收起的处理函数
-    const handleSearchExpand = (expanded: boolean) => {
-        setIsSearchExpanded(expanded);
-    };
+    // // 添加搜索框展开/收起的处理函数
+    // const handleSearchExpand = (expanded: boolean) => {
+    //     setIsSearchExpanded(expanded);
+    // };
 
     return (
         <>
