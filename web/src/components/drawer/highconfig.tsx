@@ -1,4 +1,4 @@
- /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";

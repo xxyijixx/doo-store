@@ -54,7 +54,17 @@ theme: {
 					'4': 'hsl(var(--chart-4))',
 					'5': 'hsl(var(--chart-5))'
 				}
-			}
+			},
+			
+			transitionProperty: {
+				'transform': 'transform',
+			},
+			transitionDuration: {
+				'300': '300ms',
+			},
+			transitionTimingFunction: {
+				'in-out': 'cubic-bezier(0.4, 0, 0.2, 1)',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

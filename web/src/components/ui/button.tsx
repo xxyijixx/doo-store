@@ -16,18 +16,18 @@ const buttonVariants = cva(
         outline:
           "border border-input bg-white-300 text-sm text-white shadow-sm hover:bg-white hover:text-theme-color/85 h-9 px-6 py-2",
         secondary:
-          "bg-secondary text-theme-color shadow-sm hover:bg-secondary/80 hover:text-theme-color h-9 px-4 py-2",
+          "bg-theme-color text-white/80 shadow-sm hover:bg-secondary/80 hover:text-theme-color h-9 px-4 py-2",
         ghost: "hover:bg-accent text-gray-600 hover:text-gray-500 h-9 px-4 py-2",
         link: "text-primary underline-offset-4 hover:underline h-9 px-6 py-2",
         surely: "bg-theme-color text-sm text-gray-100 shadow hover:bg-theme-color/70 h-9 px-5 py-2",
         common: " cursor-pointer bg-theme-color text-white  hover:bg-theme-color/70 text-sm rounded-full h-9 lg:px-6 md:px-8 px-3 py-2 rounded m-1",
         cancel: " cursor-pointer border border-input bg-gray-200 text-sm text-gray-500 hover:bg-white hover:border-theme-color/50 hover:text-theme-color/85 rounded h-9 px-6 py-2  m-1",
         searchbtn: "cursor-pointer bg-transparent text-white  text-sm rounded h-7 lg:px-3 md:px-8 px-3 py-2 m-1",
-        combar: " cursor-pointer  text-theme-color  border-b-2 border-theme-color/70  text-sm h-9 lg:px-6 md:px-8 px-3 py-2 m-1 rounded-none",
-        defbar: "cursor-pointer bg-transparent text-gray-600  hover:text-theme-color/70  text-sm h-9 px-6 py-2  m-1",
-        combarson: "cursor-pointer bg-theme-color/20 text-theme-color text-sm rounded-lg h-9 lg:px-6 md:px-8 px-2 py-2 m-1",
-        defbarson: "cursor-pointer bg-transparent text-gray-600  hover:bg-theme-color/20 hover:text-theme-color text-sm rounded-lg h-9 px-6 py-2 m-1",
-        insbtn:"border-2 border-theme-color text-sm text-theme-color hover:text-theme-color/80 hover:border-theme-color/80 h-8 px-3 whitespace-nowrap cursor-pointer",
+        combar: " cursor-pointer  text-theme-color  border-theme-color/70  text-sm h-9 lg:px-0 md:px-0 px-0 py-2 m-1  rounded-none",
+        defbar: "cursor-pointer bg-transparent text-gray-600  hover:text-theme-color/70  text-sm h-9 px-0 py-2  m-1",
+        combarson: "cursor-pointer bg-theme-color/20 text-theme-color text-sm rounded-lg h-9 lg:px-5 md:px-8 px-2 py-2 m-1",
+        defbarson: "cursor-pointer bg-transparent text-gray-600  hover:bg-theme-color/20 hover:text-theme-color text-sm rounded-lg h-9 px-5 py-2 m-1",
+        insbtn:"border border-theme-color text-sm font-normal text-theme-color hover:text-theme-color/80 hover:border-theme-color/80 h-8 px-3 whitespace-nowrap cursor-pointer",
         indefbtn:"border border-input rounded-md bg-gray-300 text-sm text-white shadow-sm h-8 px-3 whitespace-nowrap cursor-not-allowed"
       },
       size: {

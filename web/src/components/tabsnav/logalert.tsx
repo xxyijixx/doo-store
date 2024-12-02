@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import Codemirror, {ReactCodeMirrorRef} from "@uiw/react-codemirror";
 import { javascript } from '@codemirror/lang-javascript';
 import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from "@/components/ui/select";
@@ -84,7 +83,7 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
 
     return (
         <Sheet open={isOpen} onOpenChange={onClose}>
-            <SheetContent className="overflow-y-auto overflow-x-hidden">
+            <SheetContent className="overflow-auto lg:overflow-x-hidden">
                 <SheetHeader>
                     <SheetTitle className=' top-3 my-1 text-gray-700 text-xl'>Log</SheetTitle>
                 </SheetHeader>
@@ -92,10 +91,10 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                 <SheetDescription className='pt-3'>
                 </SheetDescription>
                 <div className='items-center mt-3'>
-                    <div className="flex justify-between w-full">
+                    <div className="flex justify-between w-full ">
                         <Label className='ml-1 w-1/6' >{t('时间范围')}</Label>
                         <Select value={logSearch.modeIndex.toString()} onValueChange={(value) => handleModeChange(Number(value))}>
-                            <SelectTrigger className="lg:w-full md:w-52 w-28 bg-gray-200/60">
+                            <SelectTrigger className="lg:w-full md:w-full w-full ml-6 bg-gray-200/60">
                                 <SelectValue>
                                     {/* 通过下标渲染选中的时间范围的label */}
                                     {timeOptions[logSearch.modeIndex].label}
@@ -118,7 +117,7 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                             value={logSearch.tail.toString()} 
                             onValueChange={(value) => setLogSearch(prev => ({ ...prev, tail: Number(value) }))}
                         >
-                            <SelectTrigger className="lg:w-full md:w-52 w-28  bg-gray-200/60">
+                            <SelectTrigger className="lg:w-full md:w-full w-full ml-6  bg-gray-200/60">
                                 <span>{logSearch.tail === 10000 ? 'All' : logSearch.tail}</span>
                             </SelectTrigger>
                             <SelectContent>
@@ -132,10 +131,10 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                     </div>
                 </div>
 
-                <div className="flex justify-between w-full mt-6">
+                <div className="flex w-full mt-6">
                     <p className="text-gray-500 ml-1 w-1/6 whitespace-nowrap">{t('日志数据')}</p>
                     {/* 日志显示区域 */}
-                    <div className="lg:w-full ml-6">
+                    <div className="lg:w-full md:w-10/12 lg:ml-6 md:ml-8">
                         <Codemirror
                             ref={codemirrorRef}
                             value={logInfo}
