@@ -6,7 +6,7 @@ import {
     CardFooter,
 } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { AlertDialogDemo } from "@/components/tabsnav/uninstallalert"
 import { LoadingOverlay } from "@/components/tabsnav/loading"
 import {  AlertLogHave } from "@/components/tabsnav/logalert"
@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslation } from "react-i18next"
 import { FalseToaster } from '@/components/ui/toaster'
 import { useToast } from "@/hooks/use-toast";
+import * as http from "@/api/modules/fouceinter";
 
 interface InStalledBtnProps {
     app: Item;
@@ -44,14 +45,46 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
         setIsLoading(false)
         closeDialog() // 关闭对话框
     }
+    const isRunning = useMemo(() => {
+        return app.status == "Running"
+    }, [app.status])
 
-    const [isDisable, setIsDisable] = useState(false)
+    const appStatus = useMemo(() => {
+        if(!app.status) {
+            return t("未知")
+        }
+        switch(app.status) {
+            case "Running":
+                return t("已运行")
+            case "Stopped":
+                return t("已停止")
+            case "UpErr":
+                return t("失败")
+            case "Error":
+                return t("错误")
+            default:
+                return t("未知")
+        }
+    }, [app.status])
     const handleToggleStarted = () => {
-        setIsDisable(!isDisable)
+        let action = "stop"
+        if(app.status == "Running") {
+            action = "stop"
+        } else {
+            action = "start"
+        }
+        http.putAppStatus(app.key, {
+            action: action,
+            params: {}
+        }).then(res => {
+            console.log(res)
+        }).catch(err => {
+            console.error(err)
+        })
     }
 
     const handleLogClick = () => {
-        if (isDisable) {
+        if (app.status != "Running") {
             // setIsLogDemoOpen(true)
             toast({
                 title: t("温馨提示"),
@@ -85,12 +118,12 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                             {app.name}
                             <span
                                 className={
-                                    isDisable
+                                    !isRunning
                                         ? "ml-3  border rounded-sm border-red-400 pt-1 px-2 text-sm font-normal text-red-400"
                                         : "ml-3  border rounded-sm border-theme-color pt-1 px-2 text-sm font-normal text-theme-color"
                                 }
                             >
-                                {isDisable ? t("已停止") : t("已运行")}
+                                {appStatus}
                             </span>
                         </div>
                     )}
@@ -115,7 +148,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                         <Button
                             variant="insbtn"
                             className={`w-[56px] min-w-0 ${
-                                isDisable 
+                                !isRunning 
                                     ? "bg-gray-300 text-white cursor-not-allowed border-2 border-gray-300 hover:bg-gray-300 hover:text-white hover:border-2 hover:border-gray-300" 
                                     : ""
                             }`}
@@ -128,9 +161,9 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                         <Button 
                             variant="insbtn" 
                             onClick={openDrawer}  
-                            disabled={isDisable}
+                            disabled={!isRunning}
                             className={`w-[56px] min-w-0 ${
-                                isDisable ? "bg-gray-300 text-white cursor-not-allowed border-2 border-gray-300 hover:bg-gray-300 hover:text-white hover:border-2 hover:border-gray-300": ""
+                                !isRunning ? "bg-gray-300 text-white cursor-not-allowed border-2 border-gray-300 hover:bg-gray-300 hover:text-white hover:border-2 hover:border-gray-300": ""
                             }`}
                         >
                             {t('参数')}
@@ -140,10 +173,10 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                             variant="insbtn" 
                             onClick={handleToggleStarted} 
                             className={`w-[56px] min-w-0 ${
-                                isDisable ? "border-theme-color text-theme-color" : ""
+                                !isRunning ? "border-theme-color text-theme-color" : ""
                             }`}
                         >
-                            {isDisable ? t("启用") : t("停止")}
+                            {!isRunning ? t("启用") : t("停止")}
                         </Button>
 
                         <Button 

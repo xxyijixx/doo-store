@@ -10,6 +10,10 @@ export const postInstall = (key: string, params: object) =>  {
     return http.post<common.Detail>(`/api/v1/apps/${key}`, params)
 }
 
+export const putAppStatus = (key: string, params: object) => {
+    return http.put(`/api/v1/apps/${key}`, params)
+}
+
 export const getInsParams = (id: string|number) =>  {
     return http.get<common.getEdit>(`/api/v1/apps/installed/${id}/params`)
 }
