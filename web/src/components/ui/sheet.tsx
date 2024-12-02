@@ -65,27 +65,28 @@ const SheetContent = React.forwardRef<
 >(({ side = "right", className, children, ...props }, ref) => (
   <SheetPortal>
     <SheetOverlay />
-    <SheetPrimitive.Close 
-      className={cn(
-        "fixed top-4 rounded-full shadow-lg p-1.5 z-[100] group hover:bg-white/10 lg:block md:block hidden",
-        side === "right" 
-          ? "right-4 md:right-[calc(75%+12px)] lg:right-[calc(666px+12px)]" 
-          : "left-4"
-      )}
-    >
-      <Cross2Icon className="h-8 w-8 text-white [transition:transform_500ms_ease-in-out] group-hover:[transform:rotate(90deg)]" />
-      <span className="sr-only">Close</span>
-    </SheetPrimitive.Close>
+
     <SheetPrimitive.Content
       ref={ref}
       className={cn(sheetVariants({ side }), className)}
       {...props}
     >
+      <SheetPrimitive.Close
+        className={cn(
+          "fixed top-4 rounded-full p-1.5 z-[100] group hover:bg-white/10 lg:block md:block hidden",
+          side === "right"
+            ? "right-4 md:right-[calc(75%+12px)] lg:right-[calc(666px+12px)]"
+            : "left-4"
+        )}
+      >
+        <Cross2Icon className="h-4 w-4 text-white [transition:transform_200ms_ease-in-out] group-hover:[transform:rotate(90deg)]" />
+        <span className="sr-only">Close</span>
+      </SheetPrimitive.Close>
       {children}
     </SheetPrimitive.Content>
   </SheetPortal>
-))
-SheetContent.displayName = SheetPrimitive.Content.displayName
+));
+SheetContent.displayName = SheetPrimitive.Content.displayName;
 
 const SheetHeader = ({
   className,
