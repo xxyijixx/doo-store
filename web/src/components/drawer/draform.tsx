@@ -152,7 +152,7 @@ export function ProfileForm({
 
     return (
         <Form {...form}>
-            <form className="space-y-8 relative overflow-visible" onSubmit={handleSubmit(handleRestart)}>
+            <form className="space-y-8 relative overflow-visible lg:px-0 md:px-0 px-3" onSubmit={handleSubmit(handleRestart)}>
                 {/* 动态渲染 form_fields */}
                 {formFields.map((field, index) => {
                     // 如果 field 没有 name 属性，生成一个默认的 name
@@ -203,22 +203,35 @@ export function ProfileForm({
                     />
                 </FormItem>
 
-                <div className="flex justify-start space-x-3">
-                        <Button
-                            type="submit"
-                            variant="surely"
-                            className="cursor-pointer"
-                            onClick={handleRestart}
-                            disabled={loading} //防止用户在请求期间重复点击按钮,没有这个条件影响局部加载，会全局加载覆盖出现问题
-                        >
-                            {t('安装')}
-                        </Button>
+                {/* 修改按钮组的布局 */}
+                <div className="lg:flex md:flex hidden justify-start space-x-3">
+                    <Button
+                        type="submit"
+                        variant="surely"
+                        className="cursor-pointer"
+                        onClick={handleRestart}
+                        disabled={loading}
+                    >
+                        {t('安装')}
+                    </Button>
 
-                        <SheetClose className="cursor-pointer border border-gray-200/60 bg-gray-200/60 text-black/70  rounded-md  text-sm  shadow-sm hover:bg-white hover:border-theme-color/85 hover:text-theme-color/85 h-9 px-5 py-2">
-                            {t('取消')}
-                        </SheetClose>
+                    <SheetClose className="cursor-pointer border border-gray-200/60 bg-gray-200/60 text-black/70 rounded-md text-sm shadow-sm hover:bg-white hover:border-theme-color/85 hover:text-theme-color/85 h-9 px-5 py-2">
+                        {t('取消')}
+                    </SheetClose>
                 </div>
-                
+
+                {/* 添加小屏幕下的固定按钮组 */}
+                <div className="lg:hidden md:hidden flex absolute -top-32 pt-6 right-0  z-50">
+                    <Button
+                        type="submit"
+                        variant="minsure"
+                        className="cursor-pointer text-theme-color text-lg font-normal "
+                        onClick={handleRestart}
+                        disabled={loading}
+                    >
+                        {t('安装')}
+                    </Button>
+                </div>
             </form>
         </Form>
     );

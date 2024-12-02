@@ -14,6 +14,8 @@ theme: {
 			},
 			colors: {
 				'theme-color': '#84c56a',
+				'theme-success': '#e8f5e2',
+				'theme-warning':'#fdf2f2',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				card: {

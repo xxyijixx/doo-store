@@ -150,7 +150,7 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
 
     return (
         <Form {...form} >
-            <form className="space-y-8" onSubmit={handleSubmit(handleRestart)}>
+            <form className="space-y-8 relative overflow-visible lg:px-0 md:px-0 px-3" onSubmit={handleSubmit(handleRestart)}>
                 {formFields.map((field, index) => {
                     const fieldName = field.env_key
                     return (
@@ -192,7 +192,7 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
                     />
                 </FormItem>
 
-                <div className="flex justify-start space-x-3">
+                <div className="lg:flex md:flex hidden justify-start space-x-3">
                     <Button
                         type="submit"
                         variant="surely"
@@ -202,6 +202,19 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
                     <SheetClose
                         className="cursor-pointer border-2 border-gray-200/60 rounded-md bg-gray-200/60 text-sm text-gray-600 shadow-sm hover:bg-white hover:border-theme-color/85 hover:text-theme-color/85 h-9 px-5 py-2"
                     >{t('取消')}</SheetClose>
+                </div>
+
+                 {/* 添加小屏幕下的固定按钮组 */}
+                <div className="lg:hidden md:hidden flex absolute -top-28 pt-6 right-0  z-50">
+                    <Button
+                        type="submit"
+                        variant="minsure"
+                        className="cursor-pointer text-theme-color text-lg font-normal "
+                        onClick={handleRestart}
+                        disabled={loading}
+                    >
+                        {t('重启')}
+                    </Button>
                 </div>
             </form>
         </Form>

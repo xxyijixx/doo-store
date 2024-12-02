@@ -20,6 +20,7 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent text-gray-600 hover:text-gray-500 h-9 px-4 py-2",
         link: "text-primary underline-offset-4 hover:underline h-9 px-6 py-2",
         surely: "bg-theme-color text-sm text-gray-100 shadow hover:bg-theme-color/70 h-9 px-5 py-2",
+        minsure: "text-sm text-theme-color border-none  h-9 px-5 py-2",
         common: " cursor-pointer bg-theme-color text-white  hover:bg-theme-color/70 text-sm rounded-full h-9 lg:px-6 md:px-8 px-3 py-2 rounded m-1",
         cancel: " cursor-pointer border border-input bg-gray-200 text-sm text-gray-500 hover:bg-white hover:border-theme-color/50 hover:text-theme-color/85 rounded h-9 px-6 py-2  m-1",
         searchbtn: "cursor-pointer bg-transparent text-white  text-sm rounded h-7 lg:px-3 md:px-8 px-3 py-2 m-1",
