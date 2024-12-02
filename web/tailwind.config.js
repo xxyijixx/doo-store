@@ -65,6 +65,12 @@ theme: {
 			transitionTimingFunction: {
 				'in-out': 'cubic-bezier(0.4, 0, 0.2, 1)',
 			},
+			rotate: {
+				'360': '360deg'
+			},
+			transform: {
+				'rotate-90': 'rotate(90deg)',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
