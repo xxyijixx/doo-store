@@ -32,6 +32,10 @@ build:
 translate:
 	cd web && npm run translate && cd ../
 
+dev:
+	cd web && npm run build && cd ../
+	go run main.go -m
+
 # 提示 fresh: No such file or directory 时解決辦法
 # go install github.com/pilu/fresh@latest
 
