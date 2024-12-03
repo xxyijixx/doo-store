@@ -14,6 +14,7 @@ type AppInstalled struct {
 	Env           string `json:"env" gorm:"type:text"`
 	DockerCompose string `json:"docker_compose" gorm:"type:text"`
 	Message       string `json:"message" gorm:"default:''"`
+	Location      string `json:"location"`
 	Status        string `json:"status" gorm:"size:20;not null;default:''"`
 }
 

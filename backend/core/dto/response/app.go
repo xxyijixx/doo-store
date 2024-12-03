@@ -31,3 +31,11 @@ type AppInstalledParamsResp struct {
 	CPUS          string       `json:"cpus"`
 	MemoryLimit   string       `json:"memory_limit"`
 }
+
+type GetInstalledPluginInfoResp struct {
+	Name          string `json:"name"`
+	Key           string `json:"key"`
+	Location      string `json:"location"`
+	Status        string `json:"status"`
+	CloudProvider string `json:"cloud_provider,omitempty"`
+}

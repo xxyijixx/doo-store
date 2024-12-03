@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"text/template"
 
 	"github.com/docker/docker/api/types"
@@ -138,6 +139,21 @@ func RemoveLocation(locationName string) error {
 		return err
 	}
 	return nil
+}
+
+func ExtractLocations(nginxConfig string) []string {
+	// 定义正则表达式来匹配 location 块
+	re := regexp.MustCompile(`location\s+(/[^/]+(?:/[^/]+)*/*)\s+{`)
+	matches := re.FindAllStringSubmatch(nginxConfig, -1)
+
+	// 提取匹配的地址
+	var locations []string
+	for _, match := range matches {
+		if len(match) > 1 {
+			locations = append(locations, match[1])
+		}
+	}
+	return locations
 }
 
 func getNginxContainer() (types.Container, error) {

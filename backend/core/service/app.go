@@ -47,6 +47,7 @@ type IAppService interface {
 	AppTags(ctx dto.ServiceContext) ([]*model.Tag, error)
 	GetLogs(ctx dto.ServiceContext, req request.AppLogsSearch) (any, error)
 	Upload(ctx dto.ServiceContext, req request.PluginUpload) error
+	GetPluginInfo(ctx dto.ServiceContext, req request.GetInstalledPluginInfo) (*response.GetInstalledPluginInfoResp, error)
 }
 
 func NewIAppService() IAppService {
@@ -335,6 +336,18 @@ func (p *AppInstallProcess) AddNginx() error {
 			}
 			_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(p.appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
 			return err
+		}
+		// 提取location
+		locationPath := fmt.Sprintf("%s/%s.conf", constant.NginxAppsConfigDir, p.app.Key)
+		content, err := os.ReadFile(locationPath)
+		if err != nil {
+			log.Debug("读取Nginx配置文件失败", err)
+			return err
+		}
+		locations := nginx.ExtractLocations(string(content))
+		if len(locations) > 0 {
+			fmt.Println("当前Location为", locations[0])
+			_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(p.appInstalled.ID)).Update(repo.AppInstalled.Location, locations[0])
 		}
 	}
 	return nil
@@ -800,6 +813,34 @@ func (AppService) Upload(ctx dto.ServiceContext, req request.PluginUpload) error
 		return err
 	}
 	return nil
+}
+
+func (AppService) GetPluginInfo(ctx dto.ServiceContext, req request.GetInstalledPluginInfo) (*response.GetInstalledPluginInfoResp, error) {
+	// 获取已安装并正常运行的插件信息
+	info, err := repo.AppInstalled.Where(repo.AppInstalled.Key.Eq(req.Key), repo.AppInstalled.Status.Eq(constant.Running)).First()
+	if err != nil {
+		log.Info("查询插件安装信息失败", err)
+		return nil, err
+	}
+	resp := &response.GetInstalledPluginInfoResp{
+		Name:     info.Name,
+		Key:      info.Key,
+		Status:   info.Status,
+		Location: info.Location,
+	}
+
+	// 获取云盘的provider
+	if req.Key == "doocloudisk" {
+		env := map[string]string{}
+		err = json.Unmarshal([]byte(info.Env), &env)
+		if err != nil {
+			log.Info("解析环境变量失败", err)
+			return nil, err
+		}
+
+		resp.CloudProvider = env["CLOUD_PROVIDER"]
+	}
+	return resp, err
 }
 
 func appRe(appInstalled *model.AppInstalled, envContent string) error {

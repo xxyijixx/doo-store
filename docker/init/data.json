@@ -51,9 +51,9 @@
           "required": false
         }
       ],
-      "command": ""
-,
-      "nginx_config": ""    },
+      "command": "",
+      "nginx_config": ""
+    },
     {
       "name": "DooAliOSS",
       "key": "dooalioss",
@@ -97,9 +97,9 @@
           "required": true
         }
       ],
-      "command": ""
-,
-      "nginx_config": ""    },
+      "command": "",
+      "nginx_config": ""
+    },
     {
       "name": "DooTxCOS",
       "key": "dootxcos",
@@ -143,9 +143,9 @@
           "required": true
         }
       ],
-      "command": ""
-,
-      "nginx_config": ""    },
+      "command": "",
+      "nginx_config": ""
+    },
     {
       "name": "DooQiNiu",
       "key": "dooqiniu",
@@ -189,9 +189,9 @@
           "required": true
         }
       ],
-      "command": ""
-,
-      "nginx_config": ""    },
+      "command": "",
+      "nginx_config": ""
+    },
     {
       "name": "Nginx2",
       "key": "nginx2",
@@ -211,9 +211,9 @@
           "required": true
         }
       ],
-      "command": ""
-,
-      "nginx_config": ""    },
+      "command": "",
+      "nginx_config": ""
+    },
     {
       "name": "Nginx3",
       "key": "nginx3",
@@ -233,9 +233,9 @@
           "required": true
         }
       ],
-      "command": ""
-,
-      "nginx_config": ""    },
+      "command": "",
+      "nginx_config": ""
+    },
     {
       "name": "Nginx4",
       "key": "nginx4",
@@ -255,9 +255,9 @@
           "required": true
         }
       ],
-      "command": ""
-,
-      "nginx_config": ""    },
+      "command": "",
+      "nginx_config": ""
+    },
     {
       "name": "Nginx5",
       "key": "nginx5",
@@ -277,9 +277,9 @@
           "required": true
         }
       ],
-      "command": ""
-,
-      "nginx_config": ""    },
+      "command": "",
+      "nginx_config": ""
+    },
     {
       "name": "Nginx6",
       "key": "nginx6",
@@ -299,9 +299,9 @@
           "required": true
         }
       ],
-      "command": ""
-,
-      "nginx_config": ""    },
+      "command": "",
+      "nginx_config": ""
+    },
     {
       "name": "Nginx7",
       "key": "nginx7",
@@ -321,9 +321,9 @@
           "required": true
         }
       ],
-      "command": ""
-,
-      "nginx_config": ""    },
+      "command": "",
+      "nginx_config": ""
+    },
     {
       "name": "Nginx8",
       "key": "nginx8",
@@ -343,9 +343,9 @@
           "required": true
         }
       ],
-      "command": ""
-,
-      "nginx_config": ""    },
+      "command": "",
+      "nginx_config": ""
+    },
     {
       "name": "Nginx9",
       "key": "nginx9",
@@ -366,9 +366,9 @@
           "required": true
         }
       ],
-      "command": ""
-,
-      "nginx_config": ""    },
+      "command": "",
+      "nginx_config": ""
+    },
     {
       "name": "Nginx10",
       "key": "nginx10",
@@ -388,8 +388,30 @@
           "required": true
         }
       ],
-      "command": ""
-,
-      "nginx_config": ""    }
+      "command": "",
+      "nginx_config": ""
+    },
+    {
+      "name": "DooCloudDisk",
+      "key": "doocloudisk",
+      "description": "测试，正式插件doocloudisk",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "name": "cloud_provider",
+          "key": "CLOUD_PROVIDER",
+          "value": "aliyun",
+          "required": true
+        }
+      ],
+      "command": "",
+      "nginx_config": ""
+    }
   ]
 }

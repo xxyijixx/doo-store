@@ -48,3 +48,7 @@ type PluginUpload struct {
 	dto.Plugin
 	DockerCompose string `json:"docker_compose"`
 }
+
+type GetInstalledPluginInfo struct {
+	Key string `form:"key" json:"-" binding:"required"`
+}

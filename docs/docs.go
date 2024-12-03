@@ -417,6 +417,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/apps/plugin/info": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app"
+                ],
+                "summary": "获取已安装的插件信息(仅需要登录)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "zh",
+                        "description": "i18n",
+                        "name": "language",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "key",
+                        "name": "key",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.GetInstalledPluginInfoResp"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/apps/tags": {
             "get": {
                 "security": [
@@ -1000,6 +1047,26 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "values": {}
+            }
+        },
+        "response.GetInstalledPluginInfoResp": {
+            "type": "object",
+            "properties": {
+                "cloud_provider": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
             }
         }
     },

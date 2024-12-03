@@ -42,6 +42,7 @@ func newAppInstalled(db *gorm.DB, opts ...gen.DOOption) appInstalled {
 	_appInstalled.Env = field.NewString(tableName, "env")
 	_appInstalled.DockerCompose = field.NewString(tableName, "docker_compose")
 	_appInstalled.Message = field.NewString(tableName, "message")
+	_appInstalled.Location = field.NewString(tableName, "location")
 	_appInstalled.Status = field.NewString(tableName, "status")
 
 	_appInstalled.fillFieldMap()
@@ -68,6 +69,7 @@ type appInstalled struct {
 	Env           field.String
 	DockerCompose field.String
 	Message       field.String
+	Location      field.String
 	Status        field.String
 
 	fieldMap map[string]field.Expr
@@ -100,6 +102,7 @@ func (a *appInstalled) updateTableName(table string) *appInstalled {
 	a.Env = field.NewString(table, "env")
 	a.DockerCompose = field.NewString(table, "docker_compose")
 	a.Message = field.NewString(table, "message")
+	a.Location = field.NewString(table, "location")
 	a.Status = field.NewString(table, "status")
 
 	a.fillFieldMap()
@@ -117,7 +120,7 @@ func (a *appInstalled) GetFieldByName(fieldName string) (field.OrderExpr, bool) 
 }
 
 func (a *appInstalled) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 16)
+	a.fieldMap = make(map[string]field.Expr, 17)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
@@ -133,6 +136,7 @@ func (a *appInstalled) fillFieldMap() {
 	a.fieldMap["env"] = a.Env
 	a.fieldMap["docker_compose"] = a.DockerCompose
 	a.fieldMap["message"] = a.Message
+	a.fieldMap["location"] = a.Location
 	a.fieldMap["status"] = a.Status
 }
 
