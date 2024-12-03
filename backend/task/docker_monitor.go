@@ -204,7 +204,7 @@ func InitDockerMonitoring() error {
 
 // 辅助函数：更新应用状态
 func updateAppStatus(appName string, status string, message string) {
-	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.Name.Eq(appName)).First()
+	appInstalled, err := repo.AppInstalled.Select(repo.AppInstalled.ID, repo.AppInstalled.Status).Where(repo.AppInstalled.Name.Eq(appName)).First()
 	if err != nil {
 		log.Errorf("Failed to find app record for %s: %v", appName, err)
 		return

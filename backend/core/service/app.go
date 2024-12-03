@@ -443,13 +443,33 @@ func (*AppService) AppInstallOperate(ctx dto.ServiceContext, req request.AppInst
 		err := appStop(appInstalled)
 		return err
 	}
+	stdout := ""
+	if req.Action == "start" {
+		// 插件未正常启动，执行up操作
+		if appInstalled.Status == constant.UpErr {
+			stdout, err = compose.Up(composeFile)
+		} else {
+			stdout, err = compose.Operate(composeFile, req.Action)
+		}
+		if err != nil {
+			log.Info("Error docker compose operate")
 
-	stdout, err := compose.Operate(composeFile, req.Action)
-	if err != nil {
-		log.Info("Error docker compose operate")
-		return err
+			_, err = docker.ParseError(stdout, err)
+			_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Updates(
+				map[string]interface{}{
+					repo.AppInstalled.Message.ColumnName().String(): err.Error(),
+				},
+			)
+			return err
+		}
+		_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Updates(
+			map[string]interface{}{
+				repo.AppInstalled.Status.ColumnName().String():  constant.Running,
+				repo.AppInstalled.Message.ColumnName().String(): "",
+			},
+		)
 	}
-	fmt.Println(stdout)
+
 	insertLog(appInstalled.ID, fmt.Sprintf("插件操作[%s]", req.Action), stdout)
 	return nil
 }

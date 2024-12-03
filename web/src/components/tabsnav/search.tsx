@@ -23,6 +23,7 @@ const UniSearch: React.FC<UniSearchProps> = ({
     const { t } = useTranslation();
     const [query, setQuery] = useState(defaultValue);
     const [error, setError] = useState<string>("");
+    const [isExpanded, setIsExpanded] = useState(false);
 
     // 正则：只允许输入中文、英文、数字(包括')
     const regex = /^[a-zA-Z0-9\u4e00-\u9fa5']*$/;
@@ -58,32 +59,70 @@ const UniSearch: React.FC<UniSearchProps> = ({
         }
     }, [query, error, onSearch, clearAfterSearch, t, chregex]);
 
+    // 添加鼠标滑过处理
+    const handleMouseEnter = () => {
+        setIsExpanded(true);
+        onExpandChange?.(true);
+    };
+
+    const handleMouseLeave = () => {
+        if (!document.activeElement?.classList.contains('search-input')) {
+            setIsExpanded(false);
+            onExpandChange?.(false);
+        }
+    };
+
     return (
-        <div>
+        <div 
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
             <div className={`relative flex group items-center ${
-                query.length > 0 ? "w-[200px]" : "w-10 hover:w-[200px]"
-            } h-10 lg:mr-0 md:mr-0 -mr-9`}>
+                query.length > 0 || isExpanded ? "w-[180px]" : "w-10"
+            } h-10 lg:mr-0 md:mr-0 mr-0`}>
                 <div 
                     className={`relative flex items-center h-10 bg-gray-200/50 rounded-full overflow-hidden transition-all duration-300 ${
-                        query.length > 0 ? "w-[200px]" : "w-10 group-hover:w-[200px] focus-within:w-[200px]"
+                        query.length > 0 || isExpanded ? "w-[180px]" : "w-10"
                     }`}
+                    onClick={() => {
+                        if (!isExpanded) {
+                            setIsExpanded(true);
+                            onExpandChange?.(true);
+                        }
+                    }}
                 >
                     <Input
                         type="text"
                         value={query}
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
-                        onFocus={() => onExpandChange?.(true)}
-                        onBlur={() => onExpandChange?.(false)}
-                        className="w-full h-full bg-transparent border-none pl-4 pr-10 focus:outline-none placeholder:text-gray-500"
+                        onFocus={() => {
+                            setIsExpanded(true);
+                            onExpandChange?.(true);
+                        }}
+                        onBlur={() => {
+                            if (query.length === 0) {
+                                setIsExpanded(false);
+                                onExpandChange?.(false);
+                            }
+                        }}
+                        className="w-full h-full bg-transparent border-none pl-4 pr-10 focus:outline-none placeholder:text-gray-500 search-input"
                     />
                     <Button
                         variant="searchbtn"
-                        onClick={handleSearch}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (query.length > 0) {
+                                handleSearch();
+                            } else {
+                                setIsExpanded(true);
+                                onExpandChange?.(true);
+                            }
+                        }}
                         disabled={!!error}
                         className="absolute lg:-right-0.5 md:-right-6 right-0 top-4 transform -translate-y-1/2 p-2 rounded-full"
                     >
-                        <MagnifyingGlassIcon className="size-20 shrink-0 font-bold text-gray-800" />
+                        <MagnifyingGlassIcon className="size-5 shrink-0 font-bold text-gray-800" />
                     </Button>
                 </div>
             </div>

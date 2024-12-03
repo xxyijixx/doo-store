@@ -77,16 +77,28 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
         let action = "stop"
         if (app.status == "Running") {
             action = "stop"
+            setIsLoading(true)  // 开启全局 loading 蒙版
             http.putAppStatus(app.key, {
                 action: action,
                 params: {}
             }).then(res => {
                 console.log(res)
                 loadData()
+                setIsLoading(false)  // 关闭 loading 蒙版
             }).catch(err => {
                 console.error(err)
             })
         } else {
+            if (app.status === "UpErr") {
+                toast({
+                    title: t("启动失败"),
+                    description: t("请卸载后重新安装"),
+                    variant: "destructive",
+                    duration: 3000,
+                    className: "fixed top-16 left-1/2 -translate-x-1/2 md:static md:translate-x-0 w-[90%] md:w-auto"
+                });
+                return;
+            }
             action = "start"
             setIsLoading(true)  // 开启全局 loading 蒙版
             http.putAppStatus(app.key, {
@@ -94,17 +106,17 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                 params: {}
             }).then(res => {
                 console.log(res)
-                // 设置 1 分钟后刷新
-                setTimeout(() => {
                     loadData()
                     setIsLoading(false)  // 关闭 loading 蒙版
-                }, 30000)  // 60000ms = 1分钟
             }).catch(err => {
                 console.error(err)
                 setIsLoading(false)
                 toast({
                     title: t("错误提示"),
                     description: t("启动失败，请重试"),
+                    variant: "destructive",
+                    duration: 3000,
+                    className: "fixed top-16 left-1/2 -translate-x-1/2 md:static md:translate-x-0 w-[90%] md:w-auto"
                 })
             })
         }
@@ -122,6 +134,20 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
             setIsLogHaveOpen(true)
         }
     }
+
+    const statusDisplay = useMemo(() => {
+        return (
+            <span
+                className={
+                    !isRunning
+                        ? "ml-3 border rounded-sm border-red-400 pt-1 px-2 text-sm font-normal text-red-400"
+                        : "ml-3 border rounded-sm border-theme-color pt-1 px-2 text-sm font-normal text-theme-color"
+                }
+            >
+                {appStatus}
+            </span>
+        );
+    }, [isRunning, appStatus]);
 
     return (
         <>
@@ -143,15 +169,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                     ) : (
                         <div className="text-xl font-semibold text-slate-950 dark:text-white flex">
                             {app.name}
-                            <span
-                                className={
-                                    !isRunning
-                                        ? "ml-3  border rounded-sm border-red-400 pt-1 px-2 text-sm font-normal text-red-400"
-                                        : "ml-3  border rounded-sm border-theme-color pt-1 px-2 text-sm font-normal text-theme-color"
-                                }
-                            >
-                                {appStatus}
-                            </span>
+                            {statusDisplay}
                         </div>
                     )}
 
@@ -204,7 +222,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                             className={`w-[56px] min-w-0 ${
                                 !isRunning ? "border-theme-color text-theme-color" : ""
                             }
-                             ${
+                            ${
                                 isInstalling || isLoading ? "bg-gray-300 text-white cursor-not-allowed border-2 border-gray-300 hover:bg-gray-300 hover:text-white hover:border-2 hover:border-gray-300" : ""
                             }`}
                         >
