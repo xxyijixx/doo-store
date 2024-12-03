@@ -84,7 +84,7 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
 
     return (
         <Sheet open={isOpen} onOpenChange={onClose}>
-            <SheetContent className="overflow-auto lg:overflow-x-hidden">
+            <SheetContent className="overflow-hidden lg:overflow-x-hidden">
                 <SheetHeader>
                     <SheetTitle  className='lg:ml-2 md:ml-2 pl-2 text-gray-700 z-50 lg:bg-transparent md:bg-transparent bg-gray-200/50 lg:py-0 md:py-0 py-3 flex items-center gap-2'>
                         <ChevronLeftIcon 
@@ -138,18 +138,17 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                     </div>
                 </div>
 
-                <div className="lg:flex md:flex w-full mt-6">
+                <div className="lg:flex md:flex w-full mt-6 h-[calc(100vh-280px)]">
                     <p className="text-gray-500 lg:ml-3 md:ml-3 ml-6 w-1/6 whitespace-nowrap">{t('日志数据')}</p>
-                    {/* 日志显示区域 */}
-                    <div className="lg:w-10/12 md:w-10/12 w-11/12 lg:ml-6 md:ml-8 ml-3 mb-6">
+                    <div className="lg:w-10/12 md:w-10/12 w-11/12 lg:ml-6 md:ml-8 ml-3 mb-6 h-full overflow-auto">
                         <Codemirror
                             ref={codemirrorRef}
                             value={logInfo}
                             editable={false}
                             width="100%"
-                            height="950px"
+                            height="100%"
                             theme="light"
-                            autoFocus={true} // 加载自动聚焦
+                            autoFocus={true}
                             extensions={[javascript()]}             
                         />
                     </div>

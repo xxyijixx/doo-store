@@ -17,6 +17,7 @@ import { Item } from "@/type.d/common"
 import { useState } from "react"
 import * as http from "@/api/modules/fouceinter"
 import { useTranslation } from "react-i18next"
+import warnIcon from "@/assets/警告.png"
 
 
 interface AlertDialogDemoProps {
@@ -68,7 +69,7 @@ export function AlertDialogDemo({ isOpen, onClose, app, onUninstall }: AlertDial
             <AlertDialogContent>
                 <div className="flex items-center space-x-4">
                 <Avatar>
-                    <AvatarImage src="@/assets/警告.png" />
+                    <AvatarImage src={warnIcon} />
                     <AvatarFallback>...</AvatarFallback>
                 </Avatar>
                 

@@ -37,7 +37,7 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 
 const sheetVariants = cva(
-  "fixed z-30 gap-4 bg-background lg:rounded-l-2xl md:rounded-l-2xl  lg:p-6 md:p-6 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out",
+  "fixed z-30 gap-4 bg-background lg:rounded-l-2xl md:rounded-l-2xl lg:p-6 md:p-6 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out",
   {
     variants: {
       side: {
@@ -73,13 +73,14 @@ const SheetContent = React.forwardRef<
     >
       <SheetPrimitive.Close
         className={cn(
-          "fixed top-4 rounded-full p-1.5 z-[100] group hover:bg-white/10 lg:block md:block hidden",
+          "fixed top-4 rounded-full p-1.5 z-[100] group  lg:block md:block hidden",
+          "focus:outline-none focus-visible:ring-0",
           side === "right"
             ? "right-4 md:right-[calc(75%+12px)] lg:right-[calc(666px+12px)]"
             : "left-4"
         )}
       >
-        <Cross2Icon className="h-4 w-4 text-white [transition:transform_200ms_ease-in-out] group-hover:[transform:rotate(90deg)]" />
+        <Cross2Icon className="h-6 w-6 text-white [transition:transform_200ms_ease-in-out] group-hover:[transform:rotate(90deg)]" />
         <span className="sr-only">Close</span>
       </SheetPrimitive.Close>
       {children}

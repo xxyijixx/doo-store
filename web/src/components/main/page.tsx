@@ -17,7 +17,9 @@ import { motion, AnimatePresence } from "framer-motion"; // 引入 framer-motion
 import * as http from '@/api/modules/fouceinter'
 import { useTokenStore } from "@/store/ TokenContext";
 import { useTranslation } from "react-i18next";
+import { ChevronLeftIcon } from "@radix-ui/react-icons"  // 添加这行导入
 
+const POLLING_INTERVAL = 5000; // 5秒轮询一次
 
 const fetchAppsData = async (tab: string, className = '', currentPage: number, pageSize = 9, query: string = '') => {
 
@@ -121,7 +123,7 @@ function MainPage() {
     const [searchQuery, setSearchQuery] = useState(""); // 搜索关键词
     const [tags, setTags] = useState<Tag[]>([]);
     const pageSize = 9; // 每页显示的应用数
-    // const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+    const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
 
     // 请求数据
@@ -140,12 +142,47 @@ function MainPage() {
         setLoading(false);
     };
 
+    
+
     const loadTags = async () => {
         const res = await http.getTags()
         if(res.data) {
             setTags(res.data)
         }
     }
+
+    // 添加新的状态更新函数
+    const updateAppsStatus = async () => {
+        try {
+            const data = await fetchAppsData(activeTab, selectedClass, currentPage, pageSize, searchQuery);
+            if (data?.items) {
+                // 只更新现有应用的状态
+                setFilteredApps(prevApps => 
+                    prevApps.map(prevApp => {
+                        const updatedApp = data.items.find(newApp => newApp.id === prevApp.id);
+                        return updatedApp ? { ...prevApp, status: updatedApp.status } : prevApp;
+                    })
+                );
+            }
+        } catch (error) {
+            console.error('Error updating status:', error);
+        }
+    };
+
+    // 修改轮询效果
+    useEffect(() => {
+        // 首次加载完整数据
+        loadData(searchQuery, currentPage);
+
+        // 只在 "installed" 标签页启用状态轮询
+        if (activeTab === 'installed') {
+            const intervalId = setInterval(() => {
+                updateAppsStatus(); // 只更新状态
+            }, POLLING_INTERVAL);
+
+            return () => clearInterval(intervalId);
+        }
+    }, [activeTab, selectedClass, currentPage, searchQuery]);
 
     // 初次加载数据
     useEffect(() => {
@@ -179,32 +216,51 @@ function MainPage() {
 
     const totalPages = Math.ceil(totalItems / pageSize); // 确保分页计算是向上取整
 
-    // // 添加搜索框展开/收起的处理函数
-    // const handleSearchExpand = (expanded: boolean) => {
-    //     setIsSearchExpanded(expanded);
-    // };
+    // 添加搜索框展开/收起的处理函数
+    const handleSearchExpand = (expanded: boolean) => {
+        setIsSearchExpanded(expanded);
+    };
 
     return (
         <>
-            <div className="flex justify-between items-center lg:block">
-                <h1 className="font-normal text-3xl lg:text-gray-800 lg:my-4 lg:text-left md:text-left text-center flex-1">
-                        {t('应用商店')}
-                    </h1>
-            </div>
-            <div className="flex justify-end w-full">
+            <div className="flex justify-between items-center mb-4">
                 {loading ? (
-                    <div className="rounded-full">
-                        <Skeleton className="mr-6 -mt-14 w-[200px] h-[40px] rounded-lg" />
+                    <div className="flex items-center flex-1">
+                        <div className="lg:hidden md:hidden">
+                            <Skeleton className="h-8 w-8 rounded-lg" />
+                        </div>
+                        <Skeleton className="h-[16px] w-[200px] rounded-lg" />
                     </div>
                 ) : (
-                    <div className="pr-6 -mt-14">
+                    <div className={`flex items-center ${!isSearchExpanded && 'flex-1'}`}>
+                        <Button 
+                            variant="goback" 
+                            size="icon"
+                            className="lg:hidden md:hidden"
+                        >
+                            <ChevronLeftIcon className="h-6 w-6" />
+                        </Button>
+                        <h1 className={`font-normal lg:text-3xl md:text-3xl text-2xl text-gray-800 transition-all duration-300
+                            lg:text-left md:text-left
+                            ${isSearchExpanded ? 'text-left' : 'text-center w-full'}`}
+                        >
+                            {t('应用商店')}
+                        </h1>
+                    </div>
+                )}
+                {loading ? (
+                    <div className="rounded-full">
+                        <Skeleton className="w-[10px] h-[40px] rounded-lg" />
+                    </div>
+                ) : (
+                    <div>
                         <UniSearch 
                             onSearch={handleSearch} 
                             clearAfterSearch={false}
-                            defaultValue={searchQuery} // 传入当前搜索值
+                            defaultValue={searchQuery}
+                            onExpandChange={handleSearchExpand}
                         />
                     </div>
-
                 )}
             </div>
             <AnimatePresence mode="wait">
