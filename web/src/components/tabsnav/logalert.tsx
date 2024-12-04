@@ -138,9 +138,9 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                     </div>
                 </div>
 
-                <div className="lg:flex md:flex w-full mt-20 h-[calc(100vh-280px)]">
+                <div className="lg:flex md:flex w-full mt-20 h-[calc(100vh-280px)] md:h-[calc(100vh-230px)] lg:h-[calc(100vh-230px)]">
                     <p className="text-gray-700 lg:ml-3 md:ml-3 ml-16 lg:pl-0 md:pl-0 pl-2 w-1/6 whitespace-nowrap">{t('日志数据')}</p>
-                    <div className="lg:w-full md:w-full w-11/12 lg:ml-6 lg:mr-3 md:ml-6 md:mr-3 ml-3 mb-6 h-full overflow-auto">
+                    <div className="lg:w-full md:w-full w-11/12 lg:ml-6 lg:mr-3 lg:mt-1 md:ml-6 md:mr-3 ml-3 mb-6 h-full overflow-auto">
                         <Codemirror
                             ref={codemirrorRef}
                             value={logInfo}
@@ -157,7 +157,7 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                                 allowMultipleSelections: true,
                                 indentOnInput: true
                             }}
-                            className="cm-scroller-show-scrollbar"
+                            className="cm-scroller-show-scrollbar h-full"
                         />
                     </div>
                 </div>

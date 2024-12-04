@@ -36,15 +36,10 @@ export function AlertDialogDemo({ isOpen, onClose, app, onUninstall }: AlertDial
         setIsLoading(true)
         try {
             // 发送 DELETE 请求来卸载应用
-
             const response = await http.deleteApp(app.key)
-
-            // const data = await response()
-
             if (response.code === 200) {
                 onUninstall() // 卸载成功后，执行回调函数
                 onClose() // 关闭对话框
-
             } else {
                 alert(response.msg) // 异常情况，显示错误信息
             }

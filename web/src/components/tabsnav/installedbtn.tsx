@@ -96,7 +96,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                     description: t("请卸载后重新安装"),
                     variant: "destructive",
                     duration: 3000,
-                    className: "fixed top-16 left-1/2 -translate-x-1/2 md:static md:translate-x-0 w-[90%] md:w-auto"
+                    className: "fixed top-20 lg:top-3 md:top-3 lg:right-6  md:right-4 right-1/2 translate-x-1/2 lg:translate-x-0 md:translate-x-0 w-[350px]"
                 });
                 return;
             }
@@ -153,7 +153,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
     return (
         <>
         < FalseToaster/>
-        <Card className="lg:w-auto  md:w-auto w-auto h-[180px] lg:mx-1 my-1 ">
+        <Card className="lg:w-auto  md:w-auto w-auto h-[180px] lg:mb-0 mb-3">
             <CardContent className="flex justify-start space-x-5 mt-6 pl-5">
                 {isLoading ? (
                     <Skeleton className="h-12 w-12 rounded-full" />

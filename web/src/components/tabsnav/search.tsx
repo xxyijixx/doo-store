@@ -105,6 +105,9 @@ const UniSearch: React.FC<UniSearchProps> = ({
                                 setIsExpanded(false);
                                 onExpandChange?.(false);
                             }
+                            if (chregex.test(query) && !error) {
+                                handleSearch();
+                            }
                         }}
                         className="w-full h-full bg-transparent border-none pl-4 pr-10 focus:outline-none placeholder:text-gray-500 search-input"
                     />
