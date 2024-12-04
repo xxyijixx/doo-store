@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Button } from "@/components/ui/button"
 import {
     Card,
@@ -153,7 +154,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
         <>
         < FalseToaster/>
         <Card className="lg:w-auto  md:w-auto w-auto h-[180px] lg:mx-1 my-1 ">
-            <CardContent className="flex justify-start space-x-5 mt-6">
+            <CardContent className="flex justify-start space-x-5 mt-6 pl-5">
                 {isLoading ? (
                     <Skeleton className="h-12 w-12 rounded-full" />
                 ) : (
@@ -167,7 +168,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                     {isLoading ? (
                         <Skeleton className="h-6 w-48" />
                     ) : (
-                        <div className="text-xl font-semibold text-slate-950 dark:text-white flex">
+                        <div className="text-xl font-medium text-slate-950 dark:text-white flex">
                             {app.name}
                             {statusDisplay}
                         </div>
@@ -176,11 +177,11 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                     {isLoading ? (
                         <Skeleton className="h-4 w-56" />
                     ) : (
-                        <p className="text-base line-clamp-2 min-h-[42px] leading-[21px] pt-1">{app.description || t("No description available")}</p>
+                        <p className="text-base line-clamp-2 min-h-[42px] leading-[21px] pt-1 pr-5">{app.description || t("No description available")}</p>
                     )}
                 </CardDescription>
             </CardContent>
-            <CardFooter className="flex justify-start -mt-1 gap-1 lg:gap-3 md:gap-2 lg:ml-14 md:ml-10 ml-8">
+            <CardFooter className="flex justify-start -mt-1 gap-1 lg:gap-3 md:gap-2 lg:ml-14 md:ml-14 md:pl-6 pl-20">
                 {isLoading ? (
                     <>
                         <Skeleton className="h-8 w-20 mx-2" />

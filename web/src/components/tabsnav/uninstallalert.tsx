@@ -36,14 +36,6 @@ export function AlertDialogDemo({ isOpen, onClose, app, onUninstall }: AlertDial
         setIsLoading(true)
         try {
             // 发送 DELETE 请求来卸载应用
-            // const response = await fetch(`http://192.168.31.214:8080/api/v1/apps/${app.key}`, {
-            //     method: "DELETE",
-            //     headers: {
-            //         "token": "YIG8ANC8q2QxFV_Gf8qwkPdBj2EpsqGqlfc3qvSdg7ksVkZcokOUtQn43XGK0NK3BXUDsyebUlpKIFKXISMXA6nB0kpNgtZ2Vus-0ALbiLKPW74oqXtwUlA_aJyQP-hq", 
-            //     },
-            //     body: JSON.stringify(requestBody), 
-            // }
-            // )
 
             const response = await http.deleteApp(app.key)
 
@@ -67,7 +59,7 @@ export function AlertDialogDemo({ isOpen, onClose, app, onUninstall }: AlertDial
     return (
         <AlertDialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
             <AlertDialogContent>
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-3">
                 <Avatar>
                     <AvatarImage src={warnIcon} />
                     <AvatarFallback>...</AvatarFallback>
@@ -80,15 +72,18 @@ export function AlertDialogDemo({ isOpen, onClose, app, onUninstall }: AlertDial
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 </div>
-                <AlertDialogFooter>
-                    <AlertDialogCancel onClick={onClose}>{t('取消')}</AlertDialogCancel>
-                    <AlertDialogAction
-                        onClick={handleUninstall} // 在确认按钮上调用 handleUninstall
-                        disabled={isLoading} // 如果正在加载，禁用按钮
-                    >
-                        {isLoading ? t("卸载中...") : t("确认")}
-                    </AlertDialogAction>             
-                </AlertDialogFooter>
+                
+                    <AlertDialogFooter>
+                            <AlertDialogCancel onClick={onClose}>{t('取消')}</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={handleUninstall} // 在确认按钮上调用 handleUninstall
+                                disabled={isLoading} // 如果正在加载，禁用按钮
+                            >
+                                {isLoading ? t("卸载中...") : t("确认")}
+                            </AlertDialogAction>           
+                    </AlertDialogFooter>
+                
+                
             </AlertDialogContent>
         </AlertDialog>
     )

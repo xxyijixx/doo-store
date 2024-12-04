@@ -58,7 +58,7 @@ export function HighConfig(
                         />
                     <div className="w-full">
                                 <div className="lg:flex md:flex justify-between py-3 ">
-                                    <Label className="mt-2" htmlFor='input'>{t('CPU限制：')}</Label>
+                                    <Label className="mt-2 whitespace-nowrap" htmlFor='input'>{t('CPU限制：')}</Label>
                                     <Input 
                                         className='lg:w-5/6 md:w-5/6 bg-gray-200/60 border-gray-200/60'
                                         id="cpuLimit"
@@ -68,7 +68,7 @@ export function HighConfig(
                                         />
                                 </div>
                                 <div className="lg:flex md:flex justify-between py-3">
-                                    <Label className="mt-2"  htmlFor='input'>{t('内存限制：')}</Label>
+                                    <Label className="mt-2 whitespace-nowrap"  htmlFor='input'>{t('内存限制：')}</Label>
                                     <Input 
                                         className='lg:w-5/6 md:w-5/6 bg-gray-200/60 border-gray-200/60'
                                         id="memoryLimit"

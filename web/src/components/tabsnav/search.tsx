@@ -78,11 +78,11 @@ const UniSearch: React.FC<UniSearchProps> = ({
             onMouseLeave={handleMouseLeave}
         >
             <div className={`relative flex group items-center ${
-                query.length > 0 || isExpanded ? "w-[180px]" : "w-10"
-            } h-10 lg:mr-0 md:mr-0 mr-0`}>
+                query.length > 0 || isExpanded ? "w-[180px]" : "w-36"
+            } h-36 lg:mr-0 md:mr-0 mr-0`}>
                 <div 
-                    className={`relative flex items-center h-10 bg-gray-200/50 rounded-full overflow-hidden transition-all duration-300 ${
-                        query.length > 0 || isExpanded ? "w-[180px]" : "w-10"
+                    className={`relative flex items-center h-36 bg-gray-200/50 rounded-full overflow-hidden transition-all duration-300 ${
+                        query.length > 0 || isExpanded ? "w-[180px]" : "w-36"
                     }`}
                     onClick={() => {
                         if (!isExpanded) {
@@ -120,9 +120,9 @@ const UniSearch: React.FC<UniSearchProps> = ({
                             }
                         }}
                         disabled={!!error}
-                        className="absolute lg:-right-0.5 md:-right-6 right-0 top-4 transform -translate-y-1/2 p-2 rounded-full"
+                        className="absolute lg:-right-3 md:-right-8 right-[-7px] top-4 transform -translate-y-1/2 p-2 rounded-full"
                     >
-                        <MagnifyingGlassIcon className="size-5 shrink-0 font-bold text-gray-800" />
+                        <MagnifyingGlassIcon className="size-6 shrink-0 font-bold text-gray-800" />
                     </Button>
                 </div>
             </div>

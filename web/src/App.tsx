@@ -12,7 +12,7 @@ function App() {
     <>
           <RootLayout>
               
-              <div className='w-full p-5'>
+              <div className='w-full lg:pl-6 lg:pt-10 lg:pr-6  p-6 '>
                   <MainPage />
               </div>
           

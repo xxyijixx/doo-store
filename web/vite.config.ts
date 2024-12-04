@@ -9,9 +9,10 @@ export default defineConfig({
     host: '0.0.0.0',
     hmr:true,
     proxy: {
-      '/api': {
+      '/store/api': {
         target: 'http://192.168.31.214:8080',
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/store/, '')
       }
     },
 

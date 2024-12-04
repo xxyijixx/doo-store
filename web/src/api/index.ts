@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { ResultData } from "@/api/interface/base";
 
-// import { useTokenStore } from "@/store/ TokenContext";
+import { useTokenStore } from "@/store/ TokenContext";
 
 const config = {
   timeout: 50000,
@@ -19,10 +19,10 @@ class RequestHttp {
     // 请求拦截器
     this.service.interceptors.request.use(
       function (config) {
-        config.baseURL = "";
-        // config.headers.Token = useTokenStore.getState().token;
+        config.baseURL = "/store";
+        config.headers.Token = useTokenStore.getState().token;
 
-        config.headers.Token = 'YIG8ANC8q2QxFV_Gf8qwkPdBj2EpsqGqlfc3qvSdg7ksVkZcokOUtQn43XGK0NK3Wpa7D4Gbnd2z5oO5q4QCOqnB0kpNgtZ2Vus-0ALbiLI00lRe9p29-4D1yJDsJKFN';
+        // config.headers.Token = 'YIG8ANC8q2QxFV_Gf8qwkPdBj2EpsqGqlfc3qvSdg7ksVkZcokOUtQn43XGK0NK3Wpa7D4Gbnd2z5oO5q4QCOqnB0kpNgtZ2Vus-0ALbiLI00lRe9p29-4D1yJDsJKFN';
         return config;
       },
       function (error) {
