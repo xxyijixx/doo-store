@@ -3,9 +3,13 @@ package app
 import (
 	"doo-store/backend/config"
 	"doo-store/backend/constant"
-	"fmt"
+	"doo-store/backend/core/repo"
+	"doo-store/backend/utils/docker" // add this line
+	"fmt"                            // add this line
 	"os"
 	"path"
+
+	"gorm.io/gorm"
 )
 
 func Init() {
@@ -21,6 +25,20 @@ func Init() {
 			fmt.Printf("创建目录失败: %v\n", err)
 			return
 		}
+	}
+
+	plugins, err := repo.AppInstalled.Select(repo.AppInstalled.ID, repo.AppInstalled.IpAddress).Find()
+	if err != nil && err != gorm.ErrRecordNotFound {
+		panic(err)
+	}
+	usedIPs := []string{}
+	for _, plugin := range plugins {
+		usedIPs = append(usedIPs, plugin.IpAddress)
+	}
+	// 初始化全局IP分配器
+	if err := docker.InitIPAllocator(config.EnvConfig.PLUGIN_CIDR, usedIPs); err != nil {
+		fmt.Printf("初始化IP分配器失败: %v", err)
+		panic(err)
 	}
 
 	requiredDirs := []string{constant.DataDir, constant.AppInstallDir, constant.NginxDir}

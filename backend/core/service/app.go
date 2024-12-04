@@ -205,14 +205,30 @@ func (p *AppInstallProcess) DHCP() error {
 	if err != nil {
 		return err
 	}
-	ipAllocator := NewIPAllocator(config.EnvConfig.IP_START, config.EnvConfig.IP_COUNT)
+	client := p.client.GetClient()
 
-	allInstalled, _ := repo.AppInstalled.Select(repo.AppInstalled.IpAddress).Find()
-	for _, installed := range allInstalled {
-		ipAllocator.RegisterUsedIP(installed.IpAddress)
+	// 获取所有容器
+	containers, err := client.ContainerList(context.Background(), container.ListOptions{All: true})
+	if err != nil {
+		return fmt.Errorf("获取容器列表失败: %v", err)
 	}
 
-	p.ipAddress, err = ipAllocator.AllocateIP()
+	// 检查所有容器使用的IP
+	for _, container := range containers {
+		if container.NetworkSettings != nil {
+			for _, network := range container.NetworkSettings.Networks {
+				if network.IPAddress != "" {
+					// 注册已使用的IP
+					if err := docker.GlobalIPAllocator.RegisterIP(network.IPAddress); err != nil {
+						log.Debugf("注册IP失败 %s: %v", network.IPAddress, err)
+					}
+				}
+			}
+		}
+	}
+
+	// 分配新IP
+	p.ipAddress, err = docker.GlobalIPAllocator.AllocateIP()
 	if err != nil {
 		return err
 	}
@@ -415,6 +431,7 @@ func (*AppService) AppDetailByKey(ctx dto.ServiceContext, key string) (*response
 // AppInstall 插件安装
 func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) error {
 	appInstallProcess := NewAppInstallProcess(ctx, req)
+
 	if err := appInstallProcess.Check(); err != nil {
 		return err
 	}
