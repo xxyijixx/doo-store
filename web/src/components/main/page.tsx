@@ -17,7 +17,7 @@ import { motion, AnimatePresence } from "framer-motion"; // 引入 framer-motion
 import * as http from '@/api/modules/fouceinter'
 import { useTokenStore } from "@/store/ TokenContext";
 import { useTranslation } from "react-i18next";
-import { ChevronLeftIcon } from "@radix-ui/react-icons"  // 添加这行导入
+import { ChevronLeftIcon, ReloadIcon } from "@radix-ui/react-icons"
 
 const POLLING_INTERVAL = 5000; // 5秒轮询一次
 
@@ -222,252 +222,258 @@ function MainPage() {
     };
 
     return (
-        <>
-            <div className="flex justify-between items-center mb-4">
-                {loading ? (
-                    <div className="flex items-center flex-1">
-                        <div className="lg:hidden md:hidden">
-                            <Skeleton className="h-8 w-8 rounded-lg" />
-                        </div>
-                        <Skeleton className="h-[16px] w-[200px] rounded-lg" />
-                    </div>
-                ) : (
-                    <div className={`flex items-center ${!isSearchExpanded && 'flex-1'}`}>
-                        <Button 
-                            variant="goback" 
-                            size="icon"
-                            className="lg:hidden md:hidden"
-                        >
-                            <ChevronLeftIcon className="h-6 w-6" />
-                        </Button>
-                        <h1 className={`font-normal lg:text-3xl md:text-3xl text-2xl text-gray-800 transition-all duration-300
-                            lg:text-left md:text-left
-                            ${isSearchExpanded ? 'text-left' : 'text-center w-full'}`}
-                        >
-                            {t('应用商店')}
-                        </h1>
-                    </div>
-                )}
-                {loading ? (
-                    <div className="rounded-full">
-                        <Skeleton className="w-[10px] h-[40px] rounded-lg" />
-                    </div>
-                ) : (
-                    <div>
-                        <UniSearch 
-                            onSearch={handleSearch} 
-                            clearAfterSearch={false}
-                            defaultValue={searchQuery}
-                            onExpandChange={handleSearchExpand}
-                        />
-                    </div>
-                )}
-            </div>
-            <AnimatePresence mode="wait">
-                <div key="b1" className="flex lg:-space-x-1 lg:justify-between md:justify-between justify-center border-b border-gray-200 relative mb-3">
+        <div className="flex flex-col min-h-[calc(100vh-66px)]">
+            <div className="flex-1">
+                <div className="flex justify-between items-center mb-4 ">
                     {loading ? (
-                        <div key="b11" className="flex space-x-4">
-                            <Skeleton className="h-[40px] w-[80px] rounded-md" />
-                            <Skeleton className="h-[40px] w-[80px] rounded-md" />
+                        <div className="flex items-center flex-1">
+                            <div className="lg:hidden md:hidden">
+                                <Skeleton className="h-8 w-8 rounded-lg" />
+                            </div>
+                            <Skeleton className="h-[16px] w-[200px] rounded-lg" />
                         </div>
                     ) : (
-                        <>
-                            <motion.div
-                                key="Aoading"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ duration: 1 }}
-                            >
-                                <ul className="flex items-center space-x-2 w-full sm:w-auto">
-                                    <li 
-                                        className={`text-md pt-2 transition-all duration-300 relative z-10  w-[50%] mr-6  ${
-                                            activeTab === 'all' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
-                                        }`}
-                                    >
-                                        <Button
-                                            variant={activeTab === "all" ? "combar" : "defbar"}
-                                            onClick={() => handleTabChange("all")}
-                                            className="w-full sm:w-auto lg:min-w-[10px] md:min-w-[10px] min-w-[130px]"
-                                        >
-                                            {t('全部')}
-                                        </Button>
-                                    </li>
-                                    <li
-                                        className={`text-md pt-2 transition-all duration-300 relative z-10 w-[50%] sm:w-auto ${
-                                            activeTab === 'installed' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
-                                        }`}
-                                    >
-                                        <Button
-                                            variant={activeTab === "installed" ? "combar" : "defbar"}
-                                            onClick={() => handleTabChange("installed")}
-                                            className="w-full sm:w-auto  lg:min-w-[10px] md:min-w-[10px] min-w-[130px]"
-                                        >
-                                            {t('已安装')}
-                                        </Button>
-                                    </li>
-                                </ul>
-                            </motion.div>
-                        </>
+                        <div className="flex items-center justify-between flex-1">
+                            <div className="flex items-center">
+                                <Button 
+                                    variant="goback" 
+                                    size="icon"
+                                    onClick={() => window.history.back()}
+                                >
+                                    <ChevronLeftIcon className="h-6 w-6" />
+                                </Button>
+                                <h1 className="lg:text-3xl lg:font-semibold md:text-3xl text-2xl text-gray-800">
+                                    {t('应用商店')}
+                                </h1>
+                                <Button 
+                                    variant="goback" 
+                                    size="icon"
+                                    onClick={() => loadData(searchQuery, currentPage)}
+                                    className="hidden md:block lg:block ml-2"
+                                >
+                                    <ReloadIcon className="h-5 w-5" />
+                                </Button>
+                            </div>
+                            <div className={`flex items-center justify-end ${isSearchExpanded ? 'flex-grow md:flex-grow-0 lg:flex-grow-0' : ''}`}>
+                                <UniSearch 
+                                    onSearch={handleSearch} 
+                                    clearAfterSearch={false}
+                                    defaultValue={searchQuery}
+                                    onExpandChange={handleSearchExpand}
+                                />
+                            </div>
+                        </div>
                     )}
                 </div>
-            </AnimatePresence>
-
-            <div className="lg:pb-2 sm:p-0  lg:w-full md:w-full ">
-
                 <AnimatePresence mode="wait">
-                    <div key="b2" className="lg:flex md:flex lg:justify-between md:justify-between sm:justify-between lg:items-center lg:mb-3 ">
+                    <div key="b1" className="flex lg:-space-x-1 lg:justify-start md:justify-start justify-center border-b border-gray-200 relative mb-3">
                         {loading ? (
-                            <div key="b22" className="flex space-x-2 whitespace-nowrap rounded-md">
-                                <Skeleton className="h-[32px] w-[60px] rounded-md" />
-                                <Skeleton className="h-[32px] w-[80px] rounded-md" />
-                                <Skeleton className="h-[32px] w-[60px] rounded-md" />
-                                <Skeleton className="h-[32px] w-[60px] rounded-md" />
-                                <Skeleton className="h-[32px] w-[60px] rounded-md" />
+                            <div key="b11" className="flex space-x-4">
+                                <Skeleton className="h-[40px] w-[80px] rounded-md" />
+                                <Skeleton className="h-[40px] w-[80px] rounded-md" />
                             </div>
                         ) : (
-                            <ScrollArea className="lg:w-[606px] md:w-[330px] whitespace-nowrap overflow-x-auto">
-                                {/* 使用 Button 切换*/}
-                                <div className="flex -space-x-2 mb-3">
-                                    <motion.div
-                                        key="Boading"
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        transition={{ duration: 1 }}
-                                    >
-                                        <Button
-                                            variant={selectedClass === "allson" ? "combarson" : "defbarson"}
-                                            onClick={() => setSelectedClass("allson")}
+                            <>
+                                <motion.div
+                                    key="Aoading"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 1 }}
+                                >
+                                    <ul className="flex items-center space-x-2 w-full sm:w-auto">
+                                        <li 
+                                            className={`text-md pt-2 transition-all duration-300 relative z-10  w-[50%] mr-6  ${
+                                                activeTab === 'all' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
+                                            }`}
                                         >
-                                            {t('全部')}
-                                        </Button>
-                                        {tags.map(tag => (
-                                            <Button 
-                                                key={tag.id}
-                                                variant={selectedClass === tag.key ? "combarson" : "defbarson"}
-                                                onClick={() => setSelectedClass(tag.key)}
+                                            <Button
+                                                variant={activeTab === "all" ? "combar" : "defbar"}
+                                                onClick={() => handleTabChange("all")}
+                                                className="w-full sm:w-auto lg:min-w-[10px] md:min-w-[10px] min-w-[130px]"
                                             >
-                                                {tag.name}
+                                                {t('全部')}
                                             </Button>
-                                        ))}
-                                    </motion.div>
-                                </div>
-                                <ScrollBar orientation="horizontal" className="bg-transparent display-none " />
-                            </ScrollArea>
+                                        </li>
+                                        <li
+                                            className={`text-md pt-2 transition-all duration-300 relative z-10 w-[50%] sm:w-auto ${
+                                                activeTab === 'installed' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
+                                            }`}
+                                        >
+                                            <Button
+                                                variant={activeTab === "installed" ? "combar" : "defbar"}
+                                                onClick={() => handleTabChange("installed")}
+                                                className="w-full sm:w-auto  lg:min-w-[10px] md:min-w-[10px] min-w-[130px]"
+                                            >
+                                                {t('已安装')}
+                                            </Button>
+                                        </li>
+                                    </ul>
+                                </motion.div>
+                            </>
                         )}
-
                     </div>
                 </AnimatePresence>
 
-                <AnimatePresence mode="wait">
-                    {/* 如果当前 Tab 是 "all" 或 "allson" 且未选择 class，显示 all 类应用列表 */}
-                    {(activeTab === "all" && selectedClass !== "installed") && (
-                        <div key="b3" className={` grid gap-4 m-1 grid-cols-1  md:grid-cols-2 lg:grid-cols-3 `}>
+                <div className="lg:pb-2 sm:p-0  lg:w-full md:w-full ">
+
+                    <AnimatePresence mode="wait">
+                        <div key="b2" className="lg:flex md:flex lg:justify-between md:justify-between sm:justify-between lg:items-center lg:mb-3 ">
                             {loading ? (
-                                Array.from({ length: 9 }).map((_, index) => (
-                                    <motion.div
-                                        key={"a" + index}
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        transition={{ duration: 0.5 }}
-                                    >
-                                        <Card key={index} className="lg:w-auto  lg:h-[200px] md:w-auto w-[360px] my-2">
-                                            <CardContent className="flex justify-start space-x-4 mt-9">
-                                                <Skeleton className="h-12 w-12 rounded-full" />
-                                                <CardDescription className="space-y-1 text-left">
-                                                    <Skeleton className="h-6 w-48" />
-                                                    <Skeleton className="h-4 w-32" />
-                                                </CardDescription>
-                                            </CardContent>
-                                            <CardFooter className="flex justify-end">
-                                                <Skeleton className="h-6 w-24" />
-                                            </CardFooter>
-                                        </Card>
-                                    </motion.div>
-                                ))
+                                <div key="b22" className="flex space-x-2 whitespace-nowrap rounded-md">
+                                    <Skeleton className="h-[32px] w-[60px] rounded-md" />
+                                    <Skeleton className="h-[32px] w-[80px] rounded-md" />
+                                    <Skeleton className="h-[32px] w-[60px] rounded-md" />
+                                    <Skeleton className="h-[32px] w-[60px] rounded-md" />
+                                    <Skeleton className="h-[32px] w-[60px] rounded-md" />
+                                </div>
                             ) : (
-
-                                filteredApps.map((app) => (
-                                    <motion.div
-                                        key={"d" + app.id}
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        transition={{ duration: 0.7 }}
-                                    >
-
-                                        <Card key={app.id} className="lg:w-auto md:w-auto w-auto lg:h-[150px] lg:my-1 mx-1">
-                                            <CardContent className="flex flex-col mt-6">
-                                                <div className="flex w-full relative">
-                                                    <div className="flex flex-1">
-                                                        <Avatar className="my-auto mr-3 size-10">
-                                                            <AvatarImage src={app.icon} />
-                                                            <AvatarFallback>loading</AvatarFallback>
-                                                        </Avatar>
-                                                        <CardDescription className="space-y-1 text-left w-full">
-                                                            <div className="lg:pr-0 md:pr-16 pr-16">
-                                                                <h1 className="text-xl font-semibold text-slate-900 dark:text-white">{app.name}</h1>
-                                                            </div>
-                                                            <p className="text-base line-clamp-2 min-h-[42px] pt-1 md:w-3/4 lg:w-3/4">
-                                                                {app.description || "No description available"}
-                                                            </p>
-                                                        </CardDescription>
-                                                    </div>
-                                                    <div className="absolute right-0 -top-2">
-                                                        <CardFooter className="p-0">
-                                                            <Drawer
-                                                                status={app.status}
-                                                                isOpen={false}
-                                                                app={app}
-                                                                loadData={loadData}
-                                                            />
-                                                        </CardFooter>
-                                                    </div>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    </motion.div>
-                                ))
+                                <ScrollArea className="lg:w-[606px] md:w-[330px] whitespace-nowrap overflow-x-auto">
+                                    {/* 使用 Button 切换*/}
+                                    <div className="flex -space-x-2 mb-3">
+                                        <motion.div
+                                            key="Boading"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            transition={{ duration: 1 }}
+                                        >
+                                            <Button
+                                                variant={selectedClass === "allson" ? "combarson" : "defbarson"}
+                                                onClick={() => setSelectedClass("allson")}
+                                            >
+                                                {t('全部')}
+                                            </Button>
+                                            {tags.map(tag => (
+                                                <Button 
+                                                    key={tag.id}
+                                                    variant={selectedClass === tag.key ? "combarson" : "defbarson"}
+                                                    onClick={() => setSelectedClass(tag.key)}
+                                                >
+                                                    {tag.name}
+                                                </Button>
+                                            ))}
+                                        </motion.div>
+                                    </div>
+                                    <ScrollBar orientation="horizontal" className="bg-transparent display-none " />
+                                </ScrollArea>
                             )}
+
                         </div>
+                    </AnimatePresence>
 
-                    )}
-
-
-                    {/* 如果 Tab 是 "installed"，只显示已安装应用 */}
-                    {activeTab === "installed" && (
-
-                        <motion.div
-                            key="eoading"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.5 }}
-                        >
-                            <div className=" grid gap-4 m-1 grid-cols-1 md:grid-cols-1 lg:grid-cols-3">
+                    <AnimatePresence mode="wait">
+                        {/* 如果当前 Tab 是 "all" 或 "allson" 且未选择 class，显示 all 类应用列表 */}
+                        {(activeTab === "all" && selectedClass !== "installed") && (
+                            <div key="b3" className={` grid gap-4 m-1 grid-cols-1  md:grid-cols-2 lg:grid-cols-3 `}>
                                 {loading ? (
-                                    <div></div>
+                                    Array.from({ length: 9 }).map((_, index) => (
+                                        <motion.div
+                                            key={"a" + index}
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            transition={{ duration: 0.5 }}
+                                        >
+                                            <Card key={index} className="lg:w-auto  lg:h-[200px] md:w-auto w-[360px]">
+                                                <CardContent className="flex justify-start space-x-4 pt-9">
+                                                    <Skeleton className="h-12 w-12 rounded-full" />
+                                                    <CardDescription className="space-y-1 text-left">
+                                                        <Skeleton className="h-6 w-48" />
+                                                        <Skeleton className="h-4 w-32" />
+                                                    </CardDescription>
+                                                </CardContent>
+                                                <CardFooter className="flex justify-end">
+                                                    <Skeleton className="h-6 w-24" />
+                                                </CardFooter>
+                                            </Card>
+                                        </motion.div>
+                                    ))
                                 ) : (
 
                                     filteredApps.map((app) => (
                                         <motion.div
-                                            key={"fo" + app.id}
+                                            key={"d" + app.id}
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                             exit={{ opacity: 0 }}
                                             transition={{ duration: 0.7 }}
                                         >
-                                            < InStalledBtn key={app.id} app={app} loadData={loadData} />
+
+                                            <Card key={app.id} className="lg:w-auto md:w-auto w-auto lg:h-[140px] lg:my-1 mx-1 px-2">
+                                                <CardContent className="flex flex-col mt-5 ">
+                                                    <div className="flex w-full relative">
+                                                        <div className="flex flex-1">
+                                                            <Avatar className="my-auto mr-12 size-10">
+                                                                <AvatarImage src={app.icon} />
+                                                                <AvatarFallback>loading</AvatarFallback>
+                                                            </Avatar>
+                                                            <CardDescription className="space-y-1 text-left w-full">
+                                                                <div className="lg:pr-0 md:pr-16 pr-16">
+                                                                    <h1 className="text-xl font-medium text-slate-900 dark:text-white">{app.name}</h1>
+                                                                </div>
+                                                                <p className="text-base line-clamp-2 min-h-[42px] pt-1 md:w-4/5 lg:w-4/5">
+                                                                    {app.description || "No description available"}
+                                                                </p>
+                                                            </CardDescription>
+                                                        </div>
+                                                        <div className="absolute right-0 -top-2">
+                                                            <CardFooter className="pt-2">
+                                                                <Drawer
+                                                                    status={app.status}
+                                                                    isOpen={false}
+                                                                    app={app}
+                                                                    loadData={loadData}
+                                                                />
+                                                            </CardFooter>
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
                                         </motion.div>
                                     ))
-
                                 )}
                             </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+
+                        )}
+
+
+                        {/* 如果 Tab 是 "installed"，只显示已安装应用 */}
+                        {activeTab === "installed" && (
+
+                            <motion.div
+                                key="eoading"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.5 }}
+                            >
+                                <div className=" grid gap-4 m-1 grid-cols-1 md:grid-cols-1 lg:grid-cols-3">
+                                    {loading ? (
+                                        <div></div>
+                                    ) : (
+
+                                        filteredApps.map((app) => (
+                                            <motion.div
+                                                key={"fo" + app.id}
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                transition={{ duration: 0.7 }}
+                                            >
+                                                < InStalledBtn key={app.id} app={app} loadData={loadData} />
+                                            </motion.div>
+                                        ))
+
+                                    )}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            </div>
+
+            <div className="mt-auto">
                 <PaginationCom
                     currentPage={currentPage}
                     totalPages={totalPages}
@@ -479,7 +485,7 @@ function MainPage() {
                     }}
                 />
             </div>
-        </>
+        </div>
     )
 }
 

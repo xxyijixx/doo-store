@@ -62,7 +62,7 @@ const AlertDialogFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex justify-end sm:space-x-2",
+      "flex lg:justify-end md:justify-end sm:space-x-2",
       className
     )}
     {...props}
@@ -88,7 +88,7 @@ const AlertDialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm text-muted-foreground pr-9 md:pr-1", className)}
     {...props}
   />
 ))

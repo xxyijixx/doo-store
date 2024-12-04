@@ -97,7 +97,7 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                 <hr  className='lg:block md:block hidden'/>
                 <SheetDescription className='pt-3'>
                 </SheetDescription>
-                <div className='items-center mt-3 px-3'>
+                <div className='items-center mt-10 px-3'>
                     <div className="lg:flex md:flex justify-between w-full ">
                         <Label className='lg:ml-1 md:ml-1 ml-3 w-1/6' >{t('时间范围')}</Label>
                         <Select value={logSearch.modeIndex.toString()} onValueChange={(value) => handleModeChange(Number(value))}>
@@ -117,7 +117,7 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                         </Select>
                     </div>
 
-                    <div className="lg:flex md:flex justify-between w-full mt-6">
+                    <div className="lg:flex md:flex justify-between w-full mt-20">
                         {/* 条数选择 */}
                         <Label className='lg:ml-1 md:ml-1 ml-3 w-1/6'>{t('条数')}</Label>
                         <Select 
@@ -138,9 +138,9 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                     </div>
                 </div>
 
-                <div className="lg:flex md:flex w-full mt-6 h-[calc(100vh-280px)]">
-                    <p className="text-gray-500 lg:ml-3 md:ml-3 ml-6 w-1/6 whitespace-nowrap">{t('日志数据')}</p>
-                    <div className="lg:w-10/12 md:w-10/12 w-11/12 lg:ml-6 md:ml-8 ml-3 mb-6 h-full overflow-auto">
+                <div className="lg:flex md:flex w-full mt-20 h-[calc(100vh-280px)]">
+                    <p className="text-gray-700 lg:ml-3 md:ml-3 ml-16 lg:pl-0 md:pl-0 pl-2 w-1/6 whitespace-nowrap">{t('日志数据')}</p>
+                    <div className="lg:w-full md:w-full w-11/12 lg:ml-6 lg:mr-3 md:ml-6 md:mr-3 ml-3 mb-6 h-full overflow-auto">
                         <Codemirror
                             ref={codemirrorRef}
                             value={logInfo}
@@ -149,7 +149,15 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                             height="100%"
                             theme="light"
                             autoFocus={true}
-                            extensions={[javascript()]}             
+                            extensions={[javascript()]}
+                            basicSetup={{
+                                lineNumbers: true,
+                                foldGutter: true,
+                                dropCursor: true,
+                                allowMultipleSelections: true,
+                                indentOnInput: true
+                            }}
+                            className="cm-scroller-show-scrollbar"
                         />
                     </div>
                 </div>

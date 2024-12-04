@@ -76,7 +76,7 @@ const SheetContent = React.forwardRef<
           "fixed top-4 rounded-full p-1.5 z-[100] group  lg:block md:block hidden",
           "focus:outline-none focus-visible:ring-0",
           side === "right"
-            ? "right-4 md:right-[calc(75%+12px)] lg:right-[calc(666px+12px)]"
+            ? "right-4 md:right-[calc(75%+100px)] lg:right-[calc(666px+12px)]"
             : "left-4"
         )}
       >
