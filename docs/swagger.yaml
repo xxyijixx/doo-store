@@ -204,19 +204,6 @@ definitions:
         type: string
       values: {}
     type: object
-  response.GetInstalledPluginInfoResp:
-    properties:
-      cloud_provider:
-        type: string
-      key:
-        type: string
-      location:
-        type: string
-      name:
-        type: string
-      status:
-        type: string
-    type: object
 info:
   contact:
     email: xxyijixx@gmail.com
@@ -613,14 +600,19 @@ paths:
       - application/json
       responses:
         "200":
-          description: success
+          description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/dto.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.GetInstalledPluginInfoResp'
-              type: object
+            properties:
+              data:
+                additionalProperties: {}
+                type: object
+              msg:
+                type: string
+              ret:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
       summary: 获取已安装的插件信息(仅需要登录)
       tags:
       - app

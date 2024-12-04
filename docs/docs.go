@@ -419,6 +419,11 @@ const docTemplate = `{
         },
         "/apps/plugin/info": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -444,21 +449,21 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "success",
+                        "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/dto.Response"
-                                },
-                                {
+                            "type": "object",
+                            "properties": {
+                                "data": {
                                     "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.GetInstalledPluginInfoResp"
-                                        }
-                                    }
+                                    "additionalProperties": {}
+                                },
+                                "msg": {
+                                    "type": "string"
+                                },
+                                "ret": {
+                                    "type": "string"
                                 }
-                            ]
+                            }
                         }
                     }
                 }
@@ -1047,26 +1052,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "values": {}
-            }
-        },
-        "response.GetInstalledPluginInfoResp": {
-            "type": "object",
-            "properties": {
-                "cloud_provider": {
-                    "type": "string"
-                },
-                "key": {
-                    "type": "string"
-                },
-                "location": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                }
             }
         }
     },

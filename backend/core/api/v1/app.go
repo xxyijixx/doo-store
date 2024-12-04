@@ -389,29 +389,30 @@ func (*BaseApi) AppUpload(c *gin.Context) {
 // @Summary 获取已安装的插件信息(仅需要登录)
 // @Schemes
 // @Description
+// @Security BearerAuth
 // @Tags app
 // @Produce json
 // @Param language header string false "i18n" default(zh)
 // @Param key query string true "key"
-// @Success 200 {object} dto.Response{data=response.GetInstalledPluginInfoResp} "success"
+// @Success 200 {object} object{ret=string,msg=string,data=map[string]any{}}) "success"
 // @Router /apps/plugin/info [get]
 func (*BaseApi) GetPluginInfo(c *gin.Context) {
 	// 身份校验，仅需要登录
 	err := checkAuth(c, false)
 	if err != nil {
-		helper.ErrorWith(c, err.Error(), nil)
+		helper.ErrorWithRet(c, err.Error(), nil)
 		return
 	}
 	var req request.GetInstalledPluginInfo
 	err = helper.CheckBindQueryAndValidate(&req, c)
 	if err != nil {
-		helper.ErrorWith(c, err.Error(), nil)
+		helper.ErrorWithRet(c, err.Error(), nil)
 		return
 	}
 	data, err := appService.GetPluginInfo(dto.ServiceContext{C: c}, req)
 	if err != nil {
-		helper.ErrorWith(c, err.Error(), nil)
+		helper.ErrorWithRet(c, err.Error(), nil)
 		return
 	}
-	helper.SuccessWith(c, data)
+	helper.SuccessWithRet(c, data)
 }

@@ -101,3 +101,33 @@ func ErrorWith(c *gin.Context, msgKey string, err error, values ...any) {
 	// msgDetail := msgKey
 	Response(c, http.StatusBadRequest, msgDetail, values...)
 }
+
+// ResponseWithRet 使用 ret/msg/data 格式的响应
+func ResponseWithRet(c *gin.Context, ret int, msg string, values ...any) {
+	var data any
+	if len(values) == 1 {
+		data = values[0]
+	} else if len(values) == 0 || (ret == 0 && (values == nil || len(values) == 0)) {
+		data = map[string]interface{}{}
+	} else {
+		data = values
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"ret":  ret,
+		"msg":  msg,
+		"data": data,
+	})
+	c.Abort()
+}
+
+// ErrorWithRet 返回错误响应（ret/msg/data 格式）
+func ErrorWithRet(c *gin.Context, msgKey string, err error, values ...any) {
+	msgDetail := i18n.GetMsgWithMap(c, msgKey, map[string]any{"detail": err})
+	ResponseWithRet(c, 0, msgDetail, values...)
+}
+
+// SuccessWithRet 返回成功响应（ret/msg/data 格式）
+func SuccessWithRet(c *gin.Context, values ...any) {
+	ResponseWithRet(c, 1, "success", values...)
+}
