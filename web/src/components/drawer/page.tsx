@@ -56,7 +56,7 @@ function Drawer({ status, app }: DrawerProps) {
             title: t("安装成功"),
             description: t("应用已成功安装"),
             variant: "success",
-            duration: 30000,
+            duration: 3000,
             className: "fixed top-20 lg:top-3 md:top-3 lg:right-6  md:right-4 right-1/2 translate-x-1/2 lg:translate-x-0 md:translate-x-0 w-[350px]"
         });
         setVariantState("success"); 
@@ -103,7 +103,7 @@ function Drawer({ status, app }: DrawerProps) {
                 
                 <SheetContent className='lg:overflow-y-auto md:overflow-auto overflow-auto'>
                     <SheetHeader>
-                        <SheetTitle className='lg:ml-2 md:ml-2 pl-2 text-gray-700 z-50 lg:bg-transparent md:bg-transparent bg-gray-200/50 lg:py-0 md:py-0 py-3 flex items-center gap-2'>
+                        <SheetTitle className='lg:ml-2 md:ml-2  text-gray-700 z-50 lg:bg-transparent md:bg-transparent bg-gray-200/50 lg:py-0 md:py-0 py-3 flex items-center gap-2'>
                             <ChevronLeftIcon 
                                 className="h-6 w-6 lg:hidden md:hidden block"
                                 onClick={() => setIsOpen(false)}
