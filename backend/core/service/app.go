@@ -21,7 +21,6 @@ import (
 	"io"
 	"os"
 	"path"
-	"strconv"
 	"strings"
 
 	"github.com/docker/docker/api/types/container"
@@ -52,75 +51,6 @@ type IAppService interface {
 
 func NewIAppService() IAppService {
 	return &AppService{}
-}
-
-type IPAllocator struct {
-	usedIPs map[string]bool
-	startIP string
-	endIP   int
-}
-
-func NewIPAllocator(startIP string, count int) *IPAllocator {
-	return &IPAllocator{
-		usedIPs: make(map[string]bool),
-		startIP: startIP,
-		endIP:   count,
-	}
-}
-
-func (a *IPAllocator) RegisterUsedIP(ip string) {
-	a.usedIPs[ip] = true
-}
-
-func (a *IPAllocator) AllocateIP() (string, error) {
-
-	if err := a.validateIPFormat(a.startIP); err != nil {
-		return "", fmt.Errorf("invalid start IP: %v", err)
-	}
-
-	ipParts := strings.Split(a.startIP, ".")
-	baseIP := strings.Join(ipParts[:3], ".")
-	startIndex, _ := strconv.Atoi(ipParts[3])
-
-	for i := startIndex; i < startIndex+a.endIP || i < 254; i++ {
-		candidateIP := fmt.Sprintf("%s.%d", baseIP, i)
-
-		if err := a.validateIPFormat(candidateIP); err != nil {
-			continue
-		}
-
-		if !a.usedIPs[candidateIP] {
-			a.usedIPs[candidateIP] = true
-			return candidateIP, nil
-		}
-	}
-
-	return "", errors.New("no available IP addresses")
-}
-
-// validateIPFormat checks if the IP address is valid
-func (a *IPAllocator) validateIPFormat(ip string) error {
-
-	parts := strings.Split(ip, ".")
-
-	if len(parts) != 4 {
-		return fmt.Errorf("IP must have 4 octets")
-	}
-
-	// Validate each part
-	for _, part := range parts {
-
-		num, err := strconv.Atoi(part)
-		if err != nil {
-			return fmt.Errorf("invalid octet: %s", part)
-		}
-
-		if num < 0 || num > 255 {
-			return fmt.Errorf("octet must be between 0 and 255: %s", part)
-		}
-	}
-
-	return nil
 }
 
 type AppInstallProcess struct {
@@ -332,11 +262,7 @@ func (p *AppInstallProcess) Install() error {
 // AddNginx 添加Nginx配置
 // 插件安装的时候，需要向Nginx添加一个配置，如果添加配置失败，会将插件停止
 func (p *AppInstallProcess) AddNginx() error {
-	client, err := docker.NewClient()
-	if err != nil {
-		return err
-	}
-	port, err := client.GetImageFirstExposedPortByName(fmt.Sprintf("%s:%s", p.appDetail.Repo, p.appDetail.Version))
+	port, err := p.client.GetImageFirstExposedPortByName(fmt.Sprintf("%s:%s", p.appDetail.Repo, p.appDetail.Version))
 	if err != nil {
 		return err
 	}
@@ -534,6 +460,8 @@ func (*AppService) AppUnInstall(ctx dto.ServiceContext, req request.AppUnInstall
 		log.Info("插件卸载失败", err)
 		return errors.New("插件卸载失败")
 	}
+	// 释放IP
+	docker.GlobalIPAllocator.ReleaseIP(appInstalled.IpAddress)
 
 	nginx.RemoveLocation(appInstalled.Key)
 	// 删除compose目录
