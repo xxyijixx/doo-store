@@ -79,7 +79,7 @@ const UniSearch: React.FC<UniSearchProps> = ({
         >
             <div className={`relative flex group items-center ${
                 query.length > 0 || isExpanded ? "w-[180px]" : "w-36"
-            } h-36 lg:mr-0 md:mr-0 mr-0`}>
+            } h-36 lg:mr-0 md:mr-0 mr-0 transition-all duration-300`}>
                 <div 
                     className={`relative flex items-center h-36 bg-gray-200/50 rounded-full overflow-hidden transition-all duration-300 ${
                         query.length > 0 || isExpanded ? "w-[180px]" : "w-36"
