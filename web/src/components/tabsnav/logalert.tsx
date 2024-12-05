@@ -88,7 +88,7 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                 <SheetHeader>
                     <SheetTitle  className='lg:ml-2 md:ml-2 pb-1  text-gray-700 z-50 lg:bg-transparent md:bg-transparent bg-gray-200/50 lg:py-0 md:py-0 py-3 flex items-center gap-2'>
                         <ChevronLeftIcon 
-                            className="h-6 w-6 lg:hidden md:hidden block"
+                            className="h-6 w-6 lg:hidden ml-6 md:hidden block"
                             onClick={() => onClose()}
                         />
                         {t('日志')}

@@ -225,14 +225,6 @@ function MainPage() {
         <div className="flex flex-col min-h-[calc(100vh-66px)]">
             <div className="flex-1">
                 <div className="flex justify-between items-center mb-4 ">
-                    {loading ? (
-                        <div className="flex items-center flex-1">
-                            <div className="lg:hidden md:hidden">
-                                <Skeleton className="h-8 w-8 rounded-lg" />
-                            </div>
-                            <Skeleton className="h-9 w-[120px] rounded-lg" />
-                        </div>
-                    ) : (
                         <div className="flex items-center justify-between flex-1">
                             <div className="flex items-center">
                                 <Button 
@@ -243,7 +235,7 @@ function MainPage() {
                                     <ChevronLeftIcon className="h-6 w-6" />
                                 </Button>
                                 
-                               <h1 className="hidden sm:flex lg:text-3xl lg:font-semibold md:text-3xl text-2xl text-center text-gray-800">
+                                <h1 className="hidden sm:flex lg:text-3xl  text-2xl text-center text-gray-800">
                                     {t('应用商店')}
                                 </h1>
 
@@ -256,7 +248,7 @@ function MainPage() {
                                     <ReloadIcon className="h-5 w-5" />
                                 </Button>
                             </div>
-                             <h1 className="sm:hidden text-2xl text-gray-800">
+                                <h1 className="sm:hidden text-2xl text-gray-800 lg:font-semibold md:text-3xl">
                                     {t('应用商店')}
                                 </h1>
                             <div className={`flex items-center justify-end ${isSearchExpanded ? 'flex-grow md:flex-grow-0 lg:flex-grow-0' : ''}`}>
@@ -268,16 +260,9 @@ function MainPage() {
                                 />
                             </div>
                         </div>
-                    )}
                 </div>
                 <AnimatePresence mode="wait">
                     <div key="b1" className="flex lg:-space-x-1  border-b lg:border-gray-200 md:border-gray-200 relative mb-3">
-                        {loading ? (
-                            <div key="b11" className="flex space-x-4">
-                                <Skeleton className="h-10 w-[100px] rounded-lg" />
-                                <Skeleton className="h-10 w-[100px] rounded-lg" />
-                            </div>
-                        ) : (
                             <>
                                 <motion.div
                                     key="Aoading"
@@ -317,12 +302,10 @@ function MainPage() {
                                     </ul>
                                 </motion.div>
                             </>
-                        )}
                     </div>
                 </AnimatePresence>
 
-                <div className="lg:pb-2 sm:p-0  lg:w-full md:w-full ">
-
+                <div className="lg:pb-2 sm:p-0  lg:w-full md:w-full">
                     <AnimatePresence mode="wait">
                         <div key="b2" className="lg:flex md:flex lg:justify-between md:justify-between sm:justify-between lg:items-center lg:mb-3 ">
                             {loading ? (
@@ -334,15 +317,15 @@ function MainPage() {
                                     <Skeleton className="h-8 w-[75px] rounded-lg" />
                                 </div>
                             ) : (
-                                <ScrollArea className="lg:w-[606px] md:w-[330px] whitespace-nowrap overflow-x-auto">
-                                    {/* 使用 Button 切换*/}
-                                    <div className="flex -space-x-2 mb-3">
+                                <ScrollArea className="lg:w-[606px] md:w-[330px] whitespace-nowrap overflow-x-auto cursor-grab active:cursor-grabbing">
+                                    <div className="flex -space-x-2 mb-3 select-none">
                                         <motion.div
                                             key="Boading"
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                             exit={{ opacity: 0 }}
                                             transition={{ duration: 1 }}
+                                            className="flex"
                                         >
                                             <Button
                                                 variant={selectedClass === "allson" ? "combarson" : "defbarson"}
@@ -361,7 +344,7 @@ function MainPage() {
                                             ))}
                                         </motion.div>
                                     </div>
-                                    <ScrollBar orientation="horizontal" className="bg-transparent display-none " />
+                                    <ScrollBar orientation="horizontal" className="bg-transparent h-0" />
                                 </ScrollArea>
                             )}
 
@@ -416,7 +399,7 @@ function MainPage() {
                                                                 <div className="lg:pr-0 md:pr-16 pr-16">
                                                                     <h1 className="text-xl font-medium text-slate-900 dark:text-white">{app.name}</h1>
                                                                 </div>
-                                                                <p className="text-base line-clamp-2 min-h-[42px] pt-1 md:w-4/5 lg:w-4/5">
+                                                                <p className="text-base line-clamp-2 min-h-[42px] pt-1 w-11/12 md:w-4/5 lg:w-4/5">
                                                                     {app.description || "No description available"}
                                                                 </p>
                                                             </CardDescription>
@@ -450,7 +433,7 @@ function MainPage() {
                                 exit={{ opacity: 0 }}
                                 transition={{ duration: 0.5 }}
                             >
-                                <div className="grid lg:gap-6 md:gap-6 grid-cols-1 md:grid-cols-1 lg:grid-cols-3">
+                                <div className="grid lg:gap-6 md:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                                     {loading ? (
                                         <div></div>
                                     ) : (
@@ -470,10 +453,24 @@ function MainPage() {
                             </motion.div>
                         )}
                     </AnimatePresence>
+
+                    <div className="mt-auto lg:hidden md:hidden">
+                        <PaginationCom
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalItems={totalItems}
+                            pageSize={pageSize}
+                            onPageChange={handlePageChange}
+                            onPageSizeChange={(_: number) => {
+                                // 如果暂时不需要处理页面大小变化，可以留空
+                            }}
+                        />
+                    </div>
+                
                 </div>
             </div>
 
-            <div className="mt-auto">
+            <div className="mt-auto hidden lg:block md:block">
                 <PaginationCom
                     currentPage={currentPage}
                     totalPages={totalPages}
@@ -485,6 +482,7 @@ function MainPage() {
                     }}
                 />
             </div>
+
         </div>
     )
 }

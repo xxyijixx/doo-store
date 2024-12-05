@@ -152,7 +152,7 @@ export function ProfileForm({
 
     return (
         <Form {...form}>
-            <form className="space-y-8 relative overflow-visible lg:px-0 md:px-0 px-3" onSubmit={handleSubmit(handleRestart)}>
+            <form className="space-y-8 relative overflow-visible lg:px-0 md:px-0 px-3 pb-3" onSubmit={handleSubmit(handleRestart)}>
                 {/* 动态渲染 form_fields */}
                 {formFields.map((field, index) => {
                     // 如果 field 没有 name 属性，生成一个默认的 name

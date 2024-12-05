@@ -150,7 +150,7 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
 
     return (
         <Form {...form} >
-            <form className="space-y-8 relative overflow-visible lg:px-0 md:px-0 px-3" onSubmit={handleSubmit(handleRestart)}>
+            <form className="space-y-8 relative overflow-visible lg:px-0 md:px-0 px-3 pb-3" onSubmit={handleSubmit(handleRestart)}>
                 {formFields.map((field, index) => {
                     const fieldName = field.env_key
                     return (
