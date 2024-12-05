@@ -230,7 +230,7 @@ function MainPage() {
                             <div className="lg:hidden md:hidden">
                                 <Skeleton className="h-8 w-8 rounded-lg" />
                             </div>
-                            <Skeleton className="h-[16px] w-[200px] rounded-lg" />
+                            <Skeleton className="h-9 w-[120px] rounded-lg" />
                         </div>
                     ) : (
                         <div className="flex items-center justify-between flex-1">
@@ -274,8 +274,8 @@ function MainPage() {
                     <div key="b1" className="flex lg:-space-x-1  border-b lg:border-gray-200 md:border-gray-200 relative mb-3">
                         {loading ? (
                             <div key="b11" className="flex space-x-4">
-                                <Skeleton className="h-[40px] w-[80px] rounded-md" />
-                                <Skeleton className="h-[40px] w-[80px] rounded-md" />
+                                <Skeleton className="h-10 w-[100px] rounded-lg" />
+                                <Skeleton className="h-10 w-[100px] rounded-lg" />
                             </div>
                         ) : (
                             <>
@@ -327,11 +327,11 @@ function MainPage() {
                         <div key="b2" className="lg:flex md:flex lg:justify-between md:justify-between sm:justify-between lg:items-center lg:mb-3 ">
                             {loading ? (
                                 <div key="b22" className="flex space-x-2 whitespace-nowrap rounded-md">
-                                    <Skeleton className="h-[32px] w-[60px] rounded-md" />
-                                    <Skeleton className="h-[32px] w-[80px] rounded-md" />
-                                    <Skeleton className="h-[32px] w-[60px] rounded-md" />
-                                    <Skeleton className="h-[32px] w-[60px] rounded-md" />
-                                    <Skeleton className="h-[32px] w-[60px] rounded-md" />
+                                    <Skeleton className="h-8 w-[60px] rounded-lg" />
+                                    <Skeleton className="h-8 w-[80px] rounded-lg" />
+                                    <Skeleton className="h-8 w-[70px] rounded-lg" />
+                                    <Skeleton className="h-8 w-[90px] rounded-lg" />
+                                    <Skeleton className="h-8 w-[75px] rounded-lg" />
                                 </div>
                             ) : (
                                 <ScrollArea className="lg:w-[606px] md:w-[330px] whitespace-nowrap overflow-x-auto">
@@ -381,16 +381,16 @@ function MainPage() {
                                             exit={{ opacity: 0 }}
                                             transition={{ duration: 0.5 }}
                                         >
-                                            <Card key={index} className="lg:w-auto lg:h-[200px] md:w-auto w-[360px]">
-                                                <CardContent className="flex justify-start space-x-4 pt-9">
-                                                    <Skeleton className="h-12 w-12 rounded-full" />
-                                                    <CardDescription className="space-y-1 text-left">
-                                                        <Skeleton className="h-6 w-48" />
-                                                        <Skeleton className="h-4 w-32" />
+                                            <Card key={index} className="lg:w-auto lg:h-[140px] md:w-auto w-[360px]">
+                                                <CardContent className="flex justify-start space-x-4 pt-6">
+                                                    <Skeleton className="h-10 w-10 rounded-full" />
+                                                    <CardDescription className="space-y-2 text-left">
+                                                        <Skeleton className="h-6 w-[200px] rounded-lg" />
+                                                        <Skeleton className="h-4 w-[300px] rounded-lg" />
                                                     </CardDescription>
                                                 </CardContent>
-                                                <CardFooter className="flex justify-end">
-                                                    <Skeleton className="h-6 w-24" />
+                                                <CardFooter className="flex justify-end pt-2">
+                                                    <Skeleton className="h-8 w-[80px] rounded-lg" />
                                                 </CardFooter>
                                             </Card>
                                         </motion.div>
