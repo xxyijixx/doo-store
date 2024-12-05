@@ -162,7 +162,13 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
         <Card className="lg:w-auto  md:w-auto w-auto h-[180px] lg:mb-0 mb-3">
             <CardContent className="flex justify-start space-x-5 mt-6 pl-5">
                 {isLoading ? (
-                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <>
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <CardDescription className="space-y-2 text-left w-full">
+                            <Skeleton className="h-6 w-[200px] rounded-lg" />
+                            <Skeleton className="h-4 w-[300px] rounded-lg" />
+                        </CardDescription>
+                    </>
                 ) : (
                     <Avatar className="my-auto size-10">
                         <AvatarImage src={app.icon} />
@@ -190,10 +196,10 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
             <CardFooter className="flex justify-start -mt-1 gap-2 lg:gap-3 md:gap-3 lg:ml-14 md:ml-14 md:pl-6 pl-20">
                 {isLoading ? (
                     <>
-                        <Skeleton className="h-8 w-20 mx-2" />
-                        <Skeleton className="h-8 w-20 mx-2" />
-                        <Skeleton className="h-8 w-20 mx-2" />
-                        <Skeleton className="h-8 w-20 mx-2" />
+                        <Skeleton className="h-8 w-[56px] rounded-lg" />
+                        <Skeleton className="h-8 w-[56px] rounded-lg" />
+                        <Skeleton className="h-8 w-[56px] rounded-lg" />
+                        <Skeleton className="h-8 w-[56px] rounded-lg" />
                     </>
                 ) : (
                     <>
