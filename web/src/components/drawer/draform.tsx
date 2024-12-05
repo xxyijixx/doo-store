@@ -100,7 +100,7 @@ export function ProfileForm({
         }
     }, [app.key, setValue]);
 
-    // 点击重启按钮，进行安装操作
+    // 点击按钮，进行安装操作
     const handleRestart = async () => {
         setLoading(true);
         setError(""); // 清除之前的错误信息

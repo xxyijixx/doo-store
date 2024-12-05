@@ -15,7 +15,7 @@ import EditDrawer from "@/components/drawer/editpage"
 import { Item } from "@/type.d/common"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslation } from "react-i18next"
-import { FalseToaster } from '@/components/ui/toaster'
+import { FalseToaster,  SuccessToaster  } from '@/components/ui/toaster'
 import { useToast } from "@/hooks/use-toast";
 import * as http from "@/api/modules/fouceinter";
 
@@ -37,6 +37,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
     const closeDialog = () => setIsDialogOpen(false)
     const closeLogHave = () => setIsLogHaveOpen(false)
     const closeDrawer = () => setIsDrawerOpen(false)
+    const [variantState, setVariantState] = useState<"success" | "destructive" | null>(null);
 
     const [isLoading, setIsLoading] = useState(false)
     const handleUninstall = async () => {
@@ -98,6 +99,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                     duration: 3000,
                     className: "fixed top-20 lg:top-3 md:top-3 lg:right-6  md:right-4 right-1/2 translate-x-1/2 lg:translate-x-0 md:translate-x-0 w-[350px]"
                 });
+                setVariantState("destructive");
                 return;
             }
             action = "start"
@@ -118,7 +120,8 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                     variant: "destructive",
                     duration: 3000,
                     className: "fixed top-16 left-1/2 -translate-x-1/2 md:static md:translate-x-0 w-[90%] md:w-auto"
-                })
+                });
+                setVariantState("destructive");
             })
         }
     }
@@ -127,9 +130,11 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
         if (app.status != "Running") {
             // setIsLogDemoOpen(true)
             toast({
+                variant: "destructive",
                 title: t("温馨提示"),
                 description: t("请先运行插件再查看日志~~~"),
-            })
+            });
+            setVariantState("destructive");
             
         } else {
             setIsLogHaveOpen(true)
@@ -152,7 +157,8 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
 
     return (
         <>
-        < FalseToaster/>
+         {variantState === "success" && <SuccessToaster />}
+         {variantState === "destructive" && <FalseToaster />}
         <Card className="lg:w-auto  md:w-auto w-auto h-[180px] lg:mb-0 mb-3">
             <CardContent className="flex justify-start space-x-5 mt-6 pl-5">
                 {isLoading ? (
