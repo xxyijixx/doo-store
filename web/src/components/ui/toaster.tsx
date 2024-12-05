@@ -25,7 +25,7 @@ export function SuccessToaster() {
                           <AvatarImage src={successIcon}/>
                           <AvatarFallback />
                         </Avatar>
-                        {title && <ToastTitle className="font-bold">{title}</ToastTitle>}
+                        {title && <ToastTitle className="font-bold ml-16">{title}</ToastTitle>}
                       </div>
                       {description && (
                         <ToastDescription className="ml-10 ">{description}</ToastDescription>
@@ -57,7 +57,7 @@ export function FalseToaster() {
                         <AvatarImage src={falseIcon}/>
                         <AvatarFallback />
                       </Avatar>
-                        {title && <ToastTitle className="font-bold">{title}</ToastTitle>}
+                        {title && <ToastTitle className="font-bold ml-16">{title}</ToastTitle>}
                     </div>
                   {description && (
                     <ToastDescription className="ml-10">{description}</ToastDescription>

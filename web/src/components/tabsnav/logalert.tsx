@@ -86,7 +86,7 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
         <Sheet open={isOpen} onOpenChange={onClose}>
             <SheetContent className="overflow-hidden lg:overflow-x-hidden">
                 <SheetHeader>
-                    <SheetTitle  className='lg:ml-2 md:ml-2 pl-2 text-gray-700 z-50 lg:bg-transparent md:bg-transparent bg-gray-200/50 lg:py-0 md:py-0 py-3 flex items-center gap-2'>
+                    <SheetTitle  className='lg:ml-2 md:ml-2 pb-1  text-gray-700 z-50 lg:bg-transparent md:bg-transparent bg-gray-200/50 lg:py-0 md:py-0 py-3 flex items-center gap-2'>
                         <ChevronLeftIcon 
                             className="h-6 w-6 lg:hidden md:hidden block"
                             onClick={() => onClose()}
@@ -138,9 +138,9 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                     </div>
                 </div>
 
-                <div className="lg:flex md:flex w-full mt-20 h-[calc(100vh-280px)]">
+                <div className="lg:flex md:flex w-full mt-20 h-[calc(100vh-280px)] md:h-[calc(100vh-230px)] lg:h-[calc(100vh-230px)]">
                     <p className="text-gray-700 lg:ml-3 md:ml-3 ml-16 lg:pl-0 md:pl-0 pl-2 w-1/6 whitespace-nowrap">{t('日志数据')}</p>
-                    <div className="lg:w-full md:w-full w-11/12 lg:ml-6 lg:mr-3 md:ml-6 md:mr-3 ml-3 mb-6 h-full overflow-auto">
+                    <div className="lg:w-full md:w-full w-11/12 lg:ml-6 lg:mr-3 lg:mt-1 md:ml-6 md:mr-3 ml-3 mb-6 h-full overflow-auto">
                         <Codemirror
                             ref={codemirrorRef}
                             value={logInfo}
@@ -157,7 +157,7 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                                 allowMultipleSelections: true,
                                 indentOnInput: true
                             }}
-                            className="cm-scroller-show-scrollbar"
+                            className="cm-scroller-show-scrollbar h-full"
                         />
                     </div>
                 </div>

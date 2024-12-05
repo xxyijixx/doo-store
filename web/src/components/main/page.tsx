@@ -27,7 +27,7 @@ const fetchAppsData = async (tab: string, className = '', currentPage: number, p
         page: 1,
         page_size: 9,
         name: '',
-        descript: '',
+        description: '',
         class: ''
     }
     if (tab === 'all') {
@@ -35,7 +35,7 @@ const fetchAppsData = async (tab: string, className = '', currentPage: number, p
         p.page = currentPage;
         p.page_size = pageSize;
         p.name = query;
-        p.descript = query;
+        p.description = query;
 
         if (className && className !== 'all' && className !== 'allson') {
             p.class = className;
@@ -44,7 +44,7 @@ const fetchAppsData = async (tab: string, className = '', currentPage: number, p
         p.page = currentPage;
         p.page_size = pageSize;
         p.name = query;
-        p.descript = query;
+        p.description = query;
 
         if (className && className !== 'installed' && className !== 'allson') {
             p.class = className;
@@ -242,9 +242,11 @@ function MainPage() {
                                 >
                                     <ChevronLeftIcon className="h-6 w-6" />
                                 </Button>
-                                <h1 className="lg:text-3xl lg:font-semibold md:text-3xl text-2xl text-gray-800">
+                                
+                               <h1 className="hidden sm:flex lg:text-3xl lg:font-semibold md:text-3xl text-2xl text-center text-gray-800">
                                     {t('应用商店')}
                                 </h1>
+
                                 <Button 
                                     variant="goback" 
                                     size="icon"
@@ -254,6 +256,9 @@ function MainPage() {
                                     <ReloadIcon className="h-5 w-5" />
                                 </Button>
                             </div>
+                             <h1 className="sm:hidden text-2xl text-gray-800">
+                                    {t('应用商店')}
+                                </h1>
                             <div className={`flex items-center justify-end ${isSearchExpanded ? 'flex-grow md:flex-grow-0 lg:flex-grow-0' : ''}`}>
                                 <UniSearch 
                                     onSearch={handleSearch} 
@@ -266,7 +271,7 @@ function MainPage() {
                     )}
                 </div>
                 <AnimatePresence mode="wait">
-                    <div key="b1" className="flex lg:-space-x-1 lg:justify-start md:justify-start justify-center border-b border-gray-200 relative mb-3">
+                    <div key="b1" className="flex lg:-space-x-1  border-b lg:border-gray-200 md:border-gray-200 relative mb-3">
                         {loading ? (
                             <div key="b11" className="flex space-x-4">
                                 <Skeleton className="h-[40px] w-[80px] rounded-md" />
@@ -280,30 +285,31 @@ function MainPage() {
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
                                     transition={{ duration: 1 }}
+                                    className="w-full lg:w-auto md:w-auto"
                                 >
-                                    <ul className="flex items-center space-x-2 w-full sm:w-auto">
+                                    <ul className="flex items-center w-full">
                                         <li 
-                                            className={`text-md pt-2 transition-all duration-300 relative z-10  w-[50%] mr-6  ${
+                                            className={`text-md pt-2 transition-all duration-300 relative z-10 w-1/2 lg:w-auto md:w-auto lg:mr-8 md:mr-8 ${
                                                 activeTab === 'all' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
                                             }`}
                                         >
                                             <Button
                                                 variant={activeTab === "all" ? "combar" : "defbar"}
                                                 onClick={() => handleTabChange("all")}
-                                                className="w-full sm:w-auto lg:min-w-[10px] md:min-w-[10px] min-w-[130px]"
+                                                className="w-full lg:w-auto md:w-auto lg:min-w-[10px] md:min-w-[10px] min-w-[130px] lg:justify-start md:justify-start justify-center"
                                             >
                                                 {t('全部')}
                                             </Button>
                                         </li>
                                         <li
-                                            className={`text-md pt-2 transition-all duration-300 relative z-10 w-[50%] sm:w-auto ${
+                                            className={`text-md pt-2 transition-all duration-300 relative z-10 w-1/2 lg:w-auto md:w-auto ${
                                                 activeTab === 'installed' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
                                             }`}
                                         >
                                             <Button
                                                 variant={activeTab === "installed" ? "combar" : "defbar"}
                                                 onClick={() => handleTabChange("installed")}
-                                                className="w-full sm:w-auto  lg:min-w-[10px] md:min-w-[10px] min-w-[130px]"
+                                                className="w-full lg:w-auto md:w-auto lg:min-w-[10px] md:min-w-[10px] min-w-[130px] lg:justify-start md:justify-start justify-center"
                                             >
                                                 {t('已安装')}
                                             </Button>
@@ -365,7 +371,7 @@ function MainPage() {
                     <AnimatePresence mode="wait">
                         {/* 如果当前 Tab 是 "all" 或 "allson" 且未选择 class，显示 all 类应用列表 */}
                         {(activeTab === "all" && selectedClass !== "installed") && (
-                            <div key="b3" className={` grid gap-4 m-1 grid-cols-1  md:grid-cols-2 lg:grid-cols-3 `}>
+                            <div className={`grid lg:gap-4 md:gap-4 gap-2 m-1 grid-cols-1 md:grid-cols-2 lg:grid-cols-3`}>
                                 {loading ? (
                                     Array.from({ length: 9 }).map((_, index) => (
                                         <motion.div
@@ -375,7 +381,7 @@ function MainPage() {
                                             exit={{ opacity: 0 }}
                                             transition={{ duration: 0.5 }}
                                         >
-                                            <Card key={index} className="lg:w-auto  lg:h-[200px] md:w-auto w-[360px]">
+                                            <Card key={index} className="lg:w-auto lg:h-[200px] md:w-auto w-[360px]">
                                                 <CardContent className="flex justify-start space-x-4 pt-9">
                                                     <Skeleton className="h-12 w-12 rounded-full" />
                                                     <CardDescription className="space-y-1 text-left">
@@ -390,7 +396,6 @@ function MainPage() {
                                         </motion.div>
                                     ))
                                 ) : (
-
                                     filteredApps.map((app) => (
                                         <motion.div
                                             key={"d" + app.id}
@@ -399,8 +404,7 @@ function MainPage() {
                                             exit={{ opacity: 0 }}
                                             transition={{ duration: 0.7 }}
                                         >
-
-                                            <Card key={app.id} className="lg:w-auto md:w-auto w-auto lg:h-[140px] lg:my-1 mx-1 px-2">
+                                            <Card key={app.id} className="lg:w-auto md:w-auto w-auto lg:h-[140px] lg:my-2 lg:mr-4 md:my-2 md:mr-4 my-0.5 mx-0 px-2">
                                                 <CardContent className="flex flex-col mt-5 ">
                                                     <div className="flex w-full relative">
                                                         <div className="flex flex-1">
@@ -418,7 +422,7 @@ function MainPage() {
                                                             </CardDescription>
                                                         </div>
                                                         <div className="absolute right-0 -top-2">
-                                                            <CardFooter className="pt-2">
+                                                            <CardFooter className="pt-1">
                                                                 <Drawer
                                                                     status={app.status}
                                                                     isOpen={false}
@@ -434,13 +438,11 @@ function MainPage() {
                                     ))
                                 )}
                             </div>
-
                         )}
 
 
                         {/* 如果 Tab 是 "installed"，只显示已安装应用 */}
                         {activeTab === "installed" && (
-
                             <motion.div
                                 key="eoading"
                                 initial={{ opacity: 0 }}
@@ -448,11 +450,10 @@ function MainPage() {
                                 exit={{ opacity: 0 }}
                                 transition={{ duration: 0.5 }}
                             >
-                                <div className=" grid gap-4 m-1 grid-cols-1 md:grid-cols-1 lg:grid-cols-3">
+                                <div className="grid lg:gap-6 md:gap-6 grid-cols-1 md:grid-cols-1 lg:grid-cols-3">
                                     {loading ? (
                                         <div></div>
                                     ) : (
-
                                         filteredApps.map((app) => (
                                             <motion.div
                                                 key={"fo" + app.id}
@@ -461,10 +462,9 @@ function MainPage() {
                                                 exit={{ opacity: 0 }}
                                                 transition={{ duration: 0.7 }}
                                             >
-                                                < InStalledBtn key={app.id} app={app} loadData={loadData} />
+                                                <InStalledBtn key={app.id} app={app} loadData={loadData} />
                                             </motion.div>
                                         ))
-
                                     )}
                                 </div>
                             </motion.div>
