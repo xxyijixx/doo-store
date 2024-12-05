@@ -37,7 +37,7 @@ func (e WithError) GenContent(ctx *gin.Context) string {
 	return content
 }
 
-func New(ctx *gin.Context, Key string) WithError {
+func NewError(ctx *gin.Context, Key string) WithError {
 	e := WithError{
 		Msg:    Key,
 		Detail: nil,
@@ -47,7 +47,7 @@ func New(ctx *gin.Context, Key string) WithError {
 	return e
 }
 
-func WithDetail(ctx *gin.Context, Key string, detail any, err error) WithError {
+func NewErrorWithDetail(ctx *gin.Context, Key string, detail any, err error) WithError {
 	e := WithError{
 		Msg:    Key,
 		Detail: detail,
@@ -57,7 +57,7 @@ func WithDetail(ctx *gin.Context, Key string, detail any, err error) WithError {
 	return e
 }
 
-func WithErr(ctx *gin.Context, Key string, err error) WithError {
+func NewErrorWithErr(ctx *gin.Context, Key string, err error) WithError {
 	e := WithError{
 		Msg:    Key,
 		Detail: "",
@@ -67,7 +67,7 @@ func WithErr(ctx *gin.Context, Key string, err error) WithError {
 	return e
 }
 
-func WithMap(ctx *gin.Context, Key string, maps map[string]any, err error) WithError {
+func NewErrorWithMap(ctx *gin.Context, Key string, maps map[string]any, err error) WithError {
 	e := WithError{
 		Msg: Key,
 		Map: maps,

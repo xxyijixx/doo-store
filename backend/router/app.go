@@ -13,20 +13,20 @@ func (a *AppRouter) InitRouter(Router *gin.RouterGroup) {
 	appRouter := Router.Group("apps")
 	baseApi := v1.Api
 	{
-		appRouter.GET("", baseApi.AppPage)
-		appRouter.POST("/:key", baseApi.AppInstall)
-		appRouter.PUT("/:key", baseApi.AppInstallOperate)
-		appRouter.DELETE("/:key", baseApi.AppUnInstall)
-		appRouter.GET("/:key/detail", baseApi.AppDetailByKey)
+		appRouter.GET("", baseApi.ListApps)
+		appRouter.POST("/:key", baseApi.InstallApp)
+		appRouter.PUT("/:key", baseApi.UpdateAppInstall)
+		appRouter.DELETE("/:key", baseApi.UninstallApp)
+		appRouter.GET("/:key/detail", baseApi.GetAppDetail)
 
-		appRouter.GET("/installed", baseApi.AppInstalledPage)
-		appRouter.GET("/installed/:id/params", baseApi.AppInstalledParams)
-		appRouter.PUT("/installed/:id/params", baseApi.AppInstalledUpdateParams)
-		appRouter.GET("/installed/:id/logs", baseApi.AppLogs)
-		appRouter.GET("/tags", baseApi.AppTags)
+		appRouter.GET("/installed", baseApi.ListInstalledApps)
+		appRouter.GET("/installed/:id/params", baseApi.GetAppParams)
+		appRouter.PUT("/installed/:id/params", baseApi.UpdateAppParams)
+		appRouter.GET("/installed/:id/logs", baseApi.GetAppLogs)
+		appRouter.GET("/tags", baseApi.ListAppTags)
 
-		appRouter.GET("/plugin/info", baseApi.GetPluginInfo)
+		appRouter.GET("/plugin/info", baseApi.GetInstalledAppInfo)
 
-		appRouter.POST("/manage/upload", baseApi.AppUpload)
+		appRouter.POST("/manage/upload", baseApi.UploadApp)
 	}
 }

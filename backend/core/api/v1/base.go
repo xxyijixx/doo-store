@@ -17,6 +17,7 @@ func checkAuth(c *gin.Context, admin bool) error {
 	if err != nil {
 		return err
 	}
+	c.Set("user", info)
 	if admin && !info.IsAdmin() {
 		return errors.New(constant.ErrPluginAdminNotCancel)
 	}

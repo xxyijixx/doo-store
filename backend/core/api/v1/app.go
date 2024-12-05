@@ -27,24 +27,25 @@ import (
 // @Param description query string false "description"
 // @Success 200 {object} dto.Response{data=dto.PageResult{items=[]model.App}} "success"
 // @Router /apps [get]
-func (*BaseApi) AppPage(c *gin.Context) {
+func (*BaseApi) ListApps(c *gin.Context) {
 	err := checkAuth(c, true)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	var req request.AppSearch
-	err = helper.CheckBindQueryAndValidate(&req, c)
+	if err := helper.ValidateQueryParams(c, &req); err != nil {
+		fmt.Printf("请求参数验证失败：%v\n", err)
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+
+	result, err := appService.ListApps(dto.NewServiceContext(c), req)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	data, err := appService.AppPage(dto.ServiceContext{C: c}, req)
-	if err != nil {
-		helper.ErrorWith(c, err.Error(), nil)
-		return
-	}
-	helper.SuccessWith(c, data)
+	helper.SuccessWith(c, result)
 }
 
 // @Summary 获取插件详情
@@ -57,19 +58,19 @@ func (*BaseApi) AppPage(c *gin.Context) {
 // @Param key path string true "key"
 // @Success 200 {object} dto.Response{data=response.AppDetail} "success"
 // @Router /apps/{key}/detail [get]
-func (*BaseApi) AppDetailByKey(c *gin.Context) {
+func (*BaseApi) GetAppDetail(c *gin.Context) {
 	err := checkAuth(c, true)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	key := c.Param("key")
-	data, err := appService.AppDetailByKey(dto.ServiceContext{C: c}, key)
+	result, err := appService.GetAppDetail(dto.NewServiceContext(c), key)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	helper.SuccessWith(c, data)
+	helper.SuccessWith(c, result)
 }
 
 // @Summary 插件安装
@@ -84,20 +85,18 @@ func (*BaseApi) AppDetailByKey(c *gin.Context) {
 // @Param data body request.AppInstall true "RequestBody"
 // @Success 200 {object} dto.Response "success"
 // @Router /apps/{key} [post]
-func (*BaseApi) AppInstall(c *gin.Context) {
+func (*BaseApi) InstallApp(c *gin.Context) {
 	err := checkAuth(c, true)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	key := c.Param("key")
 	var req request.AppInstall
-	err = helper.CheckBindAndValidate(&req, c)
-	if err != nil {
+	if err := helper.ValidateJSONRequest(c, &req); err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	req.Key = key
+	req.Key = c.Param("key")
 
 	// 校验CPUS和MemoryLimit
 	re := regexp.MustCompile(`^(\d+(\.\d+)?(B|b|K|k|M|m|G|g|T|t)?)$|^\d+(\.\d+)?$`)
@@ -112,7 +111,7 @@ func (*BaseApi) AppInstall(c *gin.Context) {
 		return
 	}
 
-	err = appService.AppInstall(dto.ServiceContext{C: c}, req)
+	err = appService.InstallApp(dto.NewServiceContext(c), req)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
@@ -132,21 +131,20 @@ func (*BaseApi) AppInstall(c *gin.Context) {
 // @Param data body request.AppInstalledOperate true "RequestBody"
 // @Success 200 {object} dto.Response "success"
 // @Router /apps/{key} [put]
-func (*BaseApi) AppInstallOperate(c *gin.Context) {
+func (*BaseApi) UpdateAppInstall(c *gin.Context) {
 	err := checkAuth(c, true)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	key := c.Param("key")
 	var req request.AppInstalledOperate
-	err = helper.CheckBindAndValidate(&req, c)
-	if err != nil {
+	if err := helper.ValidateJSONRequest(c, &req); err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	req.Key = key
-	err = appService.AppInstallOperate(dto.ServiceContext{C: c}, req)
+	req.Key = c.Param("key")
+
+	err = appService.UpdateAppInstall(dto.NewServiceContext(c), req)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
@@ -166,21 +164,21 @@ func (*BaseApi) AppInstallOperate(c *gin.Context) {
 // @Param data body request.AppUnInstall true "RequestBody"
 // @Success 200 {object} dto.Response "success"
 // @Router /apps/{key} [delete]
-func (*BaseApi) AppUnInstall(c *gin.Context) {
+func (*BaseApi) UninstallApp(c *gin.Context) {
 	err := checkAuth(c, true)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	key := c.Param("key")
 	var req request.AppUnInstall
-	// err = helper.CheckBindAndValidate(&req, c)
+	// err = helper.ValidateJSONRequest(&req, c)
 	// if err != nil {
 	// 	helper.ErrorWith(c, err.Error(), nil)
 	// 	return
 	// }
-	req.Key = key
-	err = appService.AppUnInstall(dto.ServiceContext{C: c}, req)
+	req.Key = c.Param("key")
+
+	err = appService.UninstallApp(dto.NewServiceContext(c), req)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
@@ -202,24 +200,24 @@ func (*BaseApi) AppUnInstall(c *gin.Context) {
 // @Param description query string false "description"
 // @Success 200 {object} dto.Response{data=dto.PageResult{items=[]object}} "success"
 // @Router /apps/installed [get]
-func (*BaseApi) AppInstalledPage(c *gin.Context) {
+func (*BaseApi) ListInstalledApps(c *gin.Context) {
 	err := checkAuth(c, true)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	var req request.AppInstalledSearch
-	err = helper.CheckBindQueryAndValidate(&req, c)
+	if err := helper.ValidateQueryParams(c, &req); err != nil {
+		helper.ErrorWith(c, err.Error(), nil)
+		return
+	}
+
+	result, err := appService.ListInstalledApps(dto.NewServiceContext(c), req)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	data, err := appService.AppInstalledPage(dto.ServiceContext{C: c}, req)
-	if err != nil {
-		helper.ErrorWith(c, err.Error(), nil)
-		return
-	}
-	helper.SuccessWith(c, data)
+	helper.SuccessWith(c, result)
 }
 
 // @Summary 获取插件参数信息
@@ -232,19 +230,19 @@ func (*BaseApi) AppInstalledPage(c *gin.Context) {
 // @Param id path integer true "id"
 // @Success 200 {object} dto.Response{data=response.AppInstalledParamsResp} "success"
 // @Router /apps/installed/{id}/params [get]
-func (*BaseApi) AppInstalledParams(c *gin.Context) {
+func (*BaseApi) GetAppParams(c *gin.Context) {
 	err := checkAuth(c, true)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	id, _ := strconv.Atoi(c.Param("id"))
-	data, err := appService.Params(dto.ServiceContext{C: c}, int64(id))
+	result, err := appService.GetAppParams(dto.NewServiceContext(c), int64(id))
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	helper.SuccessWith(c, data)
+	helper.SuccessWith(c, result)
 }
 
 // @Summary 修改插件参数信息
@@ -258,7 +256,7 @@ func (*BaseApi) AppInstalledParams(c *gin.Context) {
 // @Param data body request.AppInstall true "RequestBody"
 // @Success 200 {object} dto.Response "success"
 // @Router /apps/installed/{id}/params [put]
-func (*BaseApi) AppInstalledUpdateParams(c *gin.Context) {
+func (*BaseApi) UpdateAppParams(c *gin.Context) {
 	err := checkAuth(c, true)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
@@ -266,8 +264,7 @@ func (*BaseApi) AppInstalledUpdateParams(c *gin.Context) {
 	}
 	id, _ := strconv.Atoi(c.Param("id"))
 	var req request.AppInstall
-	err = helper.CheckBindAndValidate(&req, c)
-	if err != nil {
+	if err := helper.ValidateJSONRequest(c, &req); err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
@@ -285,12 +282,12 @@ func (*BaseApi) AppInstalledUpdateParams(c *gin.Context) {
 		return
 	}
 
-	data, err := appService.UpdateParams(dto.ServiceContext{C: c}, req)
+	result, err := appService.UpdateAppParams(dto.NewServiceContext(c), req)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	helper.SuccessWith(c, data)
+	helper.SuccessWith(c, result)
 }
 
 // @Summary 获取插件分类信息
@@ -302,18 +299,18 @@ func (*BaseApi) AppInstalledUpdateParams(c *gin.Context) {
 // @Param language header string false "i18n" default(zh)
 // @Success 200 {object} dto.Response{data=[]model.Tag} "success"
 // @Router /apps/tags [get]
-func (*BaseApi) AppTags(c *gin.Context) {
+func (*BaseApi) ListAppTags(c *gin.Context) {
 	err := checkAuth(c, false)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	data, err := appService.AppTags(dto.ServiceContext{C: c})
+	result, err := appService.ListAppTags(dto.NewServiceContext(c))
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	helper.SuccessWith(c, data)
+	helper.SuccessWith(c, result)
 }
 
 // @Summary 获取插件日志信息
@@ -329,7 +326,7 @@ func (*BaseApi) AppTags(c *gin.Context) {
 // @Param id path integer true "id"
 // @Success 200 {object} dto.Response "success"
 // @Router /apps/installed/{id}/logs [get]
-func (*BaseApi) AppLogs(c *gin.Context) {
+func (*BaseApi) GetAppLogs(c *gin.Context) {
 	err := checkAuth(c, true)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
@@ -337,8 +334,7 @@ func (*BaseApi) AppLogs(c *gin.Context) {
 	}
 	id, _ := strconv.Atoi(c.Param("id"))
 	var req request.AppLogsSearch
-	err = helper.CheckBindQueryAndValidate(&req, c)
-	if err != nil {
+	if err := helper.ValidateQueryParams(c, &req); err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
@@ -346,12 +342,12 @@ func (*BaseApi) AppLogs(c *gin.Context) {
 	if req.Tail <= 0 || req.Tail >= 10000 {
 		req.Tail = 1000
 	}
-	data, err := appService.GetLogs(dto.ServiceContext{C: c}, req)
+	result, err := appService.GetAppLogs(dto.NewServiceContext(c), req)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
-	helper.SuccessWith(c, data)
+	helper.SuccessWith(c, result)
 }
 
 // @Summary 上传插件
@@ -364,7 +360,7 @@ func (*BaseApi) AppLogs(c *gin.Context) {
 // @Param data body request.PluginUpload true "RequestBody"
 // @Success 200 {object} dto.Response "success"
 // @Router /apps/manage/upload [post]
-func (*BaseApi) AppUpload(c *gin.Context) {
+func (*BaseApi) UploadApp(c *gin.Context) {
 	err := checkAuth(c, true)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
@@ -372,13 +368,12 @@ func (*BaseApi) AppUpload(c *gin.Context) {
 	}
 
 	var req request.PluginUpload
-	err = helper.CheckBindAndValidate(&req, c)
-	if err != nil {
+	if err := helper.ValidateJSONRequest(c, &req); err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
 	}
 	fmt.Printf("请求参数：\n%+v\n", req)
-	err = appService.Upload(dto.ServiceContext{C: c}, req)
+	err = appService.UploadApp(dto.NewServiceContext(c), req)
 	if err != nil {
 		helper.ErrorWith(c, err.Error(), nil)
 		return
@@ -396,7 +391,7 @@ func (*BaseApi) AppUpload(c *gin.Context) {
 // @Param key query string true "key"
 // @Success 200 {object} object{ret=string,msg=string,data=map[string]any{}}) "success"
 // @Router /apps/plugin/info [get]
-func (*BaseApi) GetPluginInfo(c *gin.Context) {
+func (*BaseApi) GetInstalledAppInfo(c *gin.Context) {
 	// 身份校验，仅需要登录
 	err := checkAuth(c, false)
 	if err != nil {
@@ -404,15 +399,14 @@ func (*BaseApi) GetPluginInfo(c *gin.Context) {
 		return
 	}
 	var req request.GetInstalledPluginInfo
-	err = helper.CheckBindQueryAndValidate(&req, c)
+	if err := helper.ValidateQueryParams(c, &req); err != nil {
+		helper.ErrorWithRet(c, err.Error(), nil)
+		return
+	}
+	result, err := appService.GetInstalledAppInfo(dto.NewServiceContext(c), req)
 	if err != nil {
 		helper.ErrorWithRet(c, err.Error(), nil)
 		return
 	}
-	data, err := appService.GetPluginInfo(dto.ServiceContext{C: c}, req)
-	if err != nil {
-		helper.ErrorWithRet(c, err.Error(), nil)
-		return
-	}
-	helper.SuccessWithRet(c, data)
+	helper.SuccessWithRet(c, result)
 }

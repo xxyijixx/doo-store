@@ -20,8 +20,8 @@ var (
 	once            sync.Once
 )
 
-// GetManager 获取全局异步任务管理器实例
-func GetGlobalManager() *GlobalAsyncManager {
+// GetAsyncTaskManager 获取全局异步任务管理器实例
+func GetAsyncTaskManager() *GlobalAsyncManager {
 	if managerInstance == nil {
 		panic("GlobalAsyncManager not initialized")
 	}

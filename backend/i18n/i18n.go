@@ -35,14 +35,9 @@ func GetMsgWithMap(ctx *gin.Context, key string, maps map[string]any) string {
 func GetErrMsg(ctx *gin.Context, key string, maps map[string]any) string {
 	content := ""
 	if maps == nil {
-		content = ginI18n.MustGetMessage(ctx, &i18n.LocalizeConfig{
-			MessageID: key,
-		})
+		content = GetMsgWithMap(ctx, key, maps)
 	} else {
-		content = ginI18n.MustGetMessage(ctx, &i18n.LocalizeConfig{
-			MessageID:    key,
-			TemplateData: maps,
-		})
+		content = GetMsgWithMap(ctx, key, maps)
 	}
 	return content
 }

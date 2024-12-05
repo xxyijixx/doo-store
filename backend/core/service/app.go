@@ -35,18 +35,18 @@ type AppService struct {
 }
 
 type IAppService interface {
-	AppPage(ctx dto.ServiceContext, req request.AppSearch) (*dto.PageResult, error)
-	AppDetailByKey(ctx dto.ServiceContext, key string) (*response.AppDetail, error)
-	AppInstall(ctx dto.ServiceContext, req request.AppInstall) error
-	AppInstallOperate(ctx dto.ServiceContext, req request.AppInstalledOperate) error
-	AppUnInstall(ctx dto.ServiceContext, req request.AppUnInstall) error
-	AppInstalledPage(ctx dto.ServiceContext, req request.AppInstalledSearch) (*dto.PageResult, error)
-	Params(ctx dto.ServiceContext, id int64) (any, error)
-	UpdateParams(ctx dto.ServiceContext, req request.AppInstall) (any, error)
-	AppTags(ctx dto.ServiceContext) ([]*model.Tag, error)
-	GetLogs(ctx dto.ServiceContext, req request.AppLogsSearch) (any, error)
-	Upload(ctx dto.ServiceContext, req request.PluginUpload) error
-	GetPluginInfo(ctx dto.ServiceContext, req request.GetInstalledPluginInfo) (*response.GetInstalledPluginInfoResp, error)
+	ListApps(ctx dto.ServiceContext, req request.AppSearch) (*dto.PageResult, error)
+	GetAppDetail(ctx dto.ServiceContext, key string) (*response.AppDetail, error)
+	InstallApp(ctx dto.ServiceContext, req request.AppInstall) error
+	UpdateAppInstall(ctx dto.ServiceContext, req request.AppInstalledOperate) error
+	UninstallApp(ctx dto.ServiceContext, req request.AppUnInstall) error
+	ListInstalledApps(ctx dto.ServiceContext, req request.AppInstalledSearch) (*dto.PageResult, error)
+	GetAppParams(ctx dto.ServiceContext, id int64) (any, error)
+	UpdateAppParams(ctx dto.ServiceContext, req request.AppInstall) (any, error)
+	ListAppTags(ctx dto.ServiceContext) ([]*model.Tag, error)
+	GetAppLogs(ctx dto.ServiceContext, req request.AppLogsSearch) (any, error)
+	UploadApp(ctx dto.ServiceContext, req request.PluginUpload) error
+	GetInstalledAppInfo(ctx dto.ServiceContext, req request.GetInstalledPluginInfo) (*response.GetInstalledPluginInfoResp, error)
 }
 
 func NewIAppService() IAppService {
@@ -73,7 +73,7 @@ func NewAppInstallProcess(ctx dto.ServiceContext, req request.AppInstall) *AppIn
 	}
 }
 
-func (p *AppInstallProcess) Check() error {
+func (p *AppInstallProcess) ValidateInstallRequirements() error {
 	var err error
 	p.app, err = repo.App.Where(repo.App.Key.Eq(p.req.Key)).First()
 	if err != nil {
@@ -93,7 +93,7 @@ func (p *AppInstallProcess) Check() error {
 	}
 	// 依赖版本不符合要求
 	if !check {
-		return e.WithMap(p.ctx.C, constant.ErrPluginVersionNotSupport, map[string]interface{}{
+		return e.NewErrorWithMap(p.ctx.C, constant.ErrPluginVersionNotSupport, map[string]interface{}{
 			"detail": p.app.DependsVersion,
 		}, nil)
 	}
@@ -295,7 +295,7 @@ func (p *AppInstallProcess) AddNginx() error {
 	return nil
 }
 
-func (*AppService) AppPage(ctx dto.ServiceContext, req request.AppSearch) (*dto.PageResult, error) {
+func (*AppService) ListApps(ctx dto.ServiceContext, req request.AppSearch) (*dto.PageResult, error) {
 	var query repo.IAppDo
 	query = repo.App.Order(repo.App.Sort.Desc())
 	if req.Page <= 0 {
@@ -331,7 +331,7 @@ func (*AppService) AppPage(ctx dto.ServiceContext, req request.AppSearch) (*dto.
 	return pageResult, nil
 }
 
-func (*AppService) AppDetailByKey(ctx dto.ServiceContext, key string) (*response.AppDetail, error) {
+func (*AppService) GetAppDetail(ctx dto.ServiceContext, key string) (*response.AppDetail, error) {
 
 	app, err := repo.App.Where(repo.App.Key.Eq(key)).First()
 	if err != nil {
@@ -354,11 +354,11 @@ func (*AppService) AppDetailByKey(ctx dto.ServiceContext, key string) (*response
 	return resp, nil
 }
 
-// AppInstall 插件安装
-func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) error {
+// InstallApp 插件安装
+func (*AppService) InstallApp(ctx dto.ServiceContext, req request.AppInstall) error {
 	appInstallProcess := NewAppInstallProcess(ctx, req)
 
-	if err := appInstallProcess.Check(); err != nil {
+	if err := appInstallProcess.ValidateInstallRequirements(); err != nil {
 		return err
 	}
 	if err := appInstallProcess.DHCP(); err != nil {
@@ -368,7 +368,7 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 		return err
 	}
 	// 异步处理
-	manager := task.GetGlobalManager()
+	manager := task.GetAsyncTaskManager()
 	manager.AddTask(func() error {
 		if err := appInstallProcess.Install(); err != nil {
 			return err
@@ -382,7 +382,7 @@ func (*AppService) AppInstall(ctx dto.ServiceContext, req request.AppInstall) er
 	return nil
 }
 
-func (*AppService) AppInstallOperate(ctx dto.ServiceContext, req request.AppInstalledOperate) error {
+func (*AppService) UpdateAppInstall(ctx dto.ServiceContext, req request.AppInstalledOperate) error {
 	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.Key.Eq(req.Key)).First()
 	if err != nil {
 		return err
@@ -430,7 +430,7 @@ func (*AppService) AppInstallOperate(ctx dto.ServiceContext, req request.AppInst
 	return nil
 }
 
-func (*AppService) AppUnInstall(ctx dto.ServiceContext, req request.AppUnInstall) error {
+func (*AppService) UninstallApp(ctx dto.ServiceContext, req request.AppUnInstall) error {
 	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.Key.Eq(req.Key)).First()
 	if err != nil {
 		return err
@@ -470,7 +470,7 @@ func (*AppService) AppUnInstall(ctx dto.ServiceContext, req request.AppUnInstall
 	return nil
 }
 
-func (*AppService) AppInstalledPage(ctx dto.ServiceContext, req request.AppInstalledSearch) (*dto.PageResult, error) {
+func (*AppService) ListInstalledApps(ctx dto.ServiceContext, req request.AppInstalledSearch) (*dto.PageResult, error) {
 
 	query := repo.AppInstalled.Join(repo.App, repo.App.ID.EqCol(repo.AppInstalled.AppID))
 	if req.Class != "" {
@@ -504,7 +504,7 @@ func (*AppService) AppInstalledPage(ctx dto.ServiceContext, req request.AppInsta
 	return pageResult, nil
 }
 
-func (*AppService) Params(ctx dto.ServiceContext, id int64) (any, error) {
+func (*AppService) GetAppParams(ctx dto.ServiceContext, id int64) (any, error) {
 	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(id)).First()
 	if err != nil {
 		log.Info("Error query app installed", err)
@@ -543,7 +543,7 @@ func (*AppService) Params(ctx dto.ServiceContext, id int64) (any, error) {
 	return aParams, nil
 }
 
-func (*AppService) UpdateParams(ctx dto.ServiceContext, req request.AppInstall) (any, error) {
+func (*AppService) UpdateAppParams(ctx dto.ServiceContext, req request.AppInstall) (any, error) {
 	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(req.InstalledId)).First()
 	if err != nil {
 		log.Info("Error query app installed", err)
@@ -609,7 +609,7 @@ func (*AppService) UpdateParams(ctx dto.ServiceContext, req request.AppInstall) 
 	return aParams, nil
 }
 
-func (*AppService) AppTags(ctx dto.ServiceContext) ([]*model.Tag, error) {
+func (*AppService) ListAppTags(ctx dto.ServiceContext) ([]*model.Tag, error) {
 	tags, err := repo.Tag.Find()
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -620,7 +620,7 @@ func (*AppService) AppTags(ctx dto.ServiceContext) ([]*model.Tag, error) {
 	return tags, nil
 }
 
-func (*AppService) GetLogs(ctx dto.ServiceContext, req request.AppLogsSearch) (any, error) {
+func (*AppService) GetAppLogs(ctx dto.ServiceContext, req request.AppLogsSearch) (any, error) {
 	log.Info("获取日志")
 
 	// 获取 Docker 客户端
@@ -695,8 +695,8 @@ func (*AppService) GetLogs(ctx dto.ServiceContext, req request.AppLogsSearch) (a
 	return result, nil
 }
 
-// Upload 插件上传
-func (AppService) Upload(ctx dto.ServiceContext, req request.PluginUpload) error {
+// UploadApp 插件上传
+func (AppService) UploadApp(ctx dto.ServiceContext, req request.PluginUpload) error {
 	key := req.Plugin.Key
 	count, err := repo.App.Where(repo.App.Key.Eq(key)).Count()
 	if err != nil {
@@ -760,7 +760,7 @@ func (AppService) Upload(ctx dto.ServiceContext, req request.PluginUpload) error
 	return nil
 }
 
-func (AppService) GetPluginInfo(ctx dto.ServiceContext, req request.GetInstalledPluginInfo) (*response.GetInstalledPluginInfoResp, error) {
+func (AppService) GetInstalledAppInfo(ctx dto.ServiceContext, req request.GetInstalledPluginInfo) (*response.GetInstalledPluginInfoResp, error) {
 	// 获取已安装并正常运行的插件信息
 	info, err := repo.AppInstalled.Where(repo.AppInstalled.Key.Eq(req.Key), repo.AppInstalled.Status.Eq(constant.Running)).First()
 	if err != nil {

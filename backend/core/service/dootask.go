@@ -68,7 +68,7 @@ func (d *DootaskService) GetVersoinInfo() (*dto.VersionInfoResp, error) {
 func (d *DootaskService) UnmarshalAndCheckResponse(resp []byte) (map[string]interface{}, error) {
 	var ret map[string]interface{}
 	if err := json.Unmarshal(resp, &ret); err != nil {
-		// return nil, e.WithDetail(constant.ErrDooTaskUnmarshalResponse, err, nil)
+		// return nil, e.NewErrorWithDetail(constant.ErrDooTaskUnmarshalResponse, err, nil)
 		return nil, errors.New(constant.ErrDooTaskUnmarshalResponse)
 	}
 
@@ -82,7 +82,7 @@ func (d *DootaskService) UnmarshalAndCheckResponse(resp []byte) (map[string]inte
 		if !ok {
 			return nil, errors.New(constant.ErrDooTaskRequestFailed)
 		}
-		// return nil, e.WithDetail(constant.ErrDooTaskRequestFailedWithErr, msg, nil)
+		// return nil, e.NewErrorWithDetail(constant.ErrDooTaskRequestFailedWithErr, msg, nil)
 		return nil, errors.New(constant.ErrDooTaskRequestFailedWithErr + msg)
 	}
 
