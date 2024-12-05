@@ -4,7 +4,6 @@ import (
 	"doo-store/backend/constant"
 	"errors"
 	"fmt"
-	"regexp"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -73,34 +72,34 @@ func Check(content string) error {
 		if serviceConfig.NetworkMode == "host" {
 			return errors.New(constant.ErrPluginNetworkModeHost)
 		}
-		if err = checkLocalVolumeMounts(serviceConfig.Volumes); err != nil {
-			return err
-		}
+		// if err = checkLocalVolumeMounts(serviceConfig.Volumes); err != nil {
+		// 	return err
+		// }
 	}
 	return nil
 }
 
 // 检测 Docker Compose 文件中的挂载目录
-func checkLocalVolumeMounts(volumes []string) error {
-	// 定义正则表达式，用来匹配以 ./ 开头的挂载路径，避免包含 `..`
-	re := regexp.MustCompile(`^\.\/[^:]+$`)
+// func checkLocalVolumeMounts(volumes []string) error {
+// 	// 定义正则表达式，用来匹配以 ./ 开头的挂载路径，避免包含 `..`
+// 	re := regexp.MustCompile(`^\.\/[^:]+$`)
 
-	for _, volume := range volumes {
-		// 拆分挂载的路径和目标路径
-		parts := strings.Split(volume, ":")
-		if len(parts) > 1 {
-			localPath := parts[0] // 本地路径
+// 	for _, volume := range volumes {
+// 		// 拆分挂载的路径和目标路径
+// 		parts := strings.Split(volume, ":")
+// 		if len(parts) > 1 {
+// 			localPath := parts[0] // 本地路径
 
-			// 检查本地路径是否以 ./ 开头，并且不包含返回上级目录的 `..`
-			if !re.MatchString(localPath) {
-				return errors.New(constant.ErrPluginInvalidLocalVolumeMount)
-			}
+// 			// 检查本地路径是否以 ./ 开头，并且不包含返回上级目录的 `..`
+// 			if !re.MatchString(localPath) {
+// 				return errors.New(constant.ErrPluginInvalidLocalVolumeMount)
+// 			}
 
-			// 检查是否有环境变量
-			if strings.Contains(localPath, "${") {
-				return errors.New(constant.ErrPluginEnvVarInVolumeMount)
-			}
-		}
-	}
-	return nil
-}
+// 			// 检查是否有环境变量
+// 			if strings.Contains(localPath, "${") {
+// 				return errors.New(constant.ErrPluginEnvVarInVolumeMount)
+// 			}
+// 		}
+// 	}
+// 	return nil
+// }

@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"doo-store/backend/config"
 	"doo-store/backend/constant"
 	"encoding/json"
 	"fmt"
@@ -14,6 +15,11 @@ func GenEnv(appKey, containerName, ipAddress string, envs map[string]any, writeF
 	envFile := fmt.Sprintf("%s/%s/.env", constant.AppInstallDir, appKey)
 	envContent = fmt.Sprintf("%s=%s\n", "CONTAINER_NAME", containerName)
 	envContent += fmt.Sprintf("%s=%s\n", "IP_ADDRESS", ipAddress)
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DIR", config.EnvConfig.GetDootaskDir())
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_APP_ID", config.EnvConfig.DOOTASK_APP_ID)
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_APP_IPPR", config.EnvConfig.DOOTASK_APP_IPPR)
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_NETWORK_NAME", config.EnvConfig.GetNetworkName())
+
 	for key, value := range envs {
 		var envValue string
 		switch v := value.(type) {

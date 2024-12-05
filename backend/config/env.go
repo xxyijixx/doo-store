@@ -37,11 +37,24 @@ func (s *envConfigSchema) GetNginxContainerName() string {
 }
 
 func (s *envConfigSchema) GetNetworkName() string {
-	return fmt.Sprintf("dootask-networks-%s", s.APP_ID)
+	// return fmt.Sprintf("dootask-networks-%s", s.APP_ID)
+	return s.DOOTASK_NETWORK_NAME
 }
 
 func (s *envConfigSchema) GetDefaultContainerName(key string) string {
 	return fmt.Sprintf("dootask-plugin-%s-%s-%s", key, key, s.APP_ID)
+}
+
+func (s *envConfigSchema) GetDootaskDir() string {
+	if s.DOOTASK_DIR == "" {
+		pwd, err := os.Getwd()
+		if err != nil {
+			fmt.Println("Failed to get current directory", err)
+			return ""
+		}
+		return pwd
+	}
+	return s.DOOTASK_DIR
 }
 
 var dsn string
@@ -61,6 +74,11 @@ var defaultConfig = envConfigSchema{
 
 	SQLITE_PATH: "./app.db",
 
+	DOOTASK_DIR:          "",
+	DOOTASK_APP_ID:       "",
+	DOOTASK_APP_IPPR:     "",
+	DOOTASK_NETWORK_NAME: "",
+
 	MYSQL_HOST:     "127.0.0.1",
 	MYSQL_PORT:     "18888",
 	MYSQL_USERNAME: "devlop",
@@ -70,10 +88,6 @@ var defaultConfig = envConfigSchema{
 	DATA_DIR: "",
 
 	APP_PREFIX: "dootask-plugin-",
-
-	EXTERNAL_NETWORK_NAME:    "",
-	EXTERNAL_NETWORK_IP:      "",
-	EXTERNAL_NETWORK_GATEWAY: "",
 
 	YoudaoAppKey:    "",
 	YoudaoAppSecret: "",
@@ -92,6 +106,11 @@ type envConfigSchema struct {
 
 	SQLITE_PATH string
 
+	DOOTASK_DIR          string
+	DOOTASK_APP_ID       string
+	DOOTASK_APP_IPPR     string
+	DOOTASK_NETWORK_NAME string
+
 	MYSQL_HOST     string
 	MYSQL_PORT     string
 	MYSQL_USERNAME string
@@ -101,10 +120,6 @@ type envConfigSchema struct {
 	DATA_DIR string
 
 	APP_PREFIX string
-
-	EXTERNAL_NETWORK_NAME    string
-	EXTERNAL_NETWORK_IP      string
-	EXTERNAL_NETWORK_GATEWAY string
 
 	YoudaoAppKey    string
 	YoudaoAppSecret string

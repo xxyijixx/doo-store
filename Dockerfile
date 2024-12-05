@@ -38,6 +38,7 @@ ENV ENV=prod
 
 # 复制构建好的二进制文件
 COPY --from=builder /app/main .
+COPY --from=builder /app/web ./web
 
 RUN chmod +x /app/main
 

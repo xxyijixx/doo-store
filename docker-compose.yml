@@ -10,17 +10,19 @@ services:
       - "8080:8080"
     environment:
       TZ: Asia/Shanghai
-      ENV: "dev"
-      STORAGE: sqlite
       SQLITE_PATH: "./db/app.db"
-      DATA_DIR: "${PWD}/docker/dood"
+      DATA_DIR: "/app/docker/dood"
       APP_ID: "${APP_ID}"
-      IP_START: "${APP_IPPR}.20"
-      IP_COUNT: 100
+      PLUGIN_CIDR: "${APP_IPPR}.30/24"
+      DOOTASK_DIR: "${PWD}"
+      DOOTASK_APP_ID: "${APP_ID}"
+      DOOTASK_NETWORK_NAME: "dootask-networks-${APP_ID}"
+      DOOTASK_APP_IPPR: "${APP_IPPR}"
+
     volumes:
       - ./docker/sqlite:/app/db
       - ./docker/init:/app/init
-      - ./docker/dood:${PWD}/docker/dood
+      - ./docker/dood:/app/docker/dood
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       extnetwork:

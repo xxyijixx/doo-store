@@ -75,7 +75,7 @@ func (p *Plugin) GenService() string {
 	if len(p.Env) != 0 {
 		serviceContent = append(serviceContent, fmt.Sprintf("%senvironment:", p.getSpaces(2)))
 		for _, env := range p.Env {
-			serviceContent = append(serviceContent, fmt.Sprintf("%s- %s=\"${%s}\"", p.getSpaces(3), env.Key, env.Key))
+			serviceContent = append(serviceContent, fmt.Sprintf("%s- %s=${%s}", p.getSpaces(3), env.Key, env.Key))
 		}
 	}
 
