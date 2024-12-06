@@ -42,7 +42,7 @@ export function PaginationCom({
     };
 
     return (
-        <div className="flex items-center justify-end gap-4 text-sm mr-6 lg:mt-6 mt-3">
+        <div className="flex items-center justify-end gap-4 text-sm mr-6 lg:mt-6 md:mt-6 mt-6">
             <span>共 {totalItems || 0} 条</span>
             
             <div className="flex items-center list-none">

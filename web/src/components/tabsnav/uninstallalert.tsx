@@ -18,6 +18,8 @@ import { useState } from "react"
 import * as http from "@/api/modules/fouceinter"
 import { useTranslation } from "react-i18next"
 import warnIcon from "@/assets/警告.png"
+import { useToast } from "@/hooks/use-toast";
+import { FalseToaster } from '../ui/toaster';
 
 
 interface AlertDialogDemoProps {
@@ -28,8 +30,10 @@ interface AlertDialogDemoProps {
 }
 
 export function AlertDialogDemo({ isOpen, onClose, app, onUninstall }: AlertDialogDemoProps) {
-    const { t } = useTranslation()
-    const [isLoading, setIsLoading] = useState(false)
+    const { t } = useTranslation();
+    const { toast } = useToast();
+    const [isLoading, setIsLoading] = useState(false);
+    const [variantState, setVariantState] = useState<"success" | "destructive" | null>(null);
 
     // 卸载应用
     const handleUninstall = async () => {
@@ -44,19 +48,29 @@ export function AlertDialogDemo({ isOpen, onClose, app, onUninstall }: AlertDial
                 alert(response.msg) // 异常情况，显示错误信息
             }
         } catch (error) {
-            console.error(t("卸载应用失败:"), error)
-            alert(t("卸载失败"))
+            console.error(t("卸载应用失败:"), error);
+            toast({
+                title: t("卸载失败"),
+                description: t("本次卸载失败，请重试。"),
+                variant: "destructive",
+                duration: 3000,
+                className: "fixed top-16  lg:top-3 md:top-3 lg:right-6  md:right-4 right-1/2 translate-x-1/2 lg:translate-x-0 md:translate-x-0 w-[350px]"
+            });
+            setVariantState("destructive");
+            
         } finally {
             setIsLoading(false)
         }
     }
 
     return (
+        <>
+        {variantState === "destructive" && <FalseToaster />}
         <AlertDialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
             <AlertDialogContent>
                 <div className="flex items-center space-x-3">
                 <Avatar>
-                    <AvatarImage src={warnIcon} />
+                    <AvatarImage  src={warnIcon} />
                     <AvatarFallback>...</AvatarFallback>
                 </Avatar>
                 
@@ -81,5 +95,6 @@ export function AlertDialogDemo({ isOpen, onClose, app, onUninstall }: AlertDial
                 
             </AlertDialogContent>
         </AlertDialog>
+        </>
     )
 }

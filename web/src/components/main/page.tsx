@@ -223,155 +223,126 @@ function MainPage() {
 
     return (
         <div className="flex flex-col min-h-[calc(100vh-66px)]">
-            <div className="flex-1">
-                <div className="flex justify-between items-center mb-4 ">
-                    {loading ? (
-                        <div className="flex items-center flex-1">
-                            <div className="lg:hidden md:hidden">
-                                <Skeleton className="h-8 w-8 rounded-lg" />
-                            </div>
-                            <Skeleton className="h-9 w-[120px] rounded-lg" />
-                        </div>
-                    ) : (
-                        <div className="flex items-center justify-between flex-1">
-                            <div className="flex items-center">
-                                <Button 
-                                    variant="goback" 
-                                    size="icon"
-                                    onClick={() => window.history.back()}
-                                >
-                                    <ChevronLeftIcon className="h-6 w-6" />
-                                </Button>
-                                
-                               <h1 className="hidden sm:flex lg:text-3xl lg:font-semibold md:text-3xl text-2xl text-center text-gray-800">
-                                    {t('应用商店')}
-                                </h1>
+            <div className="flex-none">
+                <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center justify-between flex-1">
+                        <div className="flex items-center">
+                            <Button 
+                                variant="goback" 
+                                size="icon"
+                                onClick={() => window.history.back()}
+                            >
+                                <ChevronLeftIcon className="h-6 w-6" />
+                            </Button>
+                            
+                            <h1 className="hidden sm:flex lg:text-3xl  text-2xl text-center text-gray-800">
+                                {t('应用商店')}
+                            </h1>
 
-                                <Button 
-                                    variant="goback" 
-                                    size="icon"
-                                    onClick={() => loadData(searchQuery, currentPage)}
-                                    className="hidden md:block lg:block ml-2"
-                                >
-                                    <ReloadIcon className="h-5 w-5" />
-                                </Button>
-                            </div>
-                             <h1 className="sm:hidden text-2xl text-gray-800">
-                                    {t('应用商店')}
-                                </h1>
-                            <div className={`flex items-center justify-end ${isSearchExpanded ? 'flex-grow md:flex-grow-0 lg:flex-grow-0' : ''}`}>
-                                <UniSearch 
-                                    onSearch={handleSearch} 
-                                    clearAfterSearch={false}
-                                    defaultValue={searchQuery}
-                                    onExpandChange={handleSearchExpand}
-                                />
-                            </div>
+                            <Button 
+                                variant="goback" 
+                                size="icon"
+                                onClick={() => loadData(searchQuery, currentPage)}
+                                className="hidden md:block lg:block ml-2"
+                            >
+                                <ReloadIcon className="h-5 w-5" />
+                            </Button>
                         </div>
-                    )}
+                            <h1 className="sm:hidden text-2xl text-gray-800 lg:font-semibold md:text-3xl">
+                                {t('应用商店')}
+                            </h1>
+                        <div className={`flex items-center justify-end ${isSearchExpanded ? 'flex-grow md:flex-grow-0 lg:flex-grow-0' : ''}`}>
+                            <UniSearch 
+                                onSearch={handleSearch} 
+                                clearAfterSearch={false}
+                                defaultValue={searchQuery}
+                                onExpandChange={handleSearchExpand}
+                            />
+                        </div>
+                    </div>
                 </div>
                 <AnimatePresence mode="wait">
-                    <div key="b1" className="flex lg:-space-x-1  border-b lg:border-gray-200 md:border-gray-200 relative mb-3">
-                        {loading ? (
-                            <div key="b11" className="flex space-x-4">
-                                <Skeleton className="h-10 w-[100px] rounded-lg" />
-                                <Skeleton className="h-10 w-[100px] rounded-lg" />
-                            </div>
-                        ) : (
-                            <>
-                                <motion.div
-                                    key="Aoading"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 1 }}
-                                    className="w-full lg:w-auto md:w-auto"
-                                >
-                                    <ul className="flex items-center w-full">
-                                        <li 
-                                            className={`text-md pt-2 transition-all duration-300 relative z-10 w-1/2 lg:w-auto md:w-auto lg:mr-8 md:mr-8 ${
-                                                activeTab === 'all' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
-                                            }`}
+                    <div key="b1" className="flex lg:-space-x-1 border-b lg:border-gray-200 md:border-gray-200 relative mb-3">
+                        <>
+                            <motion.div
+                                key="Aoading"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 1 }}
+                                className="w-full lg:w-auto md:w-auto"
+                            >
+                                <ul className="flex items-center w-full">
+                                    <li 
+                                        className={`text-md pt-2 transition-all duration-300 relative z-10 w-1/2 lg:w-auto md:w-auto lg:mr-8 md:mr-8 ${
+                                            activeTab === 'all' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
+                                        }`}
+                                    >
+                                        <Button
+                                            variant={activeTab === "all" ? "combar" : "defbar"}
+                                            onClick={() => handleTabChange("all")}
+                                            className="w-full lg:w-auto md:w-auto lg:min-w-[10px] md:min-w-[10px] min-w-[130px] lg:justify-start md:justify-start justify-center"
                                         >
-                                            <Button
-                                                variant={activeTab === "all" ? "combar" : "defbar"}
-                                                onClick={() => handleTabChange("all")}
-                                                className="w-full lg:w-auto md:w-auto lg:min-w-[10px] md:min-w-[10px] min-w-[130px] lg:justify-start md:justify-start justify-center"
-                                            >
-                                                {t('全部')}
-                                            </Button>
-                                        </li>
-                                        <li
-                                            className={`text-md pt-2 transition-all duration-300 relative z-10 w-1/2 lg:w-auto md:w-auto ${
-                                                activeTab === 'installed' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
-                                            }`}
+                                            {t('全部')}
+                                        </Button>
+                                    </li>
+                                    <li
+                                        className={`text-md pt-2 transition-all duration-300 relative z-10 w-1/2 lg:w-auto md:w-auto ${
+                                            activeTab === 'installed' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
+                                        }`}
+                                    >
+                                        <Button
+                                            variant={activeTab === "installed" ? "combar" : "defbar"}
+                                            onClick={() => handleTabChange("installed")}
+                                            className="w-full lg:w-auto md:w-auto lg:min-w-[10px] md:min-w-[10px] min-w-[130px] lg:justify-start md:justify-start justify-center"
                                         >
-                                            <Button
-                                                variant={activeTab === "installed" ? "combar" : "defbar"}
-                                                onClick={() => handleTabChange("installed")}
-                                                className="w-full lg:w-auto md:w-auto lg:min-w-[10px] md:min-w-[10px] min-w-[130px] lg:justify-start md:justify-start justify-center"
-                                            >
-                                                {t('已安装')}
-                                            </Button>
-                                        </li>
-                                    </ul>
-                                </motion.div>
-                            </>
-                        )}
+                                            {t('已安装')}
+                                        </Button>
+                                    </li>
+                                </ul>
+                            </motion.div>
+                        </>
                     </div>
                 </AnimatePresence>
+            </div>
 
-                <div className="lg:pb-2 sm:p-0  lg:w-full md:w-full ">
+            <div className="flex-1 overflow-hidden">
+                <ScrollArea className="h-full lg:w-[606px] md:w-[330px] whitespace-nowrap cursor-grab active:cursor-grabbing">
+                    <div className="flex -space-x-2 mb-3 select-none">
+                        <motion.div
+                            key="Boading"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 1 }}
+                            className="flex"
+                        >
+                            <Button
+                                variant={selectedClass === "allson" ? "combarson" : "defbarson"}
+                                onClick={() => setSelectedClass("allson")}
+                            >
+                                {t('全部')}
+                            </Button>
+                            {tags.map(tag => (
+                                <Button 
+                                    key={tag.id}
+                                    variant={selectedClass === tag.key ? "combarson" : "defbarson"}
+                                    onClick={() => setSelectedClass(tag.key)}
+                                >
+                                    {tag.name}
+                                </Button>
+                            ))}
+                        </motion.div>
+                    </div>
+                    <ScrollBar orientation="horizontal"/>
 
-                    <AnimatePresence mode="wait">
-                        <div key="b2" className="lg:flex md:flex lg:justify-between md:justify-between sm:justify-between lg:items-center lg:mb-3 ">
-                            {loading ? (
-                                <div key="b22" className="flex space-x-2 whitespace-nowrap rounded-md">
-                                    <Skeleton className="h-8 w-[60px] rounded-lg" />
-                                    <Skeleton className="h-8 w-[80px] rounded-lg" />
-                                    <Skeleton className="h-8 w-[70px] rounded-lg" />
-                                    <Skeleton className="h-8 w-[90px] rounded-lg" />
-                                    <Skeleton className="h-8 w-[75px] rounded-lg" />
-                                </div>
-                            ) : (
-                                <ScrollArea className="lg:w-[606px] md:w-[330px] whitespace-nowrap overflow-x-auto">
-                                    {/* 使用 Button 切换*/}
-                                    <div className="flex -space-x-2 mb-3">
-                                        <motion.div
-                                            key="Boading"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            transition={{ duration: 1 }}
-                                        >
-                                            <Button
-                                                variant={selectedClass === "allson" ? "combarson" : "defbarson"}
-                                                onClick={() => setSelectedClass("allson")}
-                                            >
-                                                {t('全部')}
-                                            </Button>
-                                            {tags.map(tag => (
-                                                <Button 
-                                                    key={tag.id}
-                                                    variant={selectedClass === tag.key ? "combarson" : "defbarson"}
-                                                    onClick={() => setSelectedClass(tag.key)}
-                                                >
-                                                    {tag.name}
-                                                </Button>
-                                            ))}
-                                        </motion.div>
-                                    </div>
-                                    <ScrollBar orientation="horizontal" className="bg-transparent display-none " />
-                                </ScrollArea>
-                            )}
+                </ScrollArea>
 
-                        </div>
-                    </AnimatePresence>
-
+                <div className="mt-4">
                     <AnimatePresence mode="wait">
                         {/* 如果当前 Tab 是 "all" 或 "allson" 且未选择 class，显示 all 类应用列表 */}
                         {(activeTab === "all" && selectedClass !== "installed") && (
-                            <div className={`grid lg:gap-4 md:gap-4 gap-2 m-1 grid-cols-1 md:grid-cols-2 lg:grid-cols-3`}>
+                            <div className={`grid lg:gap-4 md:gap-4 gap-2 m-1 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-280px)] max-h-[calc(100vh-230px)]  overflow-y-auto`}>
                                 {loading ? (
                                     Array.from({ length: 9 }).map((_, index) => (
                                         <motion.div
@@ -416,7 +387,7 @@ function MainPage() {
                                                                 <div className="lg:pr-0 md:pr-16 pr-16">
                                                                     <h1 className="text-xl font-medium text-slate-900 dark:text-white">{app.name}</h1>
                                                                 </div>
-                                                                <p className="text-base line-clamp-2 min-h-[42px] pt-1 md:w-4/5 lg:w-4/5">
+                                                                <p className="text-base line-clamp-2 min-h-[42px] pt-1 w-11/12 md:w-4/5 lg:w-4/5">
                                                                     {app.description || "No description available"}
                                                                 </p>
                                                             </CardDescription>
@@ -437,6 +408,18 @@ function MainPage() {
                                         </motion.div>
                                     ))
                                 )}
+                                 <div className="mt-auto lg:hidden md:hidden">
+                                    <PaginationCom
+                                        currentPage={currentPage}
+                                        totalPages={totalPages}
+                                        totalItems={totalItems}
+                                        pageSize={pageSize}
+                                        onPageChange={handlePageChange}
+                                        onPageSizeChange={(_: number) => {
+                                            // 如果暂时不需要处理页面大小变化，可以留空
+                                        }}
+                                    />
+                                </div>
                             </div>
                         )}
 
@@ -450,7 +433,7 @@ function MainPage() {
                                 exit={{ opacity: 0 }}
                                 transition={{ duration: 0.5 }}
                             >
-                                <div className="grid lg:gap-6 md:gap-6 grid-cols-1 md:grid-cols-1 lg:grid-cols-3">
+                                <div className="grid lg:gap-6 md:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-280px)] max-h-[calc(100vh-230px)] overflow-y-auto">
                                     {loading ? (
                                         <div></div>
                                     ) : (
@@ -466,6 +449,18 @@ function MainPage() {
                                             </motion.div>
                                         ))
                                     )}
+                                     <div className="mt-auto lg:hidden md:hidden">
+                                        <PaginationCom
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            totalItems={totalItems}
+                                            pageSize={pageSize}
+                                            onPageChange={handlePageChange}
+                                            onPageSizeChange={(_: number) => {
+                                                // 如果暂时不需要处理页面大小变化，可以留空
+                                            }}
+                                        />
+                                    </div>
                                 </div>
                             </motion.div>
                         )}
@@ -473,17 +468,19 @@ function MainPage() {
                 </div>
             </div>
 
-            <div className="mt-auto">
-                <PaginationCom
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalItems={totalItems}
-                    pageSize={pageSize}
-                    onPageChange={handlePageChange}
-                    onPageSizeChange={(_: number) => {
-                        // 如果暂时不需要处理页面大小变化，可以留空
-                    }}
-                />
+            <div className="flex-none">
+                <div className="mt-auto hidden lg:block md:block">
+                    <PaginationCom
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={totalItems}
+                        pageSize={pageSize}
+                        onPageChange={handlePageChange}
+                        onPageSizeChange={(_: number) => {
+                            // 如果暂时不需要处理页面大小变化，可以留空
+                        }}
+                    />
+                </div>
             </div>
         </div>
     )

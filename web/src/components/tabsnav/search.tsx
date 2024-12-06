@@ -24,6 +24,7 @@ const UniSearch: React.FC<UniSearchProps> = ({
     const [query, setQuery] = useState(defaultValue);
     const [error, setError] = useState<string>("");
     const [isExpanded, setIsExpanded] = useState(false);
+    const [prevQuery, setPrevQuery] = useState(defaultValue);
 
     // 正则：只允许输入中文、英文、数字(包括')
     const regex = /^[a-zA-Z0-9\u4e00-\u9fa5']*$/;
@@ -32,9 +33,13 @@ const UniSearch: React.FC<UniSearchProps> = ({
     // 处理搜索输入变化
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        if (regex.test(value)) {
+        if (regex.test(value) || value === '') {
             setQuery(value);
             setError("");
+            if (value === '' && prevQuery !== '') {
+                onSearch('');
+                setPrevQuery('');
+            }
         } else {
             setError(t("请输入中文、英文或数字"));
         }
@@ -42,19 +47,20 @@ const UniSearch: React.FC<UniSearchProps> = ({
 
     // 处理键盘输入
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === "Enter" && !error) {
+        if (event.key === "Enter" && !error && query.trim()) {
             handleSearch();
         }
     };
 
     // 处理搜索
     const handleSearch = useCallback(() => {
-        if (chregex.test(query) && !error) {
+        if ((chregex.test(query) || query === '') && !error) {
             onSearch(query);
+            setPrevQuery(query);
             if (clearAfterSearch) {
                 setQuery("");
             }
-        } else {
+        } else if (query.trim()) {
             setError(t("请输入中文、英文或数字"));
         }
     }, [query, error, onSearch, clearAfterSearch, t, chregex]);
@@ -79,7 +85,7 @@ const UniSearch: React.FC<UniSearchProps> = ({
         >
             <div className={`relative flex group items-center ${
                 query.length > 0 || isExpanded ? "w-[180px]" : "w-36"
-            } h-36 lg:mr-0 md:mr-0 mr-0`}>
+            } h-36 lg:mr-0 md:mr-0 mr-0 transition-all duration-300`}>
                 <div 
                     className={`relative flex items-center h-36 bg-gray-200/50 rounded-full overflow-hidden transition-all duration-300 ${
                         query.length > 0 || isExpanded ? "w-[180px]" : "w-36"
