@@ -69,17 +69,17 @@ export function AlertDialogDemo({ isOpen, onClose, app, onUninstall }: AlertDial
         <AlertDialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
             <AlertDialogContent>
                 <div className="flex items-center space-x-3">
-                <Avatar>
-                    <AvatarImage  src={warnIcon} />
-                    <AvatarFallback>...</AvatarFallback>
-                </Avatar>
-                
-                <AlertDialogHeader>
-                    <AlertDialogTitle>{t('卸载')}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        {t('即将执行卸载操作，您是否确定要卸载此')} {app.name} {t('插件吗?')}
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
+                    <Avatar>
+                        <AvatarImage  src={warnIcon} />
+                        <AvatarFallback>...</AvatarFallback>
+                    </Avatar>
+                    
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t('卸载')}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {t('即将执行卸载操作，您是否要卸载')} {app.name} {t('插件吗?')}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
                 </div>
                 
                     <AlertDialogFooter>
