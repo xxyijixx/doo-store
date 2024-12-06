@@ -448,12 +448,14 @@ func (*AppService) UninstallApp(ctx dto.ServiceContext, req request.AppUnInstall
 			log.Info("更新插件状态失败", err)
 			return err
 		}
-		stdout, err := compose.Down(composeFile)
-		if err != nil {
-			log.Info("Error docker compose down")
-			return err
+		if appInstalled.Status != constant.UpErr {
+			stdout, err := compose.Down(composeFile)
+			if err != nil {
+				log.Info("Error docker compose down")
+				return err
+			}
+			fmt.Println(stdout)
 		}
-		fmt.Println(stdout)
 		return err
 	})
 	if err != nil {
