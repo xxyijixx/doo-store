@@ -90,7 +90,6 @@ export function PaginationCom({
             <div className="items-center gap-2 lg:flex md:flex flex">
                 <span>跳至</span>
                 <Input
-                    // type="number"
                     min={1}
                     max={totalPages}
                     value={jumpPage}

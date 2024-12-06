@@ -55,11 +55,12 @@ const PaginationLink = ({
     aria-current={isActive ? "page" : undefined}
     className={cn(
       buttonVariants({
-        variant: isActive ? "secondary" : "ghost",
+        variant: props.children && typeof props.children === 'number' ? "secondary" : "ghost",
         size,
       }),
       className,
-      { 'cursor-not-allowed opacity-50': disabled } // 添加样式
+      props.children && typeof props.children === 'number' && "bg-theme-color hover:bg-theme-color hover:text-white text-white",
+      { 'cursor-not-allowed opacity-50': disabled }
     )}
     onClick={(e) => {
       if (disabled) {
@@ -79,8 +80,9 @@ const PaginationPrevious = ({
 }: React.ComponentProps<typeof PaginationLink>  & { disabled?: boolean } )=> (
   <PaginationLink
     aria-label="Go to previous page"
-    // size="default"
-    className={cn("gap-1 pl-2.5", className, { 'cursor-not-allowed opacity-50': disabled })}
+    className={cn(
+      "gap-1 pl-2.5",className, { 'cursor-not-allowed opacity-50': disabled }
+    )}
     onClick={(e) => {
       if (disabled) {
         e.preventDefault();
@@ -104,7 +106,10 @@ const PaginationNext = ({
   <PaginationLink
     aria-label="Go to next page"
     // size="default"
-    className={cn("gap-1 pr-2.5 ", className, { 'cursor-not-allowed opacity-50': disabled })}
+    className={cn(
+      "gap-1 pr-2.5 ",
+      className, 
+      { 'cursor-not-allowed opacity-50': disabled })}
     disabled={disabled}
     {...props}
     
