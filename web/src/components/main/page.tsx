@@ -361,7 +361,7 @@ function MainPage() {
                                             exit={{ opacity: 0 }}
                                             transition={{ duration: 0.5 }}
                                         >
-                                            <Card key={index} className="lg:w-auto lg:h-[140px] md:w-auto w-[360px]">
+                                            <Card key={index} className="lg:w-auto md:w-auto w-auto lg:h-[140px] lg:my-3 lg:mr-4 md:my-3 md:mr-4 my-3 mx-0 px-2">
                                                 <CardContent className="flex justify-start space-x-4 pt-6">
                                                     <Skeleton className="h-10 w-10 rounded-full" />
                                                     <CardDescription className="space-y-2 text-left">
