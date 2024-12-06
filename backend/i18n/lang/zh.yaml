@@ -1,3 +1,10 @@
+ErrDockerClientCreate: 创建Docker客户端失败
+ErrDockerExecAttach: 附加到执行命令失败
+ErrDockerExecCreate: 创建执行命令失败
+ErrDockerExecRun: 执行命令失败
+ErrDockerFindApps: 查找应用失败
+ErrDockerListContainers: 获取容器列表失败
+ErrDockerMonitorInit: 初始化Docker监控失败
 ErrDooTaskDataFormat: 数据格式错误
 ErrDooTaskRequestFailed: 请求失败
 ErrDooTaskRequestFailedWithErr: 请求失败：{{.detail}}
@@ -5,13 +12,33 @@ ErrDooTaskResponseFormat: 响应格式错误
 ErrDooTaskUnmarshalResponse: 解析响应失败：{{.detail}}
 ErrEnvProhibition: 当前环境禁止此操作
 ErrInvalidParameter: 参数错误
+ErrLogGetFailed: 获取日志失败
+ErrLogReadFailed: 读取日志失败
+ErrNginxContainerNotFound: 未找到Nginx容器
+ErrNginxGetContainer: 获取Nginx容器失败
+ErrNginxParseContent: 解析内容失败
+ErrNginxWriteFile: 写入文件失败
 ErrNoPermission: 权限不足
 ErrPluginAdminNotCancel: 仅限管理员操作
+ErrPluginDependencyFailed: 检查依赖版本失败
 ErrPluginEnvVarInVolumeMount: 不允许在挂载路径使用环境变量
+ErrPluginInfoFailed: 获取插件信息失败
+ErrPluginInstallFailed: 插件安装失败
 ErrPluginInvalidLocalVolumeMount: 本地卷挂载路径无效
+ErrPluginKeyExist: 插件key已存在
+ErrPluginMissingParam: 缺少必填参数 {{.detail}}
+ErrPluginModifyParamFailed: 修改参数失败
 ErrPluginNetworkModeHost: 使用了host网络模式
 ErrPluginNotAllowedPrivileged: 不允许使用特权模式
+ErrPluginNotInstalled: 插件未成功安装，请重新安装
+ErrPluginNotRunning: 插件未运行
+ErrPluginParamInvalid: 插件参数无效
+ErrPluginParamParseFailed: 解析插件参数失败
+ErrPluginRestartFailed: 插件重启失败
+ErrPluginUninstallFailed: 插件卸载失败
 ErrPluginUnmarshalDockerCompose: 无法解析 Docker Compose 文件
+ErrPluginUnsupportedAction: 不支持的操作
+ErrPluginVersionFailed: 获取版本信息失败
 ErrPluginVersionNotSupport: 当前版本不满足要求，需要版本 {{.detail}} 或以上
 ErrRequestTimeout: 请求超时
 ErrTypeNotLogin: 未登录

@@ -26,7 +26,7 @@ type DockerMonitor struct {
 func NewDockerMonitor() (*DockerMonitor, error) {
 	cli, err := docker.NewClient()
 	if err != nil {
-		return nil, fmt.Errorf("failed to create Docker client: %v", err)
+		return nil, fmt.Errorf(constant.ErrDockerClientCreate, err)
 	}
 
 	return &DockerMonitor{
@@ -41,7 +41,7 @@ func (dm *DockerMonitor) StartMonitoring(interval time.Duration) {
 		log.Info("容器状态监听")
 		apps, err := repo.AppInstalled.Find()
 		if err != nil {
-			return fmt.Errorf("failed to find apps: %v", err)
+			return fmt.Errorf(constant.ErrDockerFindApps, err)
 		}
 
 		// Create filter args with app names
@@ -60,7 +60,7 @@ func (dm *DockerMonitor) StartMonitoring(interval time.Duration) {
 			Filters: filterArgs,
 		})
 		if err != nil {
-			return fmt.Errorf("failed to list containers: %v", err)
+			return fmt.Errorf(constant.ErrDockerListContainers, err)
 		}
 
 		// Process container statuses
@@ -194,7 +194,7 @@ func (dm *DockerMonitor) StartMonitoring(interval time.Duration) {
 func InitDockerMonitoring() error {
 	monitor, err := NewDockerMonitor()
 	if err != nil {
-		return fmt.Errorf("failed to initialize Docker monitor: %v", err)
+		return fmt.Errorf(constant.ErrDockerMonitorInit, err)
 	}
 
 	// 设置监控间隔为1分钟

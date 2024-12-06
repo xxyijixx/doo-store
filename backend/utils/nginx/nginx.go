@@ -27,7 +27,7 @@ func AddLocation(tmpl, locationName, proxyServerName string, port int) error {
 	fileInfo, err := os.Stat(locationPath)
 	if err != nil && !os.IsNotExist(err) {
 		log.Debug("写入文件失败", err, fileInfo)
-		return errors.New("写入文件失败")
+		return errors.New(constant.ErrNginxWriteFile)
 	}
 	fileContent := tmpl
 	// 如果模板为空，使用默认配置
@@ -56,7 +56,7 @@ func AddLocation(tmpl, locationName, proxyServerName string, port int) error {
 		t, err := template.New("nginx").Parse(tmpl)
 		if err != nil {
 			log.Debug("解析模板内容失败:", err)
-			return errors.New("解析内容失败")
+			return errors.New(constant.ErrNginxParseContent)
 		}
 		var buf bytes.Buffer
 		t.Execute(&buf, map[string]interface{}{
@@ -71,13 +71,13 @@ func AddLocation(tmpl, locationName, proxyServerName string, port int) error {
 	err = os.WriteFile(locationPath, []byte(fileContent), 0644)
 	if err != nil {
 		log.Debug("写入文件失败")
-		return errors.New("写入文件失败")
+		return errors.New(constant.ErrNginxWriteFile)
 	}
 
 	nginxContainer, err := getNginxContainer()
 	if err != nil {
 		log.Debug("获取Nginx容器失败", err)
-		return errors.New("获取Nginx容器失败")
+		return errors.New(constant.ErrNginxGetContainer)
 	}
 	dockerClient, err := docker.NewClient()
 	if err != nil {
@@ -160,17 +160,17 @@ func getNginxContainer() (types.Container, error) {
 	client, err := docker.NewClient()
 	if err != nil {
 		log.Debug("获取Docker客户端失败", err.Error())
-		return types.Container{}, err
+		return types.Container{}, errors.New(constant.ErrNginxGetContainer)
 	}
 
 	list, err := client.ListContainersByName([]string{config.EnvConfig.GetNginxContainerName()})
 	if err != nil {
 		log.Debug("查找容器失败", err)
-		return types.Container{}, err
+		return types.Container{}, errors.New(constant.ErrNginxGetContainer)
 	}
 	if len(list) < 1 {
 		log.WithField("container_name", config.EnvConfig.GetNginxContainerName()).Debug("Nginx 容器不存在")
-		return types.Container{}, fmt.Errorf("nginx container not found")
+		return types.Container{}, errors.New(constant.ErrNginxContainerNotFound)
 	}
 
 	nginxContainer := list[0]

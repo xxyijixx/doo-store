@@ -78,18 +78,18 @@ func (p *AppInstallProcess) ValidateInstallRequirements() error {
 	p.app, err = repo.App.Where(repo.App.Key.Eq(p.req.Key)).First()
 	if err != nil {
 		log.Info("Error query app")
-		return errors.New("获取插件信息失败")
+		return errors.New(constant.ErrPluginInfoFailed)
 	}
 	// 检测版本
 	dootaskService := NewIDootaskService()
 	versionInfoResp, err := dootaskService.GetVersoinInfo()
 	if err != nil {
-		return errors.New("获取版本信息失败")
+		return errors.New(constant.ErrPluginVersionFailed)
 	}
 	check, err := versionInfoResp.CheckVersion(p.app.DependsVersion)
 	if err != nil {
 		log.Info("检测版本失败", err)
-		return errors.New("检查依赖版本失败")
+		return errors.New(constant.ErrPluginDependencyFailed)
 	}
 	// 依赖版本不符合要求
 	if !check {
@@ -106,11 +106,11 @@ func (p *AppInstallProcess) ValidateInstallRequirements() error {
 
 	if err != nil {
 		if err != gorm.ErrRecordNotFound {
-			return errors.New("安装失败")
+			return errors.New(constant.ErrPluginInstallFailed)
 		}
 	}
 	if p.appInstalled != nil {
-		return errors.New("无需重复安装")
+		return errors.New(constant.ErrPluginInstallFailed)
 	}
 
 	p.appDetail, err = repo.AppDetail.Select(
@@ -124,7 +124,7 @@ func (p *AppInstallProcess) ValidateInstallRequirements() error {
 	).Where(repo.AppDetail.AppID.Eq(p.app.ID)).First()
 	if err != nil {
 		log.Info("Error query app detail", err)
-		return errors.New("安装失败")
+		return errors.New(constant.ErrPluginInfoFailed)
 	}
 	return nil
 }
@@ -140,7 +140,7 @@ func (p *AppInstallProcess) DHCP() error {
 	// 获取所有容器
 	containers, err := client.ContainerList(context.Background(), container.ListOptions{All: true})
 	if err != nil {
-		return fmt.Errorf("获取容器列表失败: %v", err)
+		return fmt.Errorf(constant.ErrDockerListContainers, err)
 	}
 
 	// 检查所有容器使用的IP
@@ -196,12 +196,12 @@ func (p *AppInstallProcess) ValidateParam() error {
 	err = common.StrToStruct(p.appDetail.Params, &params)
 	if err != nil {
 		log.Debug("解析参数失败", err)
-		return errors.New("解析插件参数失败")
+		return errors.New(constant.ErrPluginParamParseFailed)
 	}
 	for _, param := range params.FormFields {
 		if param.Required {
 			if _, exists := p.req.Params[param.EnvKey]; !exists {
-				return errors.New("缺少必填参数 " + param.EnvKey)
+				return e.NewErrorWithDetail(p.ctx.C, constant.ErrPluginMissingParam, param.EnvKey, nil)
 			}
 		}
 	}
@@ -249,7 +249,7 @@ func (p *AppInstallProcess) ValidateParam() error {
 func (p *AppInstallProcess) Install() error {
 	var err error
 	if p.appInstalled == nil {
-		return errors.New("安装失败")
+		return errors.New(constant.ErrPluginInstallFailed)
 	}
 	err = appUp(p.appInstalled, p.envContent)
 	if err != nil {
@@ -392,7 +392,7 @@ func (*AppService) UpdateAppInstall(ctx dto.ServiceContext, req request.AppInsta
 
 	supportActions := []string{"start", "stop"}
 	if !common.InArray(req.Action, supportActions) {
-		return errors.New("不支持的action")
+		return errors.New(constant.ErrPluginUnsupportedAction)
 	}
 
 	if req.Action == "stop" {
@@ -458,7 +458,7 @@ func (*AppService) UninstallApp(ctx dto.ServiceContext, req request.AppUnInstall
 	})
 	if err != nil {
 		log.Info("插件卸载失败", err)
-		return errors.New("插件卸载失败")
+		return errors.New(constant.ErrPluginUninstallFailed)
 	}
 	// 释放IP
 	docker.GlobalIPAllocator.ReleaseIP(appInstalled.IpAddress)
@@ -494,7 +494,7 @@ func (*AppService) ListInstalledApps(ctx dto.ServiceContext, req request.AppInst
 			}, nil
 		}
 		log.Info("查询已安装插件失败", err)
-		return nil, errors.New("查询已安装插件失败")
+		return nil, errors.New(constant.ErrPluginInfoFailed)
 	}
 
 	pageResult := &dto.PageResult{
@@ -508,12 +508,12 @@ func (*AppService) GetAppParams(ctx dto.ServiceContext, id int64) (any, error) {
 	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(id)).First()
 	if err != nil {
 		log.Info("Error query app installed", err)
-		return nil, errors.New("获取安装插件信息失败")
+		return nil, errors.New(constant.ErrPluginInfoFailed)
 	}
 	appDetail, err := repo.AppDetail.Where(repo.AppDetail.ID.Eq(appInstalled.AppDetailID)).First()
 	if err != nil {
 		log.Info("Error query app detail", err)
-		return nil, errors.New("获取安装插件信息失败")
+		return nil, errors.New(constant.ErrPluginInfoFailed)
 	}
 	// appDetail.Params
 	// 解析原始参数
@@ -547,12 +547,12 @@ func (*AppService) UpdateAppParams(ctx dto.ServiceContext, req request.AppInstal
 	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(req.InstalledId)).First()
 	if err != nil {
 		log.Info("Error query app installed", err)
-		return nil, errors.New("获取安装插件信息失败")
+		return nil, errors.New(constant.ErrPluginInfoFailed)
 	}
 	appDetail, err := repo.AppDetail.Where(repo.AppDetail.ID.Eq(appInstalled.AppDetailID)).First()
 	if err != nil {
 		log.Info("Error query app detail", err)
-		return nil, errors.New("获取安装插件信息失败")
+		return nil, errors.New(constant.ErrPluginInfoFailed)
 	}
 	// appDetail.Params
 	// 解析原始参数
@@ -573,12 +573,12 @@ func (*AppService) UpdateAppParams(ctx dto.ServiceContext, req request.AppInstal
 	envContent, envJson, err := docker.GenEnv(appKey, containerName, ipAddress, req.Params, false)
 	if err != nil {
 		log.Info("错误生成环境变量文件", err)
-		return nil, errors.New("修改参数失败")
+		return nil, errors.New(constant.ErrPluginModifyParamFailed)
 	}
 	appInstalled.Env = envJson
 	paramJson, err := json.Marshal(req.Params)
 	if err != nil {
-		return nil, errors.New("解析参数失败")
+		return nil, errors.New(constant.ErrPluginParamParseFailed)
 	}
 	appInstalled.Params = string(paramJson)
 	_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Updates(appInstalled)
@@ -586,7 +586,7 @@ func (*AppService) UpdateAppParams(ctx dto.ServiceContext, req request.AppInstal
 	if err != nil {
 		log.Info("重启失败", err)
 		insertLog(appInstalled.ID, "插件重启", err.Error())
-		return nil, errors.New("插件重启失败")
+		return nil, errors.New(constant.ErrPluginRestartFailed)
 	}
 	// 返回修改后的参数
 	env := map[string]string{}
@@ -635,19 +635,19 @@ func (*AppService) GetAppLogs(ctx dto.ServiceContext, req request.AppLogsSearch)
 	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(req.Id)).First()
 	if err != nil {
 		log.Error("查询插件安装信息失败", err)
-		return nil, errors.New("获取安装插件信息失败")
+		return nil, errors.New(constant.ErrPluginInfoFailed)
 	}
 
 	// 校验插件状态
 	if appInstalled.Status != constant.Running {
-		return nil, errors.New("插件未运行")
+		return nil, errors.New(constant.ErrPluginNotRunning)
 	}
 
 	// 检查容器是否存在
 	_, err = client.ContainerInspect(context.Background(), appInstalled.Name)
 	if err != nil {
 		log.Error("容器不存在", err)
-		return nil, errors.New("插件未成功安装，请重新安装")
+		return nil, errors.New(constant.ErrPluginNotInstalled)
 	}
 
 	// 获取容器日志
@@ -661,7 +661,7 @@ func (*AppService) GetAppLogs(ctx dto.ServiceContext, req request.AppLogsSearch)
 	})
 	if err != nil {
 		log.Error("获取容器日志失败", err)
-		return nil, errors.New("获取日志失败")
+		return nil, errors.New(constant.ErrLogGetFailed)
 	}
 	defer reader.Close()
 
@@ -669,7 +669,7 @@ func (*AppService) GetAppLogs(ctx dto.ServiceContext, req request.AppLogsSearch)
 	logBytes, err := io.ReadAll(reader)
 	if err != nil {
 		log.Error("读取日志内容失败", err)
-		return nil, errors.New("读取日志失败")
+		return nil, errors.New(constant.ErrLogReadFailed)
 	}
 
 	// 将字节转换为字符串
@@ -703,7 +703,7 @@ func (AppService) UploadApp(ctx dto.ServiceContext, req request.PluginUpload) er
 		return err
 	}
 	if count > 0 {
-		return errors.New("key已经存在")
+		return errors.New(constant.ErrPluginKeyExist)
 	}
 	err = repo.DB.Transaction(func(tx *gorm.DB) error {
 
