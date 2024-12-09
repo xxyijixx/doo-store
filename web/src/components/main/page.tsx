@@ -10,7 +10,7 @@ import { PaginationCom } from "@/components/tabsnav/paginationcom";
 import UniSearch from "@/components/tabsnav/search"
 import { InStalledBtn } from "@/components/tabsnav/installedbtn";
 import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+// import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Item } from "@/type.d/common";
 import { Tag } from "@/api/interface/common"
 import { motion, AnimatePresence } from "framer-motion"; // 引入 framer-motion
@@ -307,36 +307,45 @@ function MainPage() {
             </div>
 
             <div className="flex-1 overflow-hidden">
-                <ScrollArea className="h-full lg:w-[606px] md:w-[330px] whitespace-nowrap cursor-grab active:cursor-grabbing">
-                    <div className="flex -space-x-2 mb-3 select-none">
-                        <motion.div
-                            key="Boading"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 1 }}
-                            className="flex"
+                <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+                    <div 
+                        className="flex space-x-2 mb-3 py-1 min-w-max cursor-grab active:cursor-grabbing"
+                        onMouseDown={(e) => {
+                            const ele = e.currentTarget;
+                            const startX = e.pageX - ele.offsetLeft;
+                            const scrollLeft = ele.parentElement?.scrollLeft || 0;
+                            const handleMouseMove = (e: MouseEvent) => {
+                                const x = e.pageX - ele.offsetLeft;
+                                const walk = (x - startX) * 2;
+                                if (ele.parentElement) {
+                                    ele.parentElement.scrollLeft = scrollLeft - walk;
+                                }
+                            };
+                            const handleMouseUp = () => {
+                                document.removeEventListener('mousemove', handleMouseMove);
+                                document.removeEventListener('mouseup', handleMouseUp);
+                            };
+                            document.addEventListener('mousemove', handleMouseMove);
+                            document.addEventListener('mouseup', handleMouseUp);
+                        }}
+                    >
+                        <Button
+                            variant={selectedClass === "allson" ? "combarson" : "defbarson"}
+                            onClick={() => setSelectedClass("allson")}
                         >
-                            <Button
-                                variant={selectedClass === "allson" ? "combarson" : "defbarson"}
-                                onClick={() => setSelectedClass("allson")}
+                            {t('全部')}
+                        </Button>
+                        {tags.map(tag => (
+                            <Button 
+                                key={tag.id}
+                                variant={selectedClass === tag.key ? "combarson" : "defbarson"}
+                                onClick={() => setSelectedClass(tag.key)}
                             >
-                                {t('全部')}
+                                {tag.name}
                             </Button>
-                            {tags.map(tag => (
-                                <Button 
-                                    key={tag.id}
-                                    variant={selectedClass === tag.key ? "combarson" : "defbarson"}
-                                    onClick={() => setSelectedClass(tag.key)}
-                                >
-                                    {tag.name}
-                                </Button>
-                            ))}
-                        </motion.div>
+                        ))}
                     </div>
-                    <ScrollBar orientation="horizontal"/>
-
-                </ScrollArea>
+                </div>
 
                 <div className="mt-4">
                     <AnimatePresence mode="wait">
@@ -352,7 +361,7 @@ function MainPage() {
                                             exit={{ opacity: 0 }}
                                             transition={{ duration: 0.5 }}
                                         >
-                                            <Card key={index} className="lg:w-auto lg:h-[140px] md:w-auto w-[360px]">
+                                            <Card key={index} className="lg:w-auto md:w-auto w-auto lg:h-[140px] lg:my-3 lg:mr-4 md:my-3 md:mr-4 my-3 mx-0 px-2">
                                                 <CardContent className="flex justify-start space-x-4 pt-6">
                                                     <Skeleton className="h-10 w-10 rounded-full" />
                                                     <CardDescription className="space-y-2 text-left">
@@ -408,7 +417,7 @@ function MainPage() {
                                         </motion.div>
                                     ))
                                 )}
-                                 <div className="mt-auto lg:hidden md:hidden">
+                                <div className="mt-auto lg:hidden md:hidden">
                                     <PaginationCom
                                         currentPage={currentPage}
                                         totalPages={totalPages}
@@ -449,7 +458,7 @@ function MainPage() {
                                             </motion.div>
                                         ))
                                     )}
-                                     <div className="mt-auto lg:hidden md:hidden">
+                                    <div className="mt-auto lg:hidden md:hidden">
                                         <PaginationCom
                                             currentPage={currentPage}
                                             totalPages={totalPages}

@@ -8,11 +8,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { 
-    Avatar, 
-    AvatarImage, 
-    AvatarFallback 
-} from '@/components/ui/avatar';
 import { Item } from "@/type.d/common"
 import { useState } from "react"
 import * as http from "@/api/modules/fouceinter"
@@ -68,18 +63,17 @@ export function AlertDialogDemo({ isOpen, onClose, app, onUninstall }: AlertDial
         {variantState === "destructive" && <FalseToaster />}
         <AlertDialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
             <AlertDialogContent>
-                <div className="flex items-center space-x-3">
-                <Avatar>
-                    <AvatarImage  src={warnIcon} />
-                    <AvatarFallback>...</AvatarFallback>
-                </Avatar>
-                
-                <AlertDialogHeader>
-                    <AlertDialogTitle>{t('卸载')}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        {t('即将执行卸载操作，您是否确定要卸载此')} {app.name} {t('插件吗?')}
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
+                <div className="flex items-start space-x-3">
+                    <div className="w-[45px] h-[45px] rounded-3xl bg-uninsbg-warn ">
+                        <img src={warnIcon} className="size-6 ml-2.5 mt-2.5" />
+                    </div>
+                    
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t('卸载')}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {t('即将执行卸载操作，您是否要卸载')} {app.name} {t('插件吗?')}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
                 </div>
                 
                     <AlertDialogFooter>
