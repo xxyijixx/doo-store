@@ -52,18 +52,12 @@ function Drawer({ status, app }: DrawerProps) {
 
     //handleInstallSuccess成功运行安装局部更新状态
     const handleInstallSuccess = () => {
-        toast({
-            title: t("安装成功"),
-            description: t("应用已成功安装"),
-            variant: "success",
-            duration: 3000,
-            className: "fixed top-20 lg:top-3 md:top-3 lg:right-6  md:right-4 right-1/2 translate-x-1/2 lg:translate-x-0 md:translate-x-0 w-[350px]"
-        });
-        setVariantState("success"); 
         setButtonText(t("安装"));
-        setCurrentStatus('InUse'); // 更新状态为 "InUse"（已安装），以改变按钮样式
-        setIsOpen(false); // 关闭侧边栏
-
+        setCurrentStatus('InUse');
+        setIsOpen(false);
+        
+        // 直接切换到已安装页面
+        window.dispatchEvent(new CustomEvent('switchToInstalled'));
     };
 
     //handleInstallFalse失败运行安装局部更新状态

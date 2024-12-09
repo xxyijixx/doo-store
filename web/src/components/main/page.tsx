@@ -19,7 +19,7 @@ import { useTokenStore } from "@/store/ TokenContext";
 import { useTranslation } from "react-i18next";
 import { ChevronLeftIcon, ReloadIcon } from "@radix-ui/react-icons"
 
-const POLLING_INTERVAL = 5000; // 5秒轮询一次
+const POLLING_INTERVAL = 5000; // 5秒
 
 const fetchAppsData = async (tab: string, className = '', currentPage: number, pageSize = 9, query: string = '') => {
 
@@ -83,26 +83,19 @@ const handleMicroData = () => {
     const eventCenterForMicroApp = window.eventCenterForAppNameVite;
     //
     if (eventCenterForMicroApp) {
-        // 设置名称
-        // GlobalStore().setAppName(eventCenterForMicroApp.appName)
-        // 主动获取基座下发的数据
+  
         const info = eventCenterForMicroApp.getData();
-        // if (info?.type == "init") {
-        // initGlobaStore(info)
-        // }
+       
         useTokenStore.getState().token = info?.userInfo?.token
         console.log('22222222333333333', useTokenStore.getState().token);
 
         // 监听基座下发的数据变化
         eventCenterForMicroApp.addDataListener((data: any) => {
-            // handleData(router, eventCenterForMicroApp.appName, data)
             console.log('1111111111', data);
 
-            // useTokenStore().setToken(data.token)
         });
         // 监听基座下发的数据变化 - 全局
         eventCenterForMicroApp.addGlobalDataListener(() => {
-            // useTokenStore().setToken(data.token)
         });
     }
 }
@@ -220,6 +213,21 @@ function MainPage() {
     const handleSearchExpand = (expanded: boolean) => {
         setIsSearchExpanded(expanded);
     };
+
+    useEffect(() => {
+        const handleSwitchToInstalled = () => {
+            setActiveTab('installed');
+            setCurrentPage(1);
+            setSearchQuery("");
+            loadData();
+        };
+        //（考虑到安装时间过长，点安装跳至已安装）
+        window.addEventListener('switchToInstalled', handleSwitchToInstalled);
+        
+        return () => {
+            window.removeEventListener('switchToInstalled', handleSwitchToInstalled);
+        };
+    }, []);
 
     return (
         <div className="flex flex-col min-h-[calc(100vh-66px)]">
