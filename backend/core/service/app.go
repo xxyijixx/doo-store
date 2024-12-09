@@ -306,17 +306,14 @@ func (*AppService) ListApps(ctx dto.ServiceContext, req request.AppSearch) (*dto
 	} else if req.PageSize > 1000 {
 		req.PageSize = 1000
 	}
-	if req.Name != "" {
-		query = query.Where(repo.App.Name.Like(fmt.Sprintf("%%%s%%", req.Name)))
-	}
 	if req.Class != "" {
 		query = query.Where(repo.App.Class.Eq(req.Class))
 	}
 	if req.ID != 0 {
 		query = query.Where(repo.App.ID.Eq(req.ID))
 	}
-	if req.Description != "" {
-		query = query.Where(repo.App.Description.Like(fmt.Sprintf("%%%s%%", req.Description)))
+	if req.Name != "" || req.Description != "" {
+		query = query.Where(repo.App.Name.Like(fmt.Sprintf("%%%s%%", req.Name))).Or(repo.App.Description.Like(fmt.Sprintf("%%%s%%", req.Description)))
 	}
 	result, count, err := query.FindByPage((req.Page-1)*req.PageSize, req.PageSize)
 
@@ -478,11 +475,8 @@ func (*AppService) ListInstalledApps(ctx dto.ServiceContext, req request.AppInst
 	if req.Class != "" {
 		query = query.Where(repo.AppInstalled.Class.Eq(req.Class))
 	}
-	if req.Name != "" {
-		query = query.Where(repo.App.Name.Like(fmt.Sprintf("%%%s%%", req.Name)))
-	}
-	if req.Description != "" {
-		query = query.Where(repo.App.Description.Like(fmt.Sprintf("%%%s%%", req.Description)))
+	if req.Description != "" || req.Name != "" {
+		query = query.Where(repo.App.Description.Like(fmt.Sprintf("%%%s%%", req.Description))).Or(repo.App.Name.Like(fmt.Sprintf("%%%s%%", req.Name)))
 	}
 
 	result := []map[string]any{}
@@ -722,6 +716,13 @@ func (AppService) UploadApp(ctx dto.ServiceContext, req request.PluginUpload) er
 		if err != nil {
 			log.Debug(err.Error())
 			return err
+		}
+		tag, _ := repo.Tag.Where(repo.Tag.Key.Eq(req.Plugin.Class)).First()
+		if tag == nil {
+			_ = repo.Use(tx).Tag.Create(&model.Tag{
+				Key:  req.Plugin.Class,
+				Name: req.Plugin.Class,
+			})
 		}
 		dockerCompose := req.DockerCompose
 		// 生成默认docker-compose.yml
