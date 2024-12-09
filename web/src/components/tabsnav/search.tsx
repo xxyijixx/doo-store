@@ -24,7 +24,6 @@ const UniSearch: React.FC<UniSearchProps> = ({
     const [query, setQuery] = useState(defaultValue);
     const [error, setError] = useState<string>("");
     const [isExpanded, setIsExpanded] = useState(false);
-    const [prevQuery, setPrevQuery] = useState(defaultValue);
 
     // 正则：只允许输入中文、英文、数字(包括')
     const regex = /^[a-zA-Z0-9\u4e00-\u9fa5']*$/;
@@ -36,10 +35,7 @@ const UniSearch: React.FC<UniSearchProps> = ({
         if (regex.test(value) || value === '') {
             setQuery(value);
             setError("");
-            if (value === '' && prevQuery !== '') {
-                onSearch('');
-                setPrevQuery('');
-            }
+            onSearch(value);
         } else {
             setError(t("请输入中文、英文或数字"));
         }
@@ -56,14 +52,11 @@ const UniSearch: React.FC<UniSearchProps> = ({
     const handleSearch = useCallback(() => {
         if ((chregex.test(query) || query === '') && !error) {
             onSearch(query);
-            setPrevQuery(query);
             if (clearAfterSearch) {
                 setQuery("");
             }
-        } else if (query.trim()) {
-            setError(t("请输入中文、英文或数字"));
         }
-    }, [query, error, onSearch, clearAfterSearch, t, chregex]);
+    }, [query, error, onSearch, clearAfterSearch]);
 
     // 添加鼠标滑过处理
     const handleMouseEnter = () => {
@@ -110,9 +103,6 @@ const UniSearch: React.FC<UniSearchProps> = ({
                             if (query.length === 0) {
                                 setIsExpanded(false);
                                 onExpandChange?.(false);
-                            }
-                            if (chregex.test(query) && !error) {
-                                handleSearch();
                             }
                         }}
                         className="w-full h-full bg-transparent border-none pl-4 pr-10 focus:outline-none placeholder:text-gray-500 search-input"
