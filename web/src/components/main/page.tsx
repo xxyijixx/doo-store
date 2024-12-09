@@ -235,7 +235,7 @@ function MainPage() {
                                 <ChevronLeftIcon className="h-6 w-6" />
                             </Button>
                             
-                            <h1 className="hidden sm:flex lg:text-3xl  text-2xl text-center text-gray-800">
+                            <h1 className="hidden sm:flex lg:text-3xl lg:font-medium md:font-medium text-2xl text-center text-gray-800">
                                 {t('应用商店')}
                             </h1>
 
@@ -248,9 +248,9 @@ function MainPage() {
                                 <ReloadIcon className="h-5 w-5" />
                             </Button>
                         </div>
-                            <h1 className="sm:hidden text-2xl text-gray-800 lg:font-semibold md:text-3xl">
-                                {t('应用商店')}
-                            </h1>
+                        <h1 className="sm:hidden text-2xl text-gray-800 md:text-3xl truncate max-w-[4em] ">
+                            {t('应用商店')}
+                        </h1>
                         <div className={`flex items-center justify-end ${isSearchExpanded ? 'flex-grow md:flex-grow-0 lg:flex-grow-0' : ''}`}>
                             <UniSearch 
                                 onSearch={handleSearch} 

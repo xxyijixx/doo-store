@@ -13,6 +13,8 @@
     "dependencies": {
         "@codemirror/lang-javascript": "^6.2.2",
         "@douyinfe/semi-ui": "^2.70.1",
+        "@emotion/react": "^11.13.5",
+        "@emotion/styled": "^11.13.5",
         "@hookform/resolvers": "^3.9.1",
         "@radix-ui/react-alert-dialog": "^1.1.2",
         "@radix-ui/react-avatar": "^1.1.1",

@@ -10,8 +10,8 @@ import { useTranslation } from "react-i18next";
 interface UniSearchProps {
     onSearch: (query: string) => void; // 父组件传递的搜索函数
     clearAfterSearch?: boolean; // 添加新属性控制搜索后是否清空
-    defaultValue?: string; // 添加这一行
-    onExpandChange?: (expanded: boolean) => void;  // 添加这一行
+    defaultValue?: string; // 默认搜索值
+    onExpandChange?: (expanded: boolean) => void;  // 展开状态变化回调
 }
 
 const UniSearch: React.FC<UniSearchProps> = ({ 
@@ -125,9 +125,11 @@ const UniSearch: React.FC<UniSearchProps> = ({
                     </Button>
                 </div>
             </div>
-            {error && (
-                <div className="text-red-500 text-xs mt-1">{error}</div>
-            )}
+            <div className="h-2">
+                {error && isExpanded && (
+                    <div className="text-red-500 text-xs">{error}</div>
+                )}
+            </div>
         </div>
     );
 };

@@ -9,7 +9,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useState, useMemo } from "react"
 import { AlertDialogDemo } from "@/components/tabsnav/uninstallalert"
-import { LoadingOverlay } from "@/components/tabsnav/loading"
+import { PureLoadingOverlay } from "@/components/tabsnav/loading"
 import {  AlertLogHave } from "@/components/tabsnav/logalert"
 import EditDrawer from "@/components/drawer/editpage"
 import { Item } from "@/type.d/common"
@@ -158,8 +158,8 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
     return (
         <>
         {variantState === "success" && <SuccessToaster />}
-       {variantState === "destructive" && <FalseToaster />}
-        <Card className="lg:w-auto  md:w-auto w-auto h-[180px] lg:mb-0 md:mb-0 mb-3">
+        {variantState === "destructive" && <FalseToaster />}
+        <Card className="lg:w-auto md:w-auto w-auto h-[180px] lg:mb-0 md:mb-0 mb-3 relative">
             <CardContent className="flex justify-start space-x-5 mt-6 pl-5">
                 {isLoading ? (
                     <>
@@ -170,28 +170,29 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                         </CardDescription>
                     </>
                 ) : (
-                    <Avatar className="my-auto size-10">
-                        <AvatarImage src={app.icon} />
-                        <AvatarFallback>loading</AvatarFallback>
-                    </Avatar>
+                    <>
+                        <Avatar className="my-auto size-10">
+                            <AvatarImage src={app.icon} />
+                            <AvatarFallback>loading</AvatarFallback>
+                        </Avatar>
+                        <CardDescription className="space-y-1 text-left">
+                            {isLoading ? (
+                                <Skeleton className="h-6 w-48" />
+                            ) : (
+                                <div className="text-xl font-medium text-slate-950 dark:text-white flex">
+                                    {app.name}
+                                    {statusDisplay}
+                                </div>
+                            )}
+
+                            {isLoading ? (
+                                <Skeleton className="h-4 w-56" />
+                            ) : (
+                                <p className="text-base line-clamp-2 min-h-[42px] leading-[21px] pt-1 pr-5">{app.description || t("No description available")}</p>
+                            )}
+                        </CardDescription>
+                    </>
                 )}
-
-                <CardDescription className="space-y-1 text-left">
-                    {isLoading ? (
-                        <Skeleton className="h-6 w-48" />
-                    ) : (
-                        <div className="text-xl font-medium text-slate-950 dark:text-white flex">
-                            {app.name}
-                            {statusDisplay}
-                        </div>
-                    )}
-
-                    {isLoading ? (
-                        <Skeleton className="h-4 w-56" />
-                    ) : (
-                        <p className="text-base line-clamp-2 min-h-[42px] leading-[21px] pt-1 pr-5">{app.description || t("No description available")}</p>
-                    )}
-                </CardDescription>
             </CardContent>
             <CardFooter className="flex justify-start -mt-1 gap-2 lg:gap-3 md:gap-3 lg:ml-14 md:ml-14 md:pl-6 pl-20">
                 {isLoading ? (
@@ -265,7 +266,11 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                 )}
             </CardFooter>
 
-            {isLoading && <LoadingOverlay />}
+            {isLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                    <PureLoadingOverlay />
+                </div>
+            )}
 
             <EditDrawer isOpen={isDrawerOpen} onClose={closeDrawer} app={app} />
         </Card>
