@@ -86,6 +86,8 @@ const handleMicroData = () => {
   
         const info = eventCenterForMicroApp.getData();
        
+        console.log("info:",info)
+        console.log("cc:", eventCenterForMicroApp)
         useTokenStore.getState().token = info?.userInfo?.token
         console.log('22222222333333333', useTokenStore.getState().token);
 
@@ -215,13 +217,13 @@ function MainPage() {
     };
 
     useEffect(() => {
-        const handleSwitchToInstalled = () => {
+        const handleSwitchToInstalled = ()=> {
             setActiveTab('installed');
             setCurrentPage(1);
             setSearchQuery("");
             loadData();
         };
-        //（考虑到安装时间过长，点安装跳至已安装）
+        
         window.addEventListener('switchToInstalled', handleSwitchToInstalled);
         
         return () => {
