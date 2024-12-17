@@ -3,6 +3,7 @@ package docker
 import (
 	"doo-store/backend/config"
 	"doo-store/backend/constant"
+	"doo-store/backend/utils/compose"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -69,6 +70,8 @@ func WriteEnvFile(appKey, envContent string) (string, error) {
 // 写Compose文件
 func WriteComposeFile(appKey, composeContent string) (string, error) {
 	composeFile := GetComposeFile(appKey)
+	// 替换部分环境变量
+	composeContent = compose.ReplaceEnvVariables(composeContent)
 	err := os.WriteFile(composeFile, []byte(composeContent), 0644)
 	if err != nil {
 		return "", fmt.Errorf("failed to write docker-compose file: %w", err)

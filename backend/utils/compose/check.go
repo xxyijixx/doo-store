@@ -1,13 +1,19 @@
 package compose
 
 import (
+	"doo-store/backend/config"
 	"doo-store/backend/constant"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"gopkg.in/yaml.v3"
 )
+
+var envMap = map[string]string{
+	"DOOTASK_NETWORK_NAME": config.EnvConfig.DOOTASK_NETWORK_NAME,
+}
 
 // 自定义类型用于处理两种格式
 type Environment map[string]string
@@ -103,3 +109,20 @@ func Check(content string) error {
 // 	}
 // 	return nil
 // }
+
+func ReplaceEnvVariables(input string) string {
+	// 使用正则表达式匹配 ${xxx} 格式的环境变量
+	re := regexp.MustCompile(`\${([^}]+)}`)
+
+	// 替换所有匹配的环境变量
+	return re.ReplaceAllStringFunc(input, func(match string) string {
+		// 提取变量名
+		varName := strings.Trim(match, "${}")
+		// 从 map 中查找该变量的值
+		if envValue, exists := envMap[varName]; exists {
+			return envValue
+		}
+		// 如果没有找到变量值，返回原占位符
+		return match
+	})
+}

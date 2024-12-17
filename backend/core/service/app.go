@@ -435,7 +435,7 @@ func (*AppService) UninstallApp(ctx dto.ServiceContext, req request.AppUnInstall
 	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
 	composeFile := docker.GetComposeFile(appKey)
 	err = repo.DB.Transaction(func(tx *gorm.DB) error {
-		_, err = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Delete()
+		_, err = repo.Use(tx).AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Delete()
 		if err != nil {
 			log.Info("删除插件失败", err)
 			return err
