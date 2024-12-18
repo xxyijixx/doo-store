@@ -724,11 +724,8 @@ func (AppService) UploadApp(ctx dto.ServiceContext, req request.PluginUpload) er
 				Name: req.Plugin.Class,
 			})
 		}
-		dockerCompose := req.DockerCompose
-		// 生成默认docker-compose.yml
-		if dockerCompose == "" {
-			dockerCompose = req.Plugin.GenComposeFile()
-		}
+
+		dockerCompose := req.Plugin.GenComposeFile()
 
 		err = compose.Check(dockerCompose)
 		if err != nil {

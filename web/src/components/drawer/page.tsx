@@ -50,7 +50,7 @@ function Drawer({ status, app }: DrawerProps) {
     };
 
 
-    //handleInstallSuccess成功运行安装局部更新状态
+    //handleInstallSuccess执行安装操作后
     const handleInstallSuccess = () => {
         setButtonText(t("安装"));
         setCurrentStatus('InUse');

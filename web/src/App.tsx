@@ -7,7 +7,6 @@ import RootLayout from './layout'
 
 
 function App() {
-
   return (
     <>
           <RootLayout>

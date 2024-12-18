@@ -22,6 +22,7 @@ type Plugin struct {
 	Env            []EnvElement `json:"env"`
 	Command        string       `json:"command"`
 	NginxConfig    string       `json:"nginx_config"`
+	DockerCompose  string       `json:"docker_compose"`
 }
 
 type EnvElement struct {
@@ -38,6 +39,9 @@ type Volume struct {
 }
 
 func (p *Plugin) GenComposeFile() string {
+	if p.DockerCompose != "" {
+		return p.DockerCompose
+	}
 	composeContent := p.GenService()
 	composeContent += p.GenNetwork()
 	return composeContent

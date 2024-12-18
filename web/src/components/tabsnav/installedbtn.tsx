@@ -128,7 +128,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
 
     const handleLogClick = () => {
         if (app.status != "Running") {
-            // setIsLogDemoOpen(true)
+            //状态不是正在运行
             toast({
                 variant: "destructive",
                 title: t("温馨提示"),
@@ -154,7 +154,6 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
             </span>
         );
     }, [isRunning, appStatus]);
-
     return (
         <>
         {variantState === "success" && <SuccessToaster />}
@@ -184,7 +183,6 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                                     {statusDisplay}
                                 </div>
                             )}
-
                             {isLoading ? (
                                 <Skeleton className="h-4 w-56" />
                             ) : (
@@ -257,11 +255,8 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                             isOpen={isDialogOpen} 
                             onClose={closeDialog} 
                             app={app} 
-                            onUninstall={handleUninstall} 
-                            
+                            onUninstall={handleUninstall}      
                             />
-
-                        {/* <Button variant="common">重启</Button> */}
                     </>
                 )}
             </CardFooter>

@@ -46,7 +46,7 @@ type AppLogsSearch struct {
 
 type PluginUpload struct {
 	dto.Plugin
-	DockerCompose string `json:"docker_compose"`
+	// DockerCompose string `json:"docker_compose"`
 }
 
 type GetInstalledPluginInfo struct {
