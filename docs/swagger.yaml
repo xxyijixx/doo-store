@@ -616,6 +616,39 @@ paths:
       summary: 获取已安装的插件信息(仅需要登录)
       tags:
       - app
+  /apps/running:
+    get:
+      parameters:
+      - default: zh
+        description: i18n
+        in: header
+        name: language
+        type: string
+      - description: key
+        in: query
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                additionalProperties: {}
+                type: object
+              msg:
+                type: string
+              ret:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取所有已安装的插件信息(仅需要登录)
+      tags:
+      - app
   /apps/tags:
     get:
       parameters:

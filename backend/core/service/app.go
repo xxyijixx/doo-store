@@ -47,6 +47,7 @@ type IAppService interface {
 	GetAppLogs(ctx dto.ServiceContext, req request.AppLogsSearch) (any, error)
 	UploadApp(ctx dto.ServiceContext, req request.PluginUpload) error
 	GetInstalledAppInfo(ctx dto.ServiceContext, req request.GetInstalledPluginInfo) (*response.GetInstalledPluginInfoResp, error)
+	ListRunningAppKeys(ctx dto.ServiceContext) (any, error)
 }
 
 func NewIAppService() IAppService {
@@ -786,6 +787,15 @@ func (AppService) GetInstalledAppInfo(ctx dto.ServiceContext, req request.GetIns
 		resp.CloudProvider = env["CLOUD_PROVIDER"]
 	}
 	return resp, err
+}
+
+func (AppService) ListRunningAppKeys(ctx dto.ServiceContext) (any, error) {
+	result := []string{}
+	err := repo.AppInstalled.Select(repo.AppInstalled.Key).Where(repo.AppInstalled.Status.Eq(constant.Running)).Pluck(repo.AppInstalled.Key, &result)
+	if err != nil {
+		return []string{}, err
+	}
+	return result, nil
 }
 
 func appRe(appInstalled *model.AppInstalled, envContent string) error {

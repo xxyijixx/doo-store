@@ -78,6 +78,7 @@ var defaultConfig = envConfigSchema{
 	DOOTASK_APP_ID:       "",
 	DOOTASK_APP_IPPR:     "",
 	DOOTASK_NETWORK_NAME: "",
+	DOOTASK_APP_KEY:      "",
 
 	MYSQL_HOST:     "127.0.0.1",
 	MYSQL_PORT:     "18888",
@@ -95,6 +96,12 @@ var defaultConfig = envConfigSchema{
 	PLUGIN_CIDR: "",
 
 	DB_PREFIX: "",
+
+	DOOTASK_DB_HOST:     "mariadb",
+	DOOTASK_DB_PORT:     "3306",
+	DOOTASK_DB_DATABASE: "dootask",
+	DOOTASK_DB_USERNAME: "dootask",
+	DOOTASK_DB_PASSWORD: "123456",
 }
 
 type envConfigSchema struct {
@@ -110,6 +117,7 @@ type envConfigSchema struct {
 	DOOTASK_APP_ID       string
 	DOOTASK_APP_IPPR     string
 	DOOTASK_NETWORK_NAME string
+	DOOTASK_APP_KEY      string
 
 	MYSQL_HOST     string
 	MYSQL_PORT     string
@@ -127,6 +135,12 @@ type envConfigSchema struct {
 	PLUGIN_CIDR string
 
 	DB_PREFIX string
+
+	DOOTASK_DB_HOST     string
+	DOOTASK_DB_PORT     string
+	DOOTASK_DB_DATABASE string
+	DOOTASK_DB_USERNAME string
+	DOOTASK_DB_PASSWORD string
 }
 
 func (s *envConfigSchema) IsDev() bool {

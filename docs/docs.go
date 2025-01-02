@@ -469,6 +469,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/apps/running": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app"
+                ],
+                "summary": "获取所有已安装的插件信息(仅需要登录)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "zh",
+                        "description": "i18n",
+                        "name": "language",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "key",
+                        "name": "key",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                },
+                                "msg": {
+                                    "type": "string"
+                                },
+                                "ret": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/apps/tags": {
             "get": {
                 "security": [

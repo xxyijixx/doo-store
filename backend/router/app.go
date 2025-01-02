@@ -26,6 +26,7 @@ func (a *AppRouter) InitRouter(Router *gin.RouterGroup) {
 		appRouter.GET("/tags", baseApi.ListAppTags)
 
 		appRouter.GET("/plugin/info", baseApi.GetInstalledAppInfo)
+		appRouter.GET("/running", baseApi.ListRunningApps)
 
 		appRouter.POST("/manage/upload", baseApi.UploadApp)
 	}

@@ -410,3 +410,27 @@ func (*BaseApi) GetInstalledAppInfo(c *gin.Context) {
 	}
 	helper.SuccessWithRet(c, result)
 }
+
+// @Summary 获取所有已安装的插件信息(仅需要登录)
+// @Schemes
+// @Description
+// @Security BearerAuth
+// @Tags app
+// @Produce json
+// @Param language header string false "i18n" default(zh)
+// @Param key query string true "key"
+// @Success 200 {object} object{ret=string,msg=string,data=map[string]any{}}) "success"
+// @Router /apps/running [get]
+func (*BaseApi) ListRunningApps(c *gin.Context) {
+	err := checkAuth(c, false)
+	if err != nil {
+		helper.ErrorWithRet(c, err.Error(), nil)
+		return
+	}
+	result, err := appService.ListRunningAppKeys(dto.NewServiceContext(c))
+	if err != nil {
+		helper.ErrorWithRet(c, err.Error(), nil)
+		return
+	}
+	helper.SuccessWithRet(c, map[string]any{"list": result})
+}
