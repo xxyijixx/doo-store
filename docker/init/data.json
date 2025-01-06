@@ -458,7 +458,23 @@
       "env": [],
       "command": "",
       "nginx_config": "location /apps/okr/ {\n     proxy_pass http://{{.ContainerName}}:5566/apps/okr/;\n}",
-      "docker_compose": "version: '3'\n\nservices:\n  okr:\n    image: \"kuaifan/doookr:0.4.5\"\n    restart: unless-stopped\n    container_name: ${CONTAINER_NAME}\n    networks:\n      ${DOOTASK_NETWORK_NAME}:\n        ipv4_address: ${IP_ADDRESS}\n    environment:\n      # 基础配置\n      - TZ=${TIMEZONE:-RPC}\n      - DOO_TASK_URL=http://${APP_IPPR}.3     \n      - MYSQL_HOST=${DOOTASK_DB_HOST}\n      - MYSQL_PORT=${DOOTASK_DB_PORT}\n      - MYSQL_DBNAME=${DOOTASK_DB_DATABASE}\n      - MYSQL_USERNAME=${DOOTASK_DB_USERNAME}\n      - MYSQL_PASSWORD=${DOOTASK_DB_PASSWORD}\n      - MYSQL_PREFIX=${DOOTASK_DB_PREFIX}\n      - DEMO_DATA=true\n      - KEY=${DOOTASK_APP_KEY}\n\n    cpus: \"${CPUS}\"\n    mem_limit: \"${MEMORY_LIMIT}\"\n    labels:\n      createdBy: \"Apps\"\n\nnetworks:\n  ${DOOTASK_NETWORK_NAME}:\n    external: true\n"
+      "docker_compose": "version: '3'\n\nservices:\n  okr:\n    image: \"kuaifan/doookr:0.4.5\"\n    restart: unless-stopped\n    container_name: ${CONTAINER_NAME}\n    networks:\n      ${DOOTASK_NETWORK_NAME}:\n        ipv4_address: \"${DOOTASK_APP_IPPR}.13\"\n    environment:\n      # 基础配置\n      - TZ=${TIMEZONE:-RPC}\n      - DOO_TASK_URL=http://${APP_IPPR}.3     \n      - MYSQL_HOST=${DOOTASK_DB_HOST}\n      - MYSQL_PORT=${DOOTASK_DB_PORT}\n      - MYSQL_DBNAME=${DOOTASK_DB_DATABASE}\n      - MYSQL_USERNAME=${DOOTASK_DB_USERNAME}\n      - MYSQL_PASSWORD=${DOOTASK_DB_PASSWORD}\n      - MYSQL_PREFIX=${DOOTASK_DB_PREFIX}\n      - DEMO_DATA=true\n      - KEY=${DOOTASK_APP_KEY}\n\n    cpus: \"${CPUS}\"\n    mem_limit: \"${MEMORY_LIMIT}\"\n    labels:\n      createdBy: \"Apps\"\n\nnetworks:\n  ${DOOTASK_NETWORK_NAME}:\n    external: true\n"
+    },
+    {
+      "name": "思维导图",
+      "key": "minder",
+      "description": "DooTask 思维导图",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "0.1.3",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "kuaifan/minder",
+      "volume": [],
+      "env": [],
+      "command": "",
+      "nginx_config": "location /minder/ {\n        proxy_http_version 1.1;\n        proxy_set_header Connection \"\";\n        proxy_set_header X-Real-IP $remote_addr;\n        proxy_set_header X-Real-PORT $remote_port;\n        proxy_set_header X-Forwarded-Host $the_host;\n        proxy_set_header X-Forwarded-Proto $the_scheme;\n        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header Host $http_host;\n        proxy_set_header Scheme $scheme;\n        proxy_set_header Server-Protocol $server_protocol;\n        proxy_set_header Server-Name $server_name;\n        proxy_set_header Server-Addr $server_addr;\n        proxy_set_header Server-Port $server_port;\n        proxy_pass http://{{.ContainerName}}/;\n    }",
+      "docker_compose": "version: '3'\n\nservices:\n  minder:\n    container_name: ${CONTAINER_NAME}\n    image: \"kuaifan/minder:0.1.3\"\n    networks:\n      ${DOOTASK_NETWORK_NAME}:\n        ipv4_address: \"${DOOTASK_APP_IPPR}.10\"\n    restart: unless-stopped\n    cpus: \"${CPUS}\"\n    mem_limit: \"${MEMORY_LIMIT}\"\n    labels:\n      createdBy: \"Apps\"\n\nnetworks:\n  ${DOOTASK_NETWORK_NAME}:\n    external: true"
     }
   ]
 }

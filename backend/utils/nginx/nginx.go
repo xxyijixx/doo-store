@@ -85,7 +85,7 @@ func AddLocation(tmpl, locationName, proxyServerName string, port int) error {
 		return errors.New(err.Error())
 	}
 
-	err = dockerClient.CopyFileToContainer(nginxContainer.ID, locationPath, fmt.Sprintf("/etc/nginx/conf.d/site/%s.conf", locationName))
+	err = dockerClient.CopyFileToContainer(nginxContainer.ID, locationPath, fmt.Sprintf("/etc/nginx/conf.d/apps/%s.conf", locationName))
 	if err != nil {
 		log.Debug("复制文件到容器失败", err)
 		return errors.New(err.Error())
@@ -95,7 +95,7 @@ func AddLocation(tmpl, locationName, proxyServerName string, port int) error {
 	if err != nil {
 		// 检测失败需要移除配置文件
 		log.Info("Nginx 配置未通过检测", err)
-		err = dockerClient.RemoveFileFormContainer(nginxContainer.ID, fmt.Sprintf("/etc/nginx/conf.d/site/%s.conf", locationName))
+		err = dockerClient.RemoveFileFormContainer(nginxContainer.ID, fmt.Sprintf("/etc/nginx/conf.d/apps/%s.conf", locationName))
 		if err != nil {
 			log.Debug("从容器中删除文件失败", err)
 			return err
@@ -124,7 +124,7 @@ func RemoveLocation(locationName string) error {
 
 		return err
 	}
-	err = dockerClient.RemoveFileFormContainer(nginxContainer.ID, fmt.Sprintf("/etc/nginx/conf.d/site/%s.conf", locationName))
+	err = dockerClient.RemoveFileFormContainer(nginxContainer.ID, fmt.Sprintf("/etc/nginx/conf.d/apps/%s.conf", locationName))
 	if err != nil {
 		log.Debug("从容器中删除文件失败", err)
 		return err
