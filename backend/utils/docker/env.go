@@ -21,15 +21,14 @@ func GenEnv(appKey, containerName, ipAddress string, envs map[string]any, writeF
 	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_APP_IPPR", config.EnvConfig.DOOTASK_APP_IPPR)
 	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_APP_KEY", config.EnvConfig.DOOTASK_APP_KEY)
 	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_NETWORK_NAME", config.EnvConfig.GetNetworkName())
-	
+
 	// 数据库相关配置
 	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_HOST", config.EnvConfig.DOOTASK_DB_HOST)
 	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_PORT", config.EnvConfig.DOOTASK_DB_PORT)
 	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_DATABASE", config.EnvConfig.DOOTASK_DB_DATABASE)
 	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_USERNAME", config.EnvConfig.DOOTASK_DB_USERNAME)
 	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_PASSWORD", config.EnvConfig.DOOTASK_DB_PASSWORD)
-
-	
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_PREFIX", config.EnvConfig.DOOTASK_DB_PREFIX)
 
 	for key, value := range envs {
 		var envValue string

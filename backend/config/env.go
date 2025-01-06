@@ -102,6 +102,7 @@ var defaultConfig = envConfigSchema{
 	DOOTASK_DB_DATABASE: "dootask",
 	DOOTASK_DB_USERNAME: "dootask",
 	DOOTASK_DB_PASSWORD: "123456",
+	DOOTASK_DB_PREFIX:   "pre_",
 }
 
 type envConfigSchema struct {
@@ -141,6 +142,7 @@ type envConfigSchema struct {
 	DOOTASK_DB_DATABASE string
 	DOOTASK_DB_USERNAME string
 	DOOTASK_DB_PASSWORD string
+	DOOTASK_DB_PREFIX   string
 }
 
 func (s *envConfigSchema) IsDev() bool {
