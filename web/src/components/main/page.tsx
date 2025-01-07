@@ -17,7 +17,8 @@ import { motion, AnimatePresence } from "framer-motion"; // 引入 framer-motion
 import * as http from '@/api/modules/fouceinter'
 import { useTokenStore } from "@/store/ TokenContext";
 import { useTranslation } from "react-i18next";
-import { ChevronLeftIcon, ReloadIcon } from "@radix-ui/react-icons"
+import { ChevronLeftIcon, ReloadIcon, PlusIcon } from "@radix-ui/react-icons"
+import { UploadSheet } from "@/components/drawer/upload";
 
 const POLLING_INTERVAL = 5000; // 5秒
 
@@ -119,6 +120,8 @@ function MainPage() {
     const [tags, setTags] = useState<Tag[]>([]);
     const pageSize = 9; // 每页显示的应用数
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+
+    const [openUpload, setOpenUpload] = useState(false);
 
 
     // 请求数据
@@ -268,9 +271,16 @@ function MainPage() {
                                 defaultValue={searchQuery}
                                 onExpandChange={handleSearchExpand}
                             />
+                            <div onClick={()=>setOpenUpload(true)} className="w-36 h-38 pl-2 hover:cursor-pointer">
+                                <div className="w-36 h-36 relative flex items-center justify-center bg-gray-200/50 rounded-full overflow-hidden transition-all duration-300">
+                                    <PlusIcon/>
+                                </div>
+                                <div className="h-2"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
+                <UploadSheet isOpen={openUpload} onClose={() => {setOpenUpload(false)}} />
                 <AnimatePresence mode="wait">
                     <div key="b1" className="flex lg:-space-x-1 border-b lg:border-gray-200 md:border-gray-200 relative mb-3">
                         <>

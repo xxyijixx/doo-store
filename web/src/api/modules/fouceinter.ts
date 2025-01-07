@@ -42,4 +42,7 @@ export const getInstalledAppList = (params: object) =>  {
     return http.get<common.Data<common.Item>>(`/api/v1/apps/installed`,  params )
 }
 
+export const uploadApp = (params: object) => {
+    return http.post(`/api/v1/apps/manage/upload`, params)
+}
 
