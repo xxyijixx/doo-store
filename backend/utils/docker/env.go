@@ -30,6 +30,11 @@ func GenEnv(appKey, containerName, ipAddress string, envs map[string]any, writeF
 	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_PASSWORD", config.EnvConfig.DOOTASK_DB_PASSWORD)
 	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_PREFIX", config.EnvConfig.DOOTASK_DB_PREFIX)
 
+	// Redis相关
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_REDIS_HOST", config.EnvConfig.DOOTASK_REDIS_HOST)
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_REDIS_PORT", config.EnvConfig.DOOTASK_REDIS_PORT)
+
+
 	for key, value := range envs {
 		var envValue string
 		switch v := value.(type) {

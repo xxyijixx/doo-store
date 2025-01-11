@@ -422,11 +422,12 @@ func (*BaseApi) GetInstalledAppInfo(c *gin.Context) {
 // @Success 200 {object} object{ret=string,msg=string,data=map[string]any{}}) "success"
 // @Router /apps/running [get]
 func (*BaseApi) ListRunningApps(c *gin.Context) {
-	err := checkAuth(c, false)
-	if err != nil {
-		helper.ErrorWithRet(c, err.Error(), nil)
-		return
-	}
+	// TODO 暂时去除身份校验
+	// err := checkAuth(c, false)
+	// if err != nil {
+	// 	helper.ErrorWithRet(c, err.Error(), nil)
+	// 	return
+	// }
 	result, err := appService.ListRunningAppKeys(dto.NewServiceContext(c))
 	if err != nil {
 		helper.ErrorWithRet(c, err.Error(), nil)

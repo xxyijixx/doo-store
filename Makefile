@@ -36,12 +36,8 @@ dev:
 	cd web && npm run build && cd ../
 	go run main.go -m
 
-# 提示 fresh: No such file or directory 时解決辦法
-# go install github.com/pilu/fresh@latest
+preview:
+	DOCKER_BUILDKIT=1 docker buildx build -t xxyijixx/pluginstore:0.0.1 --platform linux/amd64 --no-cache --load .
+	docker compose up
 
-# 提示 air: No such file or directory 时解決辦法
-# go install github.com/cosmtrek/air@latest
 
-# 提示 swag: No such file or directory 时解決辦法
-# go get -u github.com/swaggo/swag/cmd/swag
-# go install github.com/swaggo/swag/cmd/swag@latest

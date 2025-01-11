@@ -21,6 +21,7 @@ func Init() {
 	constant.NginxAppsConfigDir = path.Join(constant.NginxDir, "apps")
 
 	if config.EnvConfig.ENV == "prod" {
+		constant.DooTaskUrl = "http://" + config.EnvConfig.DOOTASK_APP_IPPR + ".3"
 		if err := ensureDir(constant.DataDir); err != nil {
 			fmt.Printf("创建目录失败: %v\n", err)
 			return

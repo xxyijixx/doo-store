@@ -103,6 +103,9 @@ var defaultConfig = envConfigSchema{
 	DOOTASK_DB_USERNAME: "dootask",
 	DOOTASK_DB_PASSWORD: "123456",
 	DOOTASK_DB_PREFIX:   "pre_",
+
+	DOOTASK_REDIS_HOST: "redis",
+	DOOTASK_REDIS_PORT: "6379",
 }
 
 type envConfigSchema struct {
@@ -143,6 +146,9 @@ type envConfigSchema struct {
 	DOOTASK_DB_USERNAME string
 	DOOTASK_DB_PASSWORD string
 	DOOTASK_DB_PREFIX   string
+
+	DOOTASK_REDIS_HOST string
+	DOOTASK_REDIS_PORT string
 }
 
 func (s *envConfigSchema) IsDev() bool {

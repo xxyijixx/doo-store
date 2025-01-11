@@ -21,7 +21,8 @@
         }
       ],
       "command": "",
-      "nginx_config": ""
+      "nginx_config": "",
+      "docker_compose": ""
     },
     {
       "name": "Redis",
@@ -52,7 +53,8 @@
         }
       ],
       "command": "",
-      "nginx_config": ""
+      "nginx_config": "",
+      "docker_compose": ""
     },
     {
       "name": "DooAliOSS",
@@ -98,7 +100,8 @@
         }
       ],
       "command": "",
-      "nginx_config": ""
+      "nginx_config": "",
+      "docker_compose": ""
     },
     {
       "name": "DooTxCOS",
@@ -144,7 +147,8 @@
         }
       ],
       "command": "",
-      "nginx_config": ""
+      "nginx_config": "",
+      "docker_compose": ""
     },
     {
       "name": "DooQiNiu",
@@ -190,7 +194,8 @@
         }
       ],
       "command": "",
-      "nginx_config": ""
+      "nginx_config": "",
+      "docker_compose": ""
     },
     {
       "name": "Nginx2",
@@ -212,7 +217,8 @@
         }
       ],
       "command": "",
-      "nginx_config": ""
+      "nginx_config": "",
+      "docker_compose": ""
     },
     {
       "name": "Nginx3",
@@ -234,7 +240,8 @@
         }
       ],
       "command": "",
-      "nginx_config": ""
+      "nginx_config": "",
+      "docker_compose": ""
     },
     {
       "name": "Nginx4",
@@ -256,140 +263,8 @@
         }
       ],
       "command": "",
-      "nginx_config": ""
-    },
-    {
-      "name": "Nginx5",
-      "key": "nginx5",
-      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
-      "icon": "https://dootask.com/site/img/light/logo.svg",
-      "version": "alpine",
-      "github": "",
-      "class": "web",
-      "depends_version": "0.37.21",
-      "repo": "docker.io/library/nginx",
-      "volume": [],
-      "env": [
-        {
-          "name": "port",
-          "key": "NGINX_PORT",
-          "value": "80",
-          "required": true
-        }
-      ],
-      "command": "",
-      "nginx_config": ""
-    },
-    {
-      "name": "Nginx6",
-      "key": "nginx6",
-      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
-      "icon": "https://dootask.com/site/img/light/logo.svg",
-      "version": "alpine",
-      "github": "",
-      "class": "web",
-      "depends_version": "0.37.21",
-      "repo": "docker.io/library/nginx",
-      "volume": [],
-      "env": [
-        {
-          "name": "port",
-          "key": "NGINX_PORT",
-          "value": "80",
-          "required": true
-        }
-      ],
-      "command": "",
-      "nginx_config": ""
-    },
-    {
-      "name": "Nginx7",
-      "key": "nginx7",
-      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
-      "icon": "https://dootask.com/site/img/light/logo.svg",
-      "version": "alpine",
-      "github": "",
-      "class": "web",
-      "depends_version": "0.37.21",
-      "repo": "docker.io/library/nginx",
-      "volume": [],
-      "env": [
-        {
-          "name": "port",
-          "key": "NGINX_PORT",
-          "value": "80",
-          "required": true
-        }
-      ],
-      "command": "",
-      "nginx_config": ""
-    },
-    {
-      "name": "Nginx8",
-      "key": "nginx8",
-      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
-      "icon": "https://dootask.com/site/img/light/logo.svg",
-      "version": "alpine",
-      "github": "",
-      "class": "web",
-      "depends_version": "0.37.21",
-      "repo": "docker.io/library/nginx",
-      "volume": [],
-      "env": [
-        {
-          "name": "port",
-          "key": "NGINX_PORT",
-          "value": "80",
-          "required": true
-        }
-      ],
-      "command": "",
-      "nginx_config": ""
-    },
-    {
-      "name": "Nginx9",
-      "key": "nginx9",
-      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
-      "icon": "https://dootask.com/site/img/light/logo.svg",
-      "version": "alpine",
-      "github": "",
-      "class": "web",
-      "depends_version": "0.37.21",
-      "repo": "docker.io/library/nginx",
-      "volume": [],
-      "env": [
-        {
-          "name": "port",
-          "key": "NGINX_PORT",
-          "value": "80",
-          "type": "number",
-          "required": true
-        }
-      ],
-      "command": "",
-      "nginx_config": ""
-    },
-    {
-      "name": "Nginx10",
-      "key": "nginx10",
-      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
-      "icon": "https://dootask.com/site/img/light/logo.svg",
-      "version": "alpine",
-      "github": "",
-      "class": "web",
-      "depends_version": "0.37.21",
-      "repo": "docker.io/library/nginx",
-      "volume": [],
-      "env": [
-        {
-          "name": "port",
-          "key": "NGINX_PORT",
-          "value": "80",
-          "required": true
-        }
-      ],
-      "command": "",
-      "nginx_config": ""
+      "nginx_config": "",
+      "docker_compose": ""
     },
     {
       "name": "DooCloudDisk",
@@ -475,6 +350,86 @@
       "command": "",
       "nginx_config": "location /minder/ {\n        proxy_http_version 1.1;\n        proxy_set_header Connection \"\";\n        proxy_set_header X-Real-IP $remote_addr;\n        proxy_set_header X-Real-PORT $remote_port;\n        proxy_set_header X-Forwarded-Host $the_host;\n        proxy_set_header X-Forwarded-Proto $the_scheme;\n        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header Host $http_host;\n        proxy_set_header Scheme $scheme;\n        proxy_set_header Server-Protocol $server_protocol;\n        proxy_set_header Server-Name $server_name;\n        proxy_set_header Server-Addr $server_addr;\n        proxy_set_header Server-Port $server_port;\n        proxy_pass http://{{.ContainerName}}/;\n    }",
       "docker_compose": "version: '3'\n\nservices:\n  minder:\n    container_name: ${CONTAINER_NAME}\n    image: \"kuaifan/minder:0.1.3\"\n    networks:\n      ${DOOTASK_NETWORK_NAME}:\n        ipv4_address: \"${DOOTASK_APP_IPPR}.10\"\n    restart: unless-stopped\n    cpus: \"${CPUS}\"\n    mem_limit: \"${MEMORY_LIMIT}\"\n    labels:\n      createdBy: \"Apps\"\n\nnetworks:\n  ${DOOTASK_NETWORK_NAME}:\n    external: true"
+    },
+    {
+      "name": "图表",
+      "key": "drawio",
+      "description": "DooTask 图表",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "24.7.17",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "jgraph/drawio",
+      "volume": [],
+      "env": [],
+      "command": "",
+      "nginx_config": " location /drawio/webapp/ {\n    proxy_http_version 1.1;\n    proxy_set_header X-Real-IP $remote_addr;\n    proxy_set_header X-Real-PORT $remote_port;\n    proxy_set_header X-Forwarded-Host $the_host/drawio/webapp;\n    proxy_set_header X-Forwarded-Proto $the_scheme;\n    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n    proxy_set_header Host $http_host;\n    proxy_set_header Scheme $scheme;\n    proxy_set_header Server-Protocol $server_protocol;\n    proxy_set_header Server-Name $server_name;\n    proxy_set_header Server-Addr $server_addr;\n    proxy_set_header Server-Port $server_port;\n    proxy_set_header Upgrade $http_upgrade;\n    proxy_set_header Connection $connection_upgrade;\n    proxy_pass http://{{.ContainerName}}:8080/;\n}",
+      "docker_compose": "services:\n  drawio-webapp:\n    image: jgraph/drawio:24.7.17\n    restart: unless-stopped\n    container_name: ${CONTAINER_NAME}\n    networks:\n      ${DOOTASK_NETWORK_NAME}:\n        ipv4_address: \"${DOOTASK_APP_IPPR}.8\"\n    volumes:\n      - ${DOOTASK_DIR}/docker/drawio/webapp/index.html:/usr/local/tomcat/webapps/draw/index.html\n      - ${DOOTASK_DIR}/docker/drawio/webapp/stencils:/usr/local/tomcat/webapps/draw/stencils\n      - ${DOOTASK_DIR}/docker/drawio/webapp/js/app.min.js:/usr/local/tomcat/webapps/draw/js/app.min.js\n      - ${DOOTASK_DIR}/docker/drawio/webapp/js/croppie/croppie.min.css:/usr/local/tomcat/webapps/draw/js/croppie/croppie.min.css\n      - ${DOOTASK_DIR}/docker/drawio/webapp/js/diagramly/ElectronApp.js:/usr/local/tomcat/webapps/draw/js/diagramly/ElectronApp.js\n\n    cpus: \"${CPUS}\"\n    mem_limit: \"${MEMORY_LIMIT}\"\n    labels:\n      createdBy: \"Apps\"\n\nnetworks:\n  ${DOOTASK_NETWORK_NAME}:\n    external: true\n\n"
+    },
+    {
+      "name": "审批中心",
+      "key": "approve",
+      "description": "DooTask审批中心",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "0.1.5",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "kuaifan/dooapprove",
+      "volume": [],
+      "env": [],
+      "command": "",
+      "nginx_config": "location /approve/ {\n    proxy_pass http://approve/;\n}\nlocation /approve/api/ {\n    auth_request /approveAuth;\n    proxy_pass http://approve/api/;\n}\nlocation /approveAuth {\n    internal;\n    proxy_set_header Content-Type \"application/json\";\n    proxy_set_header Content-Length $request_length;\n    proxy_pass http://service/api/approve/verifyToken;\n}",
+      "docker_compose": "services:\n  approve:\n    image: kuaifan/dooapprove:0.1.5\n    restart: unless-stopped\n    container_name: ${CONTAINER_NAME}\n    networks:\n      ${DOOTASK_NETWORK_NAME}:\n        ipv4_address: \"${DOOTASK_APP_IPPR}.11\"\n    environment:\n      TZ: \"${TIMEZONE:-PRC}\"\n      MYSQL_HOST: \"${DOOTASK_DB_HOST}\"\n      MYSQL_PORT: \"${DOOTASK_DB_PORT}\"\n      MYSQL_DBNAME: \"${DOOTASK_DB_DATABASE}\"\n      MYSQL_USERNAME: \"${DOOTASK_DB_USERNAME}\"\n      MYSQL_PASSWORD: \"${DOOTASK_DB_PASSWORD}\"\n      MYSQL_Prefix: \"${DOOTASK_DB_PREFIX}approve_\"\n    cpus: \"${CPUS}\"\n    mem_limit: \"${MEMORY_LIMIT}\"\n    labels:\n      createdBy: \"Apps\"\n\nnetworks:\n  ${DOOTASK_NETWORK_NAME}:\n    external: true\n\n"
+    },
+    {
+      "name": "OnlyOffice",
+      "key": "office",
+      "description": "DooTask with OnlyOffice",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "8.2.2.1",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "onlyoffice/documentserver",
+      "volume": [],
+      "env": [],
+      "command": "",
+      "nginx_config": "location /office/ {\n    proxy_http_version 1.1;\n    proxy_set_header X-Real-IP $remote_addr;\n    proxy_set_header X-Real-PORT $remote_port;\n    proxy_set_header X-Forwarded-Host $the_host/office;\n    proxy_set_header X-Forwarded-Proto $the_scheme;\n    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n    proxy_set_header Host $http_host;\n    proxy_set_header Scheme $scheme;\n    proxy_set_header Server-Protocol $server_protocol;\n    proxy_set_header Server-Name $server_name;\n    proxy_set_header Server-Addr $server_addr;\n    proxy_set_header Server-Port $server_port;\n    proxy_set_header Upgrade $http_upgrade;\n    proxy_set_header Connection $connection_upgrade;\n    proxy_read_timeout 3600s;\n    proxy_send_timeout 3600s;\n    proxy_connect_timeout 3600s;\n    proxy_pass http://{{.ContainerName}}/;\n}",
+      "docker_compose": "version: '3'\n\nservices:\n  office:\n    container_name: \"${CONTAINER_NAME}\"\n    image: \"onlyoffice/documentserver:8.2.2.1\"\n    volumes:\n      - ${DOOTASK_DIR}/docker/office/logs:/var/log/onlyoffice\n      - ${DOOTASK_DIR}/docker/office/data:/var/www/onlyoffice/Data\n      - ${DOOTASK_DIR}/docker/office/resources/require.js:/var/www/onlyoffice/documentserver/web-apps/vendor/requirejs/require.js\n      - ${DOOTASK_DIR}/docker/office/resources/common/main/resources/img/header:/var/www/onlyoffice/documentserver/web-apps/apps/common/main/resources/img/header\n      - ${DOOTASK_DIR}/docker/office/resources/documenteditor/main/resources/css/app.css:/var/www/onlyoffice/documentserver/web-apps/apps/documenteditor/main/resources/css/app.css\n      - ${DOOTASK_DIR}/docker/office/resources/documenteditor/mobile/css/526.caf35c11a8d72ca5ac85.css:/var/www/onlyoffice/documentserver/web-apps/apps/documenteditor/mobile/css/526.caf35c11a8d72ca5ac85.css\n      - ${DOOTASK_DIR}/docker/office/resources/presentationeditor/main/resources/css/app.css:/var/www/onlyoffice/documentserver/web-apps/apps/presentationeditor/main/resources/css/app.css\n      - ${DOOTASK_DIR}/docker/office/resources/presentationeditor/mobile/css/923.f9cf19de1a25c2e7bf8b.css:/var/www/onlyoffice/documentserver/web-apps/apps/presentationeditor/mobile/css/923.f9cf19de1a25c2e7bf8b.css\n      - ${DOOTASK_DIR}/docker/office/resources/spreadsheeteditor/main/resources/css/app.css:/var/www/onlyoffice/documentserver/web-apps/apps/spreadsheeteditor/main/resources/css/app.css\n      - ${DOOTASK_DIR}/docker/office/resources/spreadsheeteditor/mobile/css/611.1bef49f175e18fc085db.css:/var/www/onlyoffice/documentserver/web-apps/apps/spreadsheeteditor/mobile/css/611.1bef49f175e18fc085db.css\n    environment:\n      JWT_SECRET: ${DOOTASK_APP_KEY}\n    networks:\n      ${DOOTASK_NETWORK_NAME}:\n        ipv4_address: \"${DOOTASK_APP_IPPR}.6\"\n    restart: unless-stopped\n    cpus: \"${CPUS}\"\n    mem_limit: \"${MEMORY_LIMIT}\"\n    labels:\n      createdBy: \"Apps\"\n\nnetworks:\n  ${DOOTASK_NETWORK_NAME}:\n    external: true"
+    },
+    {
+      "name": "人脸签到打卡",
+      "key": "face-checkin",
+      "description": "DooTask 人脸签到打卡",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "0.0.1",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "hitosea2020/dooface",
+      "volume": [],
+      "env": [],
+      "command": "",
+      "nginx_config": "location /plugin/{{.Key}}/ {\n\n}",
+      "docker_compose": "version: '3'\n\nservices:\n  face:\n    container_name: \"dootask-face-${APP_ID}\"\n    image: \"hitosea2020/dooface:0.0.1\"\n    ports:\n      - \"7788:7788\"\n    environment:\n      TZ: \"${TIMEZONE:-PRC}\"\n      STORAGE: mysql\n      MYSQL_HOST: \"${DOOTASK_DB_HOST}\"\n      MYSQL_PORT: \"${DOOTASK_DB_PORT}\"\n      MYSQL_USERNAME: \"${DOOTASK_DB_USERNAME}\"\n      MYSQL_PASSWORD: \"${DOOTASK_DB_PASSWORD}\"\n      MYSQL_DB_NAME: \"${DOOTASK_DB_DATABASE}\"\n      DB_PREFIX: \"${DOOTASK_DB_PREFIX}\"\n      REPORT_API: \"http://${DOOTASK_APP_IPPR}.3/api/public/checkin/report\"\n    networks:\n      ${DOOTASK_NETWORK_NAME}:\n        ipv4_address: \"${DOOTASK_APP_IPPR}.14\"\n    restart: unless-stopped\n    cpus: \"${CPUS}\"\n    mem_limit: \"${MEMORY_LIMIT}\"\n    labels:\n      createdBy: \"Apps\"\n\nnetworks:\n  ${DOOTASK_NETWORK_NAME}:\n    external: true"
+    },
+    {
+      "name": "AI机器人",
+      "key": "ai-robot",
+      "description": "DooTask AI机器人",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "0.2.6",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "kuaifan/dootask-ai",
+      "volume": [],
+      "env": [],
+      "command": "",
+      "nginx_config": "location /ai/ {\n    proxy_http_version 1.1;\n    proxy_buffering off;\n    proxy_cache off;\n    proxy_read_timeout 300s;\n    proxy_send_timeout 300s;\n    proxy_set_header Scheme $scheme;\n    proxy_set_header Upgrade $http_upgrade;\n    proxy_set_header Connection $connection_upgrade;\n    proxy_pass http://ai:5001/;\n}",
+      "docker_compose": "version: '3'\n\nservices:\n  ai:\n    container_name: \"${CONTAINER_NAME}\"\n    image: \"kuaifan/dootask-ai:0.2.6\"\n    environment:\n      REDIS_HOST: \"${DOOTASK_REDIS_HOST}\"\n      REDIS_PORT: \"${DOOTASK_REDIS_PORT}\"\n    networks:\n      ${DOOTASK_NETWORK_NAME}:\n        ipv4_address: \"${DOOTASK_APP_IPPR}.12\"\n    restart: unless-stopped\n    cpus: \"${CPUS}\"\n    mem_limit: \"${MEMORY_LIMIT}\"\n    labels:\n      createdBy: \"Apps\"\n\nnetworks:\n  ${DOOTASK_NETWORK_NAME}:\n    external: true"
     }
   ]
 }

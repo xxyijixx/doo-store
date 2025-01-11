@@ -31,6 +31,8 @@ RUN apk add --no-cache tzdata
 
 RUN apk add --no-cache bash
 
+RUN apk add --no-cache gcc musl-dev sqlite-dev
+
 # 设置工作目录
 WORKDIR /app
 

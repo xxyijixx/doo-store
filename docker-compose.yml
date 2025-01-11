@@ -3,6 +3,7 @@ version: "3.8"
 services:
   app:
     build: .
+    # image: "xxyijixx/pluginstore:0.0.1"
     container_name: doo-store
     restart: unless-stopped
     # privileged: true
@@ -18,6 +19,13 @@ services:
       DOOTASK_APP_ID: "${APP_ID}"
       DOOTASK_NETWORK_NAME: "dootask-networks-${APP_ID}"
       DOOTASK_APP_IPPR: "${APP_IPPR}"
+      DOOTASK_APP_KEY: "${APP_KEY}"
+      DOOTASK_DB_HOST: "${DB_HOST}"
+      DOOTASK_DB_PORT: ${DB_PORT}
+      DOOTASK_DB_DATABASE: ${DB_DATABASE}
+      DOOTASK_DB_USERNAME: ${DB_USERNAME}
+      DOOTASK_DB_PASSWORD: ${DB_PASSWORD}
+
 
     volumes:
       - ./docker/sqlite:/app/db
