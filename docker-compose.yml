@@ -2,8 +2,8 @@ version: "3.8"
 
 services:
   app:
-    build: .
-    # image: "xxyijixx/pluginstore:0.0.1"
+    # build: .
+    image: "xxyijixx/pluginstore:0.0.1"
     container_name: doo-store
     restart: unless-stopped
     # privileged: true
@@ -15,7 +15,6 @@ services:
       DATA_DIR: "/app/docker/dood"
       APP_ID: "${APP_ID}"
       PLUGIN_CIDR: "${APP_IPPR}.30/24"
-      DOOTASK_DIR: "${PWD}"
       DOOTASK_APP_ID: "${APP_ID}"
       DOOTASK_NETWORK_NAME: "dootask-networks-${APP_ID}"
       DOOTASK_APP_IPPR: "${APP_IPPR}"

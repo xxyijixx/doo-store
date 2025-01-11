@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons"
 import { Input } from "@/components/ui/input";
-import { Button } from '@/components/ui/button'
+// import { Button } from '@/components/ui/button'
 // import { debounce } from "lodash"; 
 import { useTranslation } from "react-i18next";
 
@@ -105,24 +105,24 @@ const UniSearch: React.FC<UniSearchProps> = ({
                                 onExpandChange?.(false);
                             }
                         }}
-                        className="w-full h-full bg-transparent border-none pl-4 pr-10 focus:outline-none placeholder:text-gray-500 search-input"
+                        className={`w-full h-full bg-transparent border-none focus:outline-none placeholder:text-gray-500 search-input ${isExpanded ? "pl-4 pr-10" : "pl-0 pr-0"}`}
                     />
-                    <Button
-                        variant="searchbtn"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            if (query.length > 0) {
-                                handleSearch();
-                            } else {
-                                setIsExpanded(true);
-                                onExpandChange?.(true);
-                            }
-                        }}
-                        disabled={!!error}
-                        className="absolute lg:-right-3 md:-right-8 right-[-7px] top-4 transform -translate-y-1/2 p-2 rounded-full"
-                    >
-                        <MagnifyingGlassIcon className="size-6 shrink-0 font-bold text-gray-800" />
-                    </Button>
+                   
+                        <div
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (query.length > 0) {
+                                    handleSearch();
+                                } else {
+                                    setIsExpanded(true);
+                                    onExpandChange?.(true);
+                                }
+                            }}
+                            className="absolute w-36 h-full right-0 rounded-full flex items-center justify-center hover:cursor-pointer"
+                        >
+                            <MagnifyingGlassIcon className="shrink-0 font-bold text-gray-800" />
+                    </div>
+                   
                 </div>
             </div>
             <div className="h-2">
