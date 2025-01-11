@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -183,7 +185,6 @@ func (c Client) NetworkExist(name string) bool {
 }
 
 func (c Client) CopyFileToContainer(containerId, srcFile, dstFile string) error {
-
 	cli, err := NewDockerClient()
 	if err != nil {
 		return nil
@@ -234,4 +235,112 @@ func (c Client) RemoveFileFormContainer(containerId, filePath string) error {
 	}
 
 	return nil
+}
+
+func (c Client) MoveFileInContainer(containerId, srcPath, dstPath string) error {
+	// 创建一个执行命令的配置
+	execConfig := container.ExecOptions{
+		AttachStdout: true,
+		AttachStderr: true,
+		Cmd:          []string{"mv", srcPath, dstPath},
+	}
+
+	// 创建执行命令
+	execIDResp, err := c.cli.ContainerExecCreate(context.Background(), containerId, execConfig)
+	if err != nil {
+		return fmt.Errorf("error creating exec: %v", err)
+	}
+
+	// 执行命令
+	execAttachResp, err := c.cli.ContainerExecAttach(context.Background(), execIDResp.ID, container.ExecStartOptions{})
+	if err != nil {
+		return fmt.Errorf("error attaching to exec: %v", err)
+	}
+	defer execAttachResp.Close()
+
+	// 读取命令输出
+	outputDone := make(chan error)
+	go func() {
+		_, err := stdcopy.StdCopy(os.Stdout, os.Stderr, execAttachResp.Reader)
+		outputDone <- err
+	}()
+
+	// 等待命令执行完成
+	err = <-outputDone
+	if err != nil && err != io.EOF {
+		return fmt.Errorf("error during command execution: %v", err)
+	}
+
+	return nil
+}
+
+func (c Client) FileExistsInContainer(containerId, filePath string) (bool, error) {
+	// 创建一个执行命令的配置
+	execConfig := container.ExecOptions{
+		AttachStdout: true,
+		AttachStderr: true,
+		Cmd:          []string{"test", "-f", filePath},
+	}
+
+	// 创建执行命令
+	execIDResp, err := c.cli.ContainerExecCreate(context.Background(), containerId, execConfig)
+	if err != nil {
+		return false, fmt.Errorf("error creating exec: %v", err)
+	}
+
+	// 执行命令
+	execAttachResp, err := c.cli.ContainerExecAttach(context.Background(), execIDResp.ID, container.ExecStartOptions{})
+	if err != nil {
+		return false, fmt.Errorf("error attaching to exec: %v", err)
+	}
+	defer execAttachResp.Close()
+
+	// 读取命令输出
+	outputDone := make(chan error)
+	go func() {
+		_, err := stdcopy.StdCopy(os.Stdout, os.Stderr, execAttachResp.Reader)
+		outputDone <- err
+	}()
+
+	// 等待命令执行完成
+	err = <-outputDone
+	if err != nil && err != io.EOF {
+		return false, fmt.Errorf("error during command execution: %v", err)
+	}
+
+	// 获取命令执行状态
+	inspectResp, err := c.cli.ContainerExecInspect(context.Background(), execIDResp.ID)
+	if err != nil {
+		return false, fmt.Errorf("error inspecting exec: %v", err)
+	}
+
+	// ExitCode为0表示文件存在
+	return inspectResp.ExitCode == 0, nil
+}
+
+func (c Client) MoveFileWithCheck(containerId, srcPath, dstPath string) error {
+	// 检查源文件是否存在
+	exists, err := c.FileExistsInContainer(containerId, srcPath)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return fmt.Errorf("source file does not exist: %s", srcPath)
+	}
+
+	// 检查目标文件是否存在
+	exists, err = c.FileExistsInContainer(containerId, dstPath)
+	if err != nil {
+		return err
+	}
+	if exists {
+		// 如果目标文件存在，生成一个新的文件名
+		ext := filepath.Ext(dstPath)
+		base := strings.TrimSuffix(dstPath, ext)
+		timestamp := time.Now().Format("20060102150405")
+		dstPath = fmt.Sprintf("%s_%s%s", base, timestamp, ext)
+	}
+
+	// 移动文件
+	return c.MoveFileInContainer(containerId, srcPath, dstPath)
 }

@@ -32,6 +32,10 @@ func AddLocation(tmpl, locationName, proxyServerName string, port int) error {
 	fileContent := tmpl
 	// 如果模板为空，使用默认配置
 	if tmpl == "" {
+		proxyPass := fmt.Sprintf("http://%s/", proxyServerName)
+		if port != 0 {
+			proxyPass = fmt.Sprintf("http://%s:%d/", proxyServerName, port)
+		}
 		fileContent = fmt.Sprintf(`location /plugin/%s/ {
 	proxy_http_version 1.1;
 	proxy_set_header X-Real-IP $remote_addr;
@@ -50,8 +54,8 @@ func AddLocation(tmpl, locationName, proxyServerName string, port int) error {
 	proxy_read_timeout 3600s;
 	proxy_send_timeout 3600s;
 	proxy_connect_timeout 3600s;
-	proxy_pass http://%s:%d/;
-}`, locationName, proxyServerName, port)
+	proxy_pass %s;
+}`, locationName, proxyPass)
 	} else {
 		t, err := template.New("nginx").Parse(tmpl)
 		if err != nil {
@@ -85,20 +89,41 @@ func AddLocation(tmpl, locationName, proxyServerName string, port int) error {
 		return errors.New(err.Error())
 	}
 
+	// 检查是否存在默认配置文件
+	defaultConfPath := fmt.Sprintf("/etc/nginx/conf.d/apps/%s-default.conf", locationName)
+	exists, err := dockerClient.FileExistsInContainer(nginxContainer.ID, defaultConfPath)
+	if err != nil {
+		log.Debug("检查默认配置文件失败", err)
+		return errors.New(err.Error())
+	}
+
+	if exists {
+		// 如果存在默认配置,重命名为.bak
+		err = dockerClient.MoveFileWithCheck(nginxContainer.ID, defaultConfPath, defaultConfPath+".bak")
+		if err != nil {
+			log.Debug("重命名默认配置文件失败", err)
+			return errors.New(err.Error())
+		}
+	}
+
+	// 复制新的配置文件到容器
 	err = dockerClient.CopyFileToContainer(nginxContainer.ID, locationPath, fmt.Sprintf("/etc/nginx/conf.d/apps/%s.conf", locationName))
 	if err != nil {
 		log.Debug("复制文件到容器失败", err)
+		// 如果之前重命名了默认配置,需要恢复
+		if exists {
+			_ = dockerClient.MoveFileInContainer(nginxContainer.ID, defaultConfPath+".bak", defaultConfPath)
+		}
 		return errors.New(err.Error())
 	}
 
 	err = testNginxConfig(dockerClient.GetClient(), nginxContainer.ID)
 	if err != nil {
-		// 检测失败需要移除配置文件
+		// 检测失败需要移除配置文件并恢复默认配置
 		log.Info("Nginx 配置未通过检测", err)
-		err = dockerClient.RemoveFileFormContainer(nginxContainer.ID, fmt.Sprintf("/etc/nginx/conf.d/apps/%s.conf", locationName))
-		if err != nil {
-			log.Debug("从容器中删除文件失败", err)
-			return err
+		_ = dockerClient.RemoveFileFormContainer(nginxContainer.ID, fmt.Sprintf("/etc/nginx/conf.d/apps/%s.conf", locationName))
+		if exists {
+			_ = dockerClient.MoveFileInContainer(nginxContainer.ID, defaultConfPath+".bak", defaultConfPath)
 		}
 		return err
 	}
@@ -116,24 +141,43 @@ func RemoveLocation(locationName string) error {
 
 	nginxContainer, err := getNginxContainer()
 	if err != nil {
-
 		return err
 	}
 	dockerClient, err := docker.NewClient()
 	if err != nil {
-
 		return err
 	}
+
+	// 检查是否存在.bak文件
+	bakPath := fmt.Sprintf("/etc/nginx/conf.d/apps/%s-default.conf.bak", locationName)
+	exists, err := dockerClient.FileExistsInContainer(nginxContainer.ID, bakPath)
+	if err != nil {
+		log.Debug("检查.bak文件失败", err)
+		return err
+	}
+
+	// 删除当前配置文件
 	err = dockerClient.RemoveFileFormContainer(nginxContainer.ID, fmt.Sprintf("/etc/nginx/conf.d/apps/%s.conf", locationName))
 	if err != nil {
 		log.Debug("从容器中删除文件失败", err)
 		return err
 	}
+
+	// 如果存在.bak文件，恢复它
+	if exists {
+		err = dockerClient.MoveFileInContainer(nginxContainer.ID, bakPath, fmt.Sprintf("/etc/nginx/conf.d/apps/%s-default.conf", locationName))
+		if err != nil {
+			log.Debug("恢复.bak文件失败", err)
+			return err
+		}
+	}
+
 	err = os.Remove(locationPath)
 	if err != nil {
 		fmt.Printf("删除文件失败: %v\n", err)
 		return err
 	}
+
 	err = reloadNginx()
 	if err != nil {
 		return err
