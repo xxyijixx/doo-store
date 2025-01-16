@@ -42,7 +42,7 @@ func (s *envConfigSchema) GetNetworkName() string {
 }
 
 func (s *envConfigSchema) GetDefaultContainerName(key string) string {
-	return fmt.Sprintf("dootask-plugin-%s-%s-%s", key, key, s.APP_ID)
+	return fmt.Sprintf("dootask-p-%s-%s", key, s.APP_ID)
 }
 
 func (s *envConfigSchema) GetDootaskDir() string {

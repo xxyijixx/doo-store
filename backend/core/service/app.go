@@ -281,7 +281,7 @@ func (p *AppInstallProcess) AddNginx() error {
 			return err
 		}
 		// 提取location
-		locationPath := fmt.Sprintf("%s/%s.conf", constant.NginxAppsConfigDir, p.app.Key)
+		locationPath := fmt.Sprintf("%s/%s.conf", constant.NginxDir, p.app.Key)
 		content, err := os.ReadFile(locationPath)
 		if err != nil {
 			log.Debug("读取Nginx配置文件失败", err)

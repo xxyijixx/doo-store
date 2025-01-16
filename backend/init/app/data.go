@@ -24,43 +24,32 @@ func LoadData() error {
 		filename = "./init/data.json"
 	}
 	data, err := os.ReadFile(filename)
-	if os.IsNotExist(err) {
-		logrus.Debug("File not exist:", filename)
-		return err
-	}
-
 	if err != nil {
-		logrus.Debug(err.Error())
+		if os.IsNotExist(err) {
+			logrus.Debug("File not exist:", filename)
+		} else {
+			logrus.Debug("Failed to read file", filename)
+		}
 		return err
 	}
 
+	// 解析 JSON
 	err = json.Unmarshal(data, &pluginConfig)
 	if err != nil {
 		logrus.Debug(err.Error())
 		return err
 	}
-	apps, err := repo.App.Find()
+	appKeyMap, _ := loadApps()
+	oldTagMap, err := loadTags()
 	if err != nil && err != gorm.ErrRecordNotFound {
 		logrus.Debug(err.Error())
 		return err
 	}
-	appKeyMap := make(map[string]string)
-	for _, app := range apps {
-		appKeyMap[app.Key] = "true"
-	}
-	tags, err := repo.Tag.Find()
-	if err != nil && err != gorm.ErrRecordNotFound {
-		logrus.Debug(err.Error())
-		return err
-	}
-	tagMap := make(map[string]string)
-	oldTagMap := make(map[string]*model.Tag)
-	for _, tag := range tags {
-		oldTagMap[tag.Name] = tag
-	}
+	tagMap := make(map[string]struct{})
+
 	err = repo.DB.Transaction(func(tx *gorm.DB) error {
 		for _, p := range pluginConfig.Plugins {
-			tagMap[p.Class] = "true"
+			tagMap[p.Class] = struct{}{}
 			// 对于key存在，忽略
 			if _, exist := appKeyMap[p.Key]; exist {
 				continue
@@ -79,7 +68,7 @@ func LoadData() error {
 				logrus.Debug(err.Error())
 				return err
 			}
-			appKeyMap[p.Key] = "true"
+			appKeyMap[p.Key] = struct{}{}
 
 			appDetail := &model.AppDetail{
 				AppID:          app.ID,
@@ -97,27 +86,54 @@ func LoadData() error {
 				return err
 			}
 		}
-
-		needTags := make([]*model.Tag, 0)
-		unneedTags := make([]*model.Tag, 0)
-		for key := range tagMap {
-			if _, exist := oldTagMap[key]; !exist {
-				needTags = append(needTags, &model.Tag{
-					Name: key,
-					Key:  key,
-				})
-			}
-		}
-		for key, tag := range oldTagMap {
-			if _, exist := tagMap[key]; !exist {
-				unneedTags = append(unneedTags, tag)
-			}
-		}
-		if len(unneedTags) != 0 {
-			repo.Use(tx).Tag.Delete(unneedTags...)
-		}
-		repo.Use(tx).Tag.Create(needTags...)
+		createTagsIfNeeded(tagMap, oldTagMap, tx)
 		return nil
 	})
 	return err
+}
+
+// createTagsIfNeeded 创建缺失的标签
+func createTagsIfNeeded(tagMap, oldTagMap map[string]struct{}, tx *gorm.DB) error {
+	needTags := make([]*model.Tag, 0)
+	for key := range tagMap {
+		if _, exist := oldTagMap[key]; !exist {
+			needTags = append(needTags, &model.Tag{
+				Name: key,
+				Key:  key,
+			})
+		}
+	}
+	if len(needTags) > 0 {
+		if err := repo.Use(tx).Tag.Create(needTags...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func loadApps() (map[string]struct{}, error) {
+	apps, err := repo.App.Select(repo.App.Key).Find()
+	if err != nil && err != gorm.ErrRecordNotFound {
+		logrus.Debug(err, "Failed to find apps")
+		return nil, err
+	}
+
+	appKeyMap := make(map[string]struct{})
+	for _, app := range apps {
+		appKeyMap[app.Key] = struct{}{}
+	}
+	return appKeyMap, nil
+}
+
+func loadTags() (map[string]struct{}, error) {
+	tags, err := repo.Tag.Find()
+	if err != nil && err != gorm.ErrRecordNotFound {
+		logrus.Debug(err.Error())
+		return nil, err
+	}
+	oldTagMap := make(map[string]struct{})
+	for _, tag := range tags {
+		oldTagMap[tag.Name] = struct{}{}
+	}
+	return oldTagMap, nil
 }

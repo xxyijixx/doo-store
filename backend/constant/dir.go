@@ -11,8 +11,6 @@ var (
 	DataDir            = getDataDir(config.EnvConfig.DATA_DIR)
 	AppInstallDir      = path.Join(DataDir, "apps")
 	NginxDir           = path.Join(DataDir, "nginx")
-	NginxConfigDir     = path.Join(DataDir, "nginx")
-	NginxAppsConfigDir = path.Join(DataDir, "nginx")
 )
 
 func getDataDir(dataDir string) string {

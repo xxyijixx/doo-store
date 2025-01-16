@@ -22,7 +22,7 @@ import (
 
 // AddLocation 添加一个location块
 func AddLocation(tmpl, locationName, proxyServerName string, port int) error {
-	locationPath := fmt.Sprintf("%s/%s.conf", constant.NginxAppsConfigDir, locationName)
+	locationPath := fmt.Sprintf("%s/%s.conf", constant.NginxDir, locationName)
 
 	fileInfo, err := os.Stat(locationPath)
 	if err != nil && !os.IsNotExist(err) {
@@ -137,7 +137,7 @@ func AddLocation(tmpl, locationName, proxyServerName string, port int) error {
 }
 
 func RemoveLocation(locationName string) error {
-	locationPath := fmt.Sprintf("%s/%s.conf", constant.NginxAppsConfigDir, locationName)
+	locationPath := fmt.Sprintf("%s/%s.conf", constant.NginxDir, locationName)
 
 	nginxContainer, err := getNginxContainer()
 	if err != nil {
