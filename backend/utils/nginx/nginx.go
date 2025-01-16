@@ -3,40 +3,269 @@ package nginx
 import (
 	"bytes"
 	"context"
-	"doo-store/backend/config"
-	"doo-store/backend/constant"
-	"doo-store/backend/utils/docker"
-	"errors"
 	"fmt"
 	"io"
 	"os"
 	"regexp"
 	"text/template"
 
+	"doo-store/backend/config"
+	"doo-store/backend/constant"
+	"doo-store/backend/utils/docker"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
 	log "github.com/sirupsen/logrus"
 )
 
-// AddLocation 添加一个location块
-func AddLocation(tmpl, locationName, proxyServerName string, port int) error {
-	locationPath := fmt.Sprintf("%s/%s.conf", constant.NginxDir, locationName)
+// NginxManager handles all Nginx-related operations including configuration management,
+// location blocks handling, and container operations
+type NginxManager struct {
+	dockerClient *docker.Client // Docker client for container operations
+	containerID  string         // ID of the Nginx container
+	nginxConfig  *NginxConfig   // Nginx configuration settings
+}
 
-	fileInfo, err := os.Stat(locationPath)
-	if err != nil && !os.IsNotExist(err) {
-		log.Debug("写入文件失败", err, fileInfo)
-		return errors.New(constant.ErrNginxWriteFile)
+// NginxConfig contains Nginx configuration settings
+type NginxConfig struct {
+	DefaultTemplate string // Default template for location blocks
+	ConfigDir       string // Directory containing Nginx configuration files
+	ContainerName   string // Name of the Nginx container
+}
+
+// NewNginxManager creates a new NginxManager instance with initialized Docker client
+// and container information
+func NewNginxManager() (*NginxManager, error) {
+	log.Info("Initializing Nginx Manager")
+	dockerClient, err := docker.NewClient()
+	if err != nil {
+		log.Errorf("Failed to create docker client: %v", err)
+		return nil, fmt.Errorf("failed to create docker client: %w", err)
 	}
-	fileContent := tmpl
-	// 如果模板为空，使用默认配置
-	if tmpl == "" {
-		proxyPass := fmt.Sprintf("http://%s/", proxyServerName)
-		if port != 0 {
-			proxyPass = fmt.Sprintf("http://%s:%d/", proxyServerName, port)
+
+	container, err := getContainer(&dockerClient, config.EnvConfig.GetNginxContainerName())
+	if err != nil {
+		log.Errorf("Failed to get nginx container: %v", err)
+		return nil, fmt.Errorf("failed to get nginx container: %w", err)
+	}
+	log.Infof("Successfully initialized Nginx Manager with container ID: %s", container.ID)
+
+	return &NginxManager{
+		dockerClient: &dockerClient,
+		containerID:  container.ID,
+		nginxConfig: &NginxConfig{
+			ConfigDir:     constant.NginxDir,
+			ContainerName: config.EnvConfig.GetNginxContainerName(),
+		},
+	}, nil
+}
+
+// AddLocation adds a new location block to Nginx configuration
+// It handles the entire process including file generation, container updates,
+// and configuration testing
+func (nm *NginxManager) AddLocation(locationConfig *LocationConfig) error {
+	log.Infof("Adding new location block for: %s", locationConfig.Name)
+	locationPath := nm.getLocationPath(locationConfig.Name)
+
+	// Generate configuration content
+	content, err := nm.generateLocationContent(locationConfig)
+	if err != nil {
+		log.Errorf("Failed to generate location content: %v", err)
+		return fmt.Errorf("failed to generate location content: %w", err)
+	}
+
+	// Write configuration to local file
+	if err := os.WriteFile(locationPath, []byte(content), 0644); err != nil {
+		log.Errorf("Failed to write configuration file: %v", err)
+		return fmt.Errorf("failed to write configuration file: %w", err)
+	}
+	log.Debugf("Successfully wrote configuration to: %s", locationPath)
+
+	// Handle default configuration backup
+	if err := nm.handleDefaultConfig(locationConfig.Name); err != nil {
+		log.Errorf("Failed to handle default config: %v", err)
+		return fmt.Errorf("failed to handle default config: %w", err)
+	}
+
+	// Copy configuration to container
+	containerPath := fmt.Sprintf("/etc/nginx/conf.d/apps/%s.conf", locationConfig.Name)
+	if err := nm.dockerClient.CopyFileToContainer(nm.containerID, locationPath, containerPath); err != nil {
+		log.Errorf("Failed to copy config to container: %v", err)
+		nm.rollbackChanges(locationConfig.Name)
+		return fmt.Errorf("failed to copy config to container: %w", err)
+	}
+	log.Debugf("Successfully copied configuration to container path: %s", containerPath)
+
+	// Test and reload configuration
+	if err := nm.testAndReload(); err != nil {
+		log.Errorf("Failed to test and reload nginx: %v", err)
+		nm.rollbackChanges(locationConfig.Name)
+		return fmt.Errorf("failed to test and reload nginx: %w", err)
+	}
+
+	log.Infof("Successfully added location block for: %s", locationConfig.Name)
+	return nil
+}
+
+// RemoveLocation removes a location block from Nginx configuration
+// It handles cleanup of both container and local files
+func (nm *NginxManager) RemoveLocation(locationName string) error {
+	log.Infof("Removing location block for: %s", locationName)
+
+	// Remove configuration file from container
+	containerPath := fmt.Sprintf("/etc/nginx/conf.d/apps/%s.conf", locationName)
+	if err := nm.dockerClient.RemoveFileFormContainer(nm.containerID, containerPath); err != nil {
+		log.Errorf("Failed to remove config from container: %v", err)
+		return fmt.Errorf("failed to remove config from container: %w", err)
+	}
+
+	// Restore default configuration if exists
+	if err := nm.restoreDefaultConfig(locationName); err != nil {
+		log.Errorf("Failed to restore default config: %v", err)
+		return fmt.Errorf("failed to restore default config: %w", err)
+	}
+
+	// Remove local configuration file
+	locationPath := nm.getLocationPath(locationName)
+	if err := os.Remove(locationPath); err != nil {
+		log.Errorf("Failed to remove local config file: %v", err)
+		return fmt.Errorf("failed to remove local config file: %w", err)
+	}
+
+	log.Infof("Successfully removed location block for: %s", locationName)
+	return nm.testAndReload()
+}
+
+// handleDefaultConfig handles the backup of default configuration
+// It creates a backup of existing default configuration if it exists
+func (nm *NginxManager) handleDefaultConfig(locationName string) error {
+	log.Debugf("Handling default config for: %s", locationName)
+	defaultConfPath := fmt.Sprintf("/etc/nginx/conf.d/apps/%s-default.conf", locationName)
+	exists, err := nm.dockerClient.FileExistsInContainer(nm.containerID, defaultConfPath)
+	if err != nil {
+		log.Errorf("Failed to check default config existence: %v", err)
+		return fmt.Errorf("failed to check default config existence: %w", err)
+	}
+
+	if exists {
+		backupPath := defaultConfPath + ".bak"
+		if err := nm.dockerClient.MoveFileWithCheck(nm.containerID, defaultConfPath, backupPath); err != nil {
+			log.Errorf("Failed to backup default config: %v", err)
+			return fmt.Errorf("failed to backup default config: %w", err)
 		}
-		fileContent = fmt.Sprintf(`location /plugin/%s/ {
+		log.Debugf("Successfully backed up default config to: %s", backupPath)
+	}
+
+	return nil
+}
+
+// restoreDefaultConfig restores the default configuration if it exists
+// It moves the backup file back to its original location
+func (nm *NginxManager) restoreDefaultConfig(locationName string) error {
+	log.Debugf("Restoring default config for: %s", locationName)
+	backupPath := fmt.Sprintf("/etc/nginx/conf.d/apps/%s-default.conf.bak", locationName)
+	defaultPath := fmt.Sprintf("/etc/nginx/conf.d/apps/%s-default.conf", locationName)
+
+	exists, err := nm.dockerClient.FileExistsInContainer(nm.containerID, backupPath)
+	if err != nil {
+		log.Errorf("Failed to check backup config existence: %v", err)
+		return fmt.Errorf("failed to check backup config existence: %w", err)
+	}
+
+	if exists {
+		if err := nm.dockerClient.MoveFileInContainer(nm.containerID, backupPath, defaultPath); err != nil {
+			log.Errorf("Failed to restore default config: %v", err)
+			return fmt.Errorf("failed to restore default config: %w", err)
+		}
+		log.Debugf("Successfully restored default config from backup")
+	}
+
+	return nil
+}
+
+// rollbackChanges rolls back any changes made during the configuration process
+// It attempts to restore the system to its previous state in case of failure
+func (nm *NginxManager) rollbackChanges(locationName string) error {
+	log.Infof("Rolling back changes for: %s", locationName)
+	containerPath := fmt.Sprintf("/etc/nginx/conf.d/apps/%s.conf", locationName)
+
+	// Remove the new configuration file if it exists
+	if err := nm.dockerClient.RemoveFileFormContainer(nm.containerID, containerPath); err != nil {
+		log.Warnf("Failed to remove new config during rollback: %v", err)
+	}
+
+	// Restore the default configuration if it was backed up
+	if err := nm.restoreDefaultConfig(locationName); err != nil {
+		log.Warnf("Failed to restore default config during rollback: %v", err)
+	}
+
+	// Remove the local configuration file
+	locationPath := nm.getLocationPath(locationName)
+	if err := os.Remove(locationPath); err != nil {
+		log.Warnf("Failed to remove local config file during rollback: %v", err)
+	}
+
+	log.Info("Rollback completed")
+	return nil
+}
+
+// ExtractLocations extracts all location blocks from Nginx configuration
+// It uses regex to find and return all location paths
+func (nm *NginxManager) ExtractLocations(nginxConfig string) []string {
+	log.Debug("Extracting locations from nginx config")
+	re := regexp.MustCompile(`location\s+(/[^/]+(?:/[^/]+)*/*)\s+{`)
+	matches := re.FindAllStringSubmatch(nginxConfig, -1)
+
+	locations := make([]string, 0, len(matches))
+	for _, match := range matches {
+		if len(match) > 1 {
+			locations = append(locations, match[1])
+		}
+	}
+	log.Debugf("Found %d locations", len(locations))
+	return locations
+}
+
+
+// generateLocationContent generates the content for a location block
+// It either uses a custom template or generates a default one
+func (nm *NginxManager) generateLocationContent(locationConfig *LocationConfig) (string, error) {
+	log.Debugf("Generating location content for: %s", locationConfig.Name)
+	if locationConfig.Template == "" {
+		return nm.generateDefaultTemplate(locationConfig), nil
+	}
+
+	t, err := template.New("nginx").Parse(locationConfig.Template)
+	if err != nil {
+		log.Errorf("Failed to parse template: %v", err)
+		return "", fmt.Errorf("failed to parse template: %w", err)
+	}
+
+	var buf bytes.Buffer
+	data := map[string]interface{}{
+		"Key":           locationConfig.Name,
+		"ContainerName": locationConfig.ProxyServerName,
+		"Port":          locationConfig.Port,
+	}
+
+	if err := t.Execute(&buf, data); err != nil {
+		log.Errorf("Failed to execute template: %v", err)
+		return "", fmt.Errorf("failed to execute template: %w", err)
+	}
+
+	return buf.String(), nil
+}
+
+// generateDefaultTemplate generates a default Nginx location block template
+func (nm *NginxManager) generateDefaultTemplate(locationConfig *LocationConfig) string {
+	log.Debugf("Generating default template for: %s", locationConfig.Name)
+	proxyPass := fmt.Sprintf("http://%s/", locationConfig.ProxyServerName)
+	if locationConfig.Port != 0 {
+		proxyPass = fmt.Sprintf("http://%s:%d/", locationConfig.ProxyServerName, locationConfig.Port)
+	}
+
+	return fmt.Sprintf(`location /plugin/%s/ {
 	proxy_http_version 1.1;
 	proxy_set_header X-Real-IP $remote_addr;
 	proxy_set_header X-Real-PORT $remote_port;
@@ -55,211 +284,63 @@ func AddLocation(tmpl, locationName, proxyServerName string, port int) error {
 	proxy_send_timeout 3600s;
 	proxy_connect_timeout 3600s;
 	proxy_pass %s;
-}`, locationName, proxyPass)
-	} else {
-		t, err := template.New("nginx").Parse(tmpl)
-		if err != nil {
-			log.Debug("解析模板内容失败:", err)
-			return errors.New(constant.ErrNginxParseContent)
-		}
-		var buf bytes.Buffer
-		t.Execute(&buf, map[string]interface{}{
-			"Key":           locationName,
-			"ContainerName": proxyServerName,
-			"Port":          port,
-		})
-
-		fileContent = buf.String()
-	}
-
-	err = os.WriteFile(locationPath, []byte(fileContent), 0644)
-	if err != nil {
-		log.Debug("写入文件失败")
-		return errors.New(constant.ErrNginxWriteFile)
-	}
-
-	nginxContainer, err := getNginxContainer()
-	if err != nil {
-		log.Debug("获取Nginx容器失败", err)
-		return errors.New(constant.ErrNginxGetContainer)
-	}
-	dockerClient, err := docker.NewClient()
-	if err != nil {
-		log.Debug("创建Docker客户端失败", err)
-		return errors.New(err.Error())
-	}
-
-	// 检查是否存在默认配置文件
-	defaultConfPath := fmt.Sprintf("/etc/nginx/conf.d/apps/%s-default.conf", locationName)
-	exists, err := dockerClient.FileExistsInContainer(nginxContainer.ID, defaultConfPath)
-	if err != nil {
-		log.Debug("检查默认配置文件失败", err)
-		return errors.New(err.Error())
-	}
-
-	if exists {
-		// 如果存在默认配置,重命名为.bak
-		err = dockerClient.MoveFileWithCheck(nginxContainer.ID, defaultConfPath, defaultConfPath+".bak")
-		if err != nil {
-			log.Debug("重命名默认配置文件失败", err)
-			return errors.New(err.Error())
-		}
-	}
-
-	// 复制新的配置文件到容器
-	err = dockerClient.CopyFileToContainer(nginxContainer.ID, locationPath, fmt.Sprintf("/etc/nginx/conf.d/apps/%s.conf", locationName))
-	if err != nil {
-		log.Debug("复制文件到容器失败", err)
-		// 如果之前重命名了默认配置,需要恢复
-		if exists {
-			_ = dockerClient.MoveFileInContainer(nginxContainer.ID, defaultConfPath+".bak", defaultConfPath)
-		}
-		return errors.New(err.Error())
-	}
-
-	err = testNginxConfig(dockerClient.GetClient(), nginxContainer.ID)
-	if err != nil {
-		// 检测失败需要移除配置文件并恢复默认配置
-		log.Info("Nginx 配置未通过检测", err)
-		_ = dockerClient.RemoveFileFormContainer(nginxContainer.ID, fmt.Sprintf("/etc/nginx/conf.d/apps/%s.conf", locationName))
-		if exists {
-			_ = dockerClient.MoveFileInContainer(nginxContainer.ID, defaultConfPath+".bak", defaultConfPath)
-		}
-		return err
-	}
-
-	err = reloadNginx()
-	if err != nil {
-		log.Debug("Nginx 重载失败", err)
-		return err
-	}
-	return nil
+}`, locationConfig.Name, proxyPass)
 }
 
-func RemoveLocation(locationName string) error {
-	locationPath := fmt.Sprintf("%s/%s.conf", constant.NginxDir, locationName)
-
-	nginxContainer, err := getNginxContainer()
+// ExtractLocationsByKey extracts locations from a specific configuration file
+func (nm *NginxManager) ExtractLocationsByKey(key string) ([]string, error) {
+	log.Debugf("Extracting locations for key: %s", key)
+	locationPath := nm.getLocationPath(key)
+	content, err := os.ReadFile(locationPath)
 	if err != nil {
-		return err
+		log.Errorf("Failed to read Nginx config file: %v", err)
+		return []string{}, err
 	}
-	dockerClient, err := docker.NewClient()
-	if err != nil {
-		return err
-	}
-
-	// 检查是否存在.bak文件
-	bakPath := fmt.Sprintf("/etc/nginx/conf.d/apps/%s-default.conf.bak", locationName)
-	exists, err := dockerClient.FileExistsInContainer(nginxContainer.ID, bakPath)
-	if err != nil {
-		log.Debug("检查.bak文件失败", err)
-		return err
-	}
-
-	// 删除当前配置文件
-	err = dockerClient.RemoveFileFormContainer(nginxContainer.ID, fmt.Sprintf("/etc/nginx/conf.d/apps/%s.conf", locationName))
-	if err != nil {
-		log.Debug("从容器中删除文件失败", err)
-		return err
-	}
-
-	// 如果存在.bak文件，恢复它
-	if exists {
-		err = dockerClient.MoveFileInContainer(nginxContainer.ID, bakPath, fmt.Sprintf("/etc/nginx/conf.d/apps/%s-default.conf", locationName))
-		if err != nil {
-			log.Debug("恢复.bak文件失败", err)
-			return err
-		}
-	}
-
-	err = os.Remove(locationPath)
-	if err != nil {
-		fmt.Printf("删除文件失败: %v\n", err)
-		return err
-	}
-
-	err = reloadNginx()
-	if err != nil {
-		return err
-	}
-	return nil
+	locations := nm.ExtractLocations(string(content))
+	return locations, nil
 }
 
-func ExtractLocations(nginxConfig string) []string {
-	// 定义正则表达式来匹配 location 块
-	re := regexp.MustCompile(`location\s+(/[^/]+(?:/[^/]+)*/*)\s+{`)
-	matches := re.FindAllStringSubmatch(nginxConfig, -1)
-
-	// 提取匹配的地址
-	var locations []string
-	for _, match := range matches {
-		if len(match) > 1 {
-			locations = append(locations, match[1])
-		}
+// testAndReload tests the Nginx configuration and reloads if valid
+func (nm *NginxManager) testAndReload() error {
+	log.Debug("Testing and reloading Nginx configuration")
+	if err := nm.testConfig(); err != nil {
+		log.Errorf("Nginx configuration test failed: %v", err)
+		return fmt.Errorf("nginx configuration test failed: %w", err)
 	}
-	return locations
+	return nm.reload()
 }
 
-func getNginxContainer() (types.Container, error) {
-	client, err := docker.NewClient()
-	if err != nil {
-		log.Debug("获取Docker客户端失败", err.Error())
-		return types.Container{}, errors.New(constant.ErrNginxGetContainer)
-	}
-
-	list, err := client.ListContainersByName([]string{config.EnvConfig.GetNginxContainerName()})
-	if err != nil {
-		log.Debug("查找容器失败", err)
-		return types.Container{}, errors.New(constant.ErrNginxGetContainer)
-	}
-	if len(list) < 1 {
-		log.WithField("container_name", config.EnvConfig.GetNginxContainerName()).Debug("Nginx 容器不存在")
-		return types.Container{}, errors.New(constant.ErrNginxContainerNotFound)
-	}
-
-	nginxContainer := list[0]
-	return nginxContainer, nil
+// testConfig tests the Nginx configuration
+func (nm *NginxManager) testConfig() error {
+	log.Debug("Testing Nginx configuration")
+	return nm.executeCommand([]string{"nginx", "-t"})
 }
 
-// 重载Nginx
-func reloadNginx() error {
-
-	nginxContainer, err := getNginxContainer()
-	if err != nil {
-		log.Info("获取Nginx容器失败")
-		return err
-	}
-	dockerClient, err := docker.NewDockerClient()
-	if err != nil {
-		log.Info("获取Docker Client失败", err)
-		return err
-	}
-	err = testNginxConfig(dockerClient, nginxContainer.ID)
-	if err != nil {
-		log.Info("Nginx 配置未通过检测", err)
-		return err
-	}
-
-	err = reloadNginxConfig(dockerClient, nginxContainer.ID)
-
-	return err
+// reload reloads the Nginx configuration
+func (nm *NginxManager) reload() error {
+	log.Debug("Reloading Nginx configuration")
+	return nm.executeCommand([]string{"nginx", "-s", "reload"})
 }
 
-func reloadNginxConfig(dockerClient *client.Client, containerID string) error {
+// executeCommand executes a command in the Nginx container
+func (nm *NginxManager) executeCommand(cmd []string) error {
+	log.Debugf("Executing command in container: %v", cmd)
 	execConfig := container.ExecOptions{
 		AttachStdout: true,
 		AttachStderr: true,
-		Cmd:          []string{"nginx", "-s", "reload"},
+		Cmd:          cmd,
 	}
 
-	execIDResp, err := dockerClient.ContainerExecCreate(context.Background(), containerID, execConfig)
+	execIDResp, err := nm.dockerClient.GetClient().ContainerExecCreate(context.Background(), nm.containerID, execConfig)
 	if err != nil {
-		return fmt.Errorf("error creating exec: %w", err)
+		log.Errorf("Failed to create exec: %v", err)
+		return fmt.Errorf("failed to create exec: %w", err)
 	}
 
-	execAttachResp, err := dockerClient.ContainerExecAttach(context.Background(), execIDResp.ID, container.ExecStartOptions{})
+	execAttachResp, err := nm.dockerClient.GetClient().ContainerExecAttach(context.Background(), execIDResp.ID, container.ExecStartOptions{})
 	if err != nil {
-		panic(err)
+		log.Errorf("Failed to attach exec: %v", err)
+		return fmt.Errorf("failed to attach exec: %w", err)
 	}
 	defer execAttachResp.Close()
 
@@ -269,50 +350,30 @@ func reloadNginxConfig(dockerClient *client.Client, containerID string) error {
 		outputDone <- err
 	}()
 
-	err = <-outputDone
-	if err != nil && err != io.EOF {
-		fmt.Printf("Error during command execution: %v\n", err)
-		return err
-	} else {
-		fmt.Println("Nginx configuration reloaded successfully.")
+	if err := <-outputDone; err != nil && err != io.EOF {
+		log.Errorf("Command execution failed: %v", err)
+		return fmt.Errorf("command execution failed: %w", err)
 	}
+
 	return nil
 }
 
-func testNginxConfig(dockerClient *client.Client, containerID string) error {
+// getLocationPath returns the full path for a location configuration file
+func (nm *NginxManager) getLocationPath(key string) string {
+	return fmt.Sprintf("%s/%s.conf", nm.nginxConfig.ConfigDir, key)
+}
 
-	// 创建一个执行命令的配置
-	execConfig := container.ExecOptions{
-		AttachStdout: true,
-		AttachStderr: true,
-		Cmd:          []string{"nginx", "-t"},
-	}
-
-	// 创建执行命令
-	execIDResp, err := dockerClient.ContainerExecCreate(context.Background(), containerID, execConfig)
+// getContainer retrieves the Nginx container by name
+func getContainer(client *docker.Client, name string) (types.Container, error) {
+	log.Debugf("Getting container with name: %s", name)
+	containers, err := client.ListContainersByName([]string{name})
 	if err != nil {
-		return fmt.Errorf("error creating exec: %v", err)
+		log.Errorf("Failed to list containers: %v", err)
+		return types.Container{}, err
 	}
-
-	// 执行命令
-	execAttachResp, err := dockerClient.ContainerExecAttach(context.Background(), execIDResp.ID, container.ExecStartOptions{})
-	if err != nil {
-		return fmt.Errorf("error attaching to exec: %v", err)
+	if len(containers) == 0 {
+		log.Errorf("Nginx container not found: %s", name)
+		return types.Container{}, fmt.Errorf("nginx container not found: %s", name)
 	}
-	defer execAttachResp.Close()
-
-	// 读取命令输出
-	outputDone := make(chan error)
-	go func() {
-		_, err := stdcopy.StdCopy(os.Stdout, os.Stderr, execAttachResp.Reader)
-		outputDone <- err
-	}()
-
-	// 等待命令执行完成
-	err = <-outputDone
-	if err != nil && err != io.EOF {
-		return fmt.Errorf("error during command execution: %v", err)
-	}
-
-	return nil
+	return containers[0], nil
 }

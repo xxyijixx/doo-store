@@ -13,14 +13,12 @@ import (
 	"doo-store/backend/utils/common"
 	"doo-store/backend/utils/compose"
 	"doo-store/backend/utils/docker"
-	e "doo-store/backend/utils/error"
 	"doo-store/backend/utils/nginx"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"os"
-	"path"
 	"strings"
 
 	"github.com/docker/docker/api/types/container"
@@ -52,248 +50,6 @@ type IAppService interface {
 
 func NewIAppService() IAppService {
 	return &AppService{}
-}
-
-type AppInstallProcess struct {
-	ctx           dto.ServiceContext
-	app           *model.App
-	appDetail     *model.AppDetail
-	appInstalled  *model.AppInstalled
-	appKey        string
-	containerName string
-	envContent    string
-	req           request.AppInstall
-	ipAddress     string
-	client        docker.Client
-}
-
-func NewAppInstallProcess(ctx dto.ServiceContext, req request.AppInstall) *AppInstallProcess {
-	return &AppInstallProcess{
-		ctx: ctx,
-		req: req,
-	}
-}
-
-func (p *AppInstallProcess) ValidateInstallRequirements() error {
-	var err error
-	p.app, err = repo.App.Where(repo.App.Key.Eq(p.req.Key)).First()
-	if err != nil {
-		log.Info("Error query app")
-		return errors.New(constant.ErrPluginInfoFailed)
-	}
-	// 检测版本
-	dootaskService := NewIDootaskService()
-	versionInfoResp, err := dootaskService.GetVersoinInfo()
-	if err != nil {
-		return errors.New(constant.ErrPluginVersionFailed)
-	}
-	check, err := versionInfoResp.CheckVersion(p.app.DependsVersion)
-	if err != nil {
-		log.Info("检测版本失败", err)
-		return errors.New(constant.ErrPluginDependencyFailed)
-	}
-	// 依赖版本不符合要求
-	if !check {
-		return e.NewErrorWithMap(p.ctx.C, constant.ErrPluginVersionNotSupport, map[string]interface{}{
-			"detail": p.app.DependsVersion,
-		}, nil)
-	}
-
-	// 判断是否已安装
-	p.appInstalled, err = repo.AppInstalled.
-		Select(repo.AppInstalled.ID, repo.AppInstalled.AppID).
-		Where(repo.AppInstalled.AppID.Eq(p.app.ID)).
-		First()
-
-	if err != nil {
-		if err != gorm.ErrRecordNotFound {
-			return errors.New(constant.ErrPluginInstallFailed)
-		}
-	}
-	if p.appInstalled != nil {
-		return errors.New(constant.ErrPluginInstallFailed)
-	}
-
-	p.appDetail, err = repo.AppDetail.Select(
-		repo.AppDetail.ID,
-		repo.AppDetail.AppID,
-		repo.AppDetail.Repo,
-		repo.AppDetail.Version,
-		repo.AppDetail.Params,
-		repo.AppDetail.DependsVersion,
-		repo.AppDetail.NginxConfig,
-	).Where(repo.AppDetail.AppID.Eq(p.app.ID)).First()
-	if err != nil {
-		log.Info("Error query app detail", err)
-		return errors.New(constant.ErrPluginInfoFailed)
-	}
-	return nil
-}
-
-func (p *AppInstallProcess) DHCP() error {
-	var err error
-	p.client, err = docker.NewClient()
-	if err != nil {
-		return err
-	}
-	client := p.client.GetClient()
-
-	// 获取所有容器
-	containers, err := client.ContainerList(context.Background(), container.ListOptions{All: true})
-	if err != nil {
-		return fmt.Errorf(constant.ErrDockerListContainers, err)
-	}
-
-	// 检查所有容器使用的IP
-	for _, container := range containers {
-		if container.NetworkSettings != nil {
-			for _, network := range container.NetworkSettings.Networks {
-				if network.IPAddress != "" {
-					// 注册已使用的IP
-					if err := docker.GlobalIPAllocator.RegisterIP(network.IPAddress); err != nil {
-						log.Debugf("注册IP失败 %s: %v", network.IPAddress, err)
-					}
-				}
-			}
-		}
-	}
-
-	// 分配新IP
-	p.ipAddress, err = docker.GlobalIPAllocator.AllocateIP()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// ValidateParam 验证参数
-func (p *AppInstallProcess) ValidateParam() error {
-	var err error
-	// 检测 docker-compose 文件
-	err = compose.Check(p.req.DockerCompose)
-	if err != nil {
-		log.Info("DockerCompose 内容未通过检测", err)
-		return err
-	}
-
-	p.appKey = config.EnvConfig.APP_PREFIX + p.app.Key
-	// 创建工作目录
-	workspaceDir := path.Join(constant.AppInstallDir, p.appKey)
-	err = createDir(workspaceDir)
-	if err != nil {
-		log.Info("Error create dir", err)
-		return err
-	}
-
-	// 容器名称
-	p.containerName = config.EnvConfig.GetDefaultContainerName(p.app.Key)
-
-	paramJson, err := json.Marshal(p.req.Params)
-	if err != nil {
-		return err
-	}
-
-	params := response.AppParams{}
-	err = common.StrToStruct(p.appDetail.Params, &params)
-	if err != nil {
-		log.Debug("解析参数失败", err)
-		return errors.New(constant.ErrPluginParamParseFailed)
-	}
-	for _, param := range params.FormFields {
-		if param.Required {
-			if _, exists := p.req.Params[param.EnvKey]; !exists {
-				return e.NewErrorWithDetail(p.ctx.C, constant.ErrPluginMissingParam, param.EnvKey, nil)
-			}
-		}
-	}
-
-	// 资源限制
-	p.req.Params[constant.CPUS] = p.req.CPUS
-	p.req.Params[constant.MemoryLimit] = p.req.MemoryLimit
-	var envJson string
-	p.envContent, envJson, err = docker.GenEnv(p.appKey, p.containerName, p.ipAddress, p.req.Params, false)
-	if err != nil {
-		return err
-	}
-	p.appInstalled = &model.AppInstalled{
-		Name:          p.containerName,
-		AppID:         p.app.ID,
-		AppDetailID:   p.appDetail.ID,
-		Class:         p.app.Class,
-		Repo:          p.appDetail.Repo,
-		Version:       p.appDetail.Version,
-		Params:        string(paramJson),
-		Env:           envJson,
-		DockerCompose: p.req.DockerCompose,
-		Key:           p.app.Key,
-		Status:        constant.Installing,
-		IpAddress:     p.ipAddress,
-	}
-	// 更新插件状态
-	err = repo.DB.Transaction(func(tx *gorm.DB) error {
-		_, err = repo.Use(tx).App.Where(repo.App.ID.Eq(p.appInstalled.AppID)).Update(repo.App.Status, constant.AppInUse)
-		if err != nil {
-			return err
-		}
-		err = repo.Use(tx).AppInstalled.Create(p.appInstalled)
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (p *AppInstallProcess) Install() error {
-	var err error
-	if p.appInstalled == nil {
-		return errors.New(constant.ErrPluginInstallFailed)
-	}
-	err = appUp(p.appInstalled, p.envContent)
-	if err != nil {
-		log.Info("启动失败", err)
-		return err
-	}
-	return nil
-}
-
-// AddNginx 添加Nginx配置
-// 插件安装的时候，需要向Nginx添加一个配置，如果添加配置失败，会将插件停止
-func (p *AppInstallProcess) AddNginx() error {
-	port, err := p.client.GetImageFirstExposedPortByName(fmt.Sprintf("%s:%s", p.appDetail.Repo, p.appDetail.Version))
-	if err != nil {
-		return err
-	}
-	if p.appDetail.NginxConfig != "" || port != 0 {
-		err = nginx.AddLocation(p.appDetail.NginxConfig, p.app.Key, p.containerName, port)
-
-		if err != nil {
-			log.Info("添加Nginx配置失败", err)
-
-			std, err := compose.Operate(docker.GetComposeFile(p.appKey), "stop")
-			if err != nil {
-				log.Info("Error docker compose operate", std)
-			}
-			_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(p.appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
-			return err
-		}
-		// 提取location
-		locationPath := fmt.Sprintf("%s/%s.conf", constant.NginxDir, p.app.Key)
-		content, err := os.ReadFile(locationPath)
-		if err != nil {
-			log.Debug("读取Nginx配置文件失败", err)
-			return err
-		}
-		locations := nginx.ExtractLocations(string(content))
-		if len(locations) > 0 {
-			fmt.Println("当前Location为", locations[0])
-			_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(p.appInstalled.ID)).Update(repo.AppInstalled.Location, locations[0])
-		}
-	}
-	return nil
 }
 
 func (*AppService) ListApps(ctx dto.ServiceContext, req request.AppSearch) (*dto.PageResult, error) {
@@ -462,8 +218,11 @@ func (*AppService) UninstallApp(ctx dto.ServiceContext, req request.AppUnInstall
 	}
 	// 释放IP
 	docker.GlobalIPAllocator.ReleaseIP(appInstalled.IpAddress)
-
-	nginx.RemoveLocation(appInstalled.Key)
+	nm, err := nginx.NewNginxManager()
+	if err != nil {
+		return err
+	}
+	nm.RemoveLocation(appInstalled.Key)
 	// 删除compose目录
 	_ = os.RemoveAll(fmt.Sprintf("%s/%s", constant.AppInstallDir, appKey))
 
