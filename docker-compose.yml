@@ -15,6 +15,7 @@ services:
       DATA_DIR: "/app/docker/dood"
       APP_ID: "${APP_ID}"
       PLUGIN_CIDR: "${APP_IPPR}.30/24"
+      DOOTASK_DIR: "/Users/mac-47/Desktop/zeniein/devlop/plugin-market/plugin-dootask"
       DOOTASK_APP_ID: "${APP_ID}"
       DOOTASK_NETWORK_NAME: "dootask-networks-${APP_ID}"
       DOOTASK_APP_IPPR: "${APP_IPPR}"

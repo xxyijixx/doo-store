@@ -279,22 +279,23 @@ func (*AppService) GetAppParams(ctx dto.ServiceContext, id int64) (any, error) {
 		log.Info("错误解析Json", err)
 		return nil, err
 	}
-	env := map[string]string{}
+	env := map[string]interface{}{}
 	err = json.Unmarshal([]byte(appInstalled.Env), &env)
 	if err != nil {
 		log.Info("解析环境变量失败", err)
 		return nil, err
 	}
-	for _, formField := range params.FormFields {
-		formField.Value = env[formField.EnvKey]
-		formField.Key = formField.EnvKey
-	}
+	// for _, formField := range params.FormFields {
+	// 	formField.Value = env[formField.EnvKey]
+	// 	formField.Key = formField.EnvKey
+	// }
+	params.FormFields = dto.FillAndValidateForm(params.FormFields, env)
 	// 构建插件参数
 	aParams := response.AppInstalledParamsResp{
 		Params:        params.FormFields,
 		DockerCompose: appInstalled.DockerCompose,
-		CPUS:          env[constant.CPUS],
-		MemoryLimit:   env[constant.MemoryLimit],
+		CPUS:          env[constant.CPUS].(string),
+		MemoryLimit:   env[constant.MemoryLimit].(string),
 	}
 	return aParams, nil
 }
@@ -345,16 +346,18 @@ func (*AppService) UpdateAppParams(ctx dto.ServiceContext, req request.AppInstal
 		return nil, errors.New(constant.ErrPluginRestartFailed)
 	}
 	// 返回修改后的参数
-	env := map[string]string{}
+	env := map[string]interface{}{}
 	err = json.Unmarshal([]byte(appInstalled.Env), &env)
 	if err != nil {
 		log.Info("解析环境变量失败", err)
 		return nil, err
 	}
-	for _, formField := range params.FormFields {
-		formField.Value = env[formField.EnvKey]
-		formField.Key = formField.EnvKey
-	}
+	// for _, formField := range params.FormFields {
+	// 	formField.Value = env[formField.EnvKey]
+	// 	formField.Key = formField.EnvKey
+	// }
+
+	params.FormFields = dto.FillAndValidateForm(params.FormFields, env)
 	aParams := response.AppInstalledParamsResp{
 		Params:        params.FormFields,
 		DockerCompose: appInstalled.DockerCompose,

@@ -21,6 +21,7 @@ import { Item } from "@/type.d/common";
 import { useEffect, useState } from "react";
 import * as http from "@/api/modules/fouceinter";
 import { useTranslation } from "react-i18next";
+import { FormField } from "@/api/interface/common"
 
 interface ProfileFormProps {
     app: Item; // 接收 app 数据
@@ -28,15 +29,7 @@ interface ProfileFormProps {
     onFalse: () => void; // 失败回调
 }
 
-interface Field {
-    default: string;
-    label: string;
-    env_key: string;
-    values: any;
-    type: string;
-    rule: string;
-    required: boolean;
-}
+
 
 type FormValues = {
     [key: string]: string | number | boolean; // 根据实际情况调整类型
@@ -55,7 +48,7 @@ export function ProfileForm({
     const [loading, setLoading] = useState<boolean>(false); // 加载状态
     const [error, setError] = useState<string>(""); // 错误信息
     // const [successMessage, setSuccessMessage] = useState<string>("");
-    const [formFields, setFormFields] = useState<any[]>([]); // 存储 form_fields 数据
+    const [formFields, setFormFields] = useState<FormField[]>([]); // 存储 form_fields 数据
 
     const form = useForm<FormValues>({
         defaultValues: {},
@@ -85,7 +78,7 @@ export function ProfileForm({
                     setFormFields(data.data?.params.form_fields || []);
                     // 设置 formFields 的默认值
                     data.data?.params.form_fields.forEach(
-                        (field: Field) => {
+                        (field: FormField) => {
                             const fieldName = field.env_key;
                             setValue(fieldName, field.default || ""); // 设置每个字段的默认值
                         }
@@ -117,7 +110,7 @@ export function ProfileForm({
         const currentValues = form.getValues()
         console.log("表单数据:", currentValues)
         const params: { [key: string]: string | number | boolean } = {};
-        formFields.forEach((field: Field) => {
+        formFields.forEach((field: FormField) => {
             params[field.env_key] = currentValues[field.env_key]
         })
         try {
@@ -154,30 +147,81 @@ export function ProfileForm({
         <Form {...form}>
             <form className="space-y-8 relative overflow-visible lg:px-0 md:px-0 px-3 pb-3" onSubmit={handleSubmit(handleRestart)}>
                 {/* 动态渲染 form_fields */}
-                {formFields.map((field, index) => {
-                    // 如果 field 没有 name 属性，生成一个默认的 name
-                    const fieldName = field.env_key
+                {formFields.sort((a, b) => a.order - b.order).map((field, index) => {
+                    const fieldName = field.env_key;
+                    
+                    // 检查依赖关系
+                    if (field.dependency) {
+                        const dependentValue = form.watch(field.dependency.field);
+                        if (dependentValue !== field.dependency.value) {
+                            return null;
+                        }
+                    }
+
                     return (
                         <FormItem key={index}>
                             <FormLabel>{field.label}</FormLabel>
                             <FormControl>
-                                
-                                <Input
-                                    className="bg-gray-200/60 border border-gray-200/60"
-                                    id={fieldName}
-                                    placeholder={t("请输入...")}
-                                    {...form.register(fieldName, {
-                                        required: t(`${field.label} 不能为空`),
-                                        onChange: (_error) => {
-                                            // 触发 onChange 时重新校验（即时校验）
-                                            form.trigger(fieldName);
-                                        },
-                                        onBlur: () => {
-                                            // 输入框失去焦点时触发校验
-                                            form.trigger(fieldName);
-                                        },
-                                    })}
-                                />
+                                <>
+                                    {field.type === 'select' && (
+                                        <select
+                                            className="flex h-9 w-full rounded-md border border-gray-200/60 bg-gray-200/60 px-3 py-1 text-sm shadow-sm transition-colors"
+                                            id={fieldName}
+                                            defaultValue={field.default}
+                                            {...form.register(fieldName, {
+                                                required: field.validation?.required && t(`${field.label} 不能为空`),
+                                                onChange: () => form.trigger(fieldName),
+                                                onBlur: () => form.trigger(fieldName),
+                                            })}
+                                        >
+                                            {field.options?.map((option, i) => (
+                                                <option key={i} value={option.value}>
+                                                    {option.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
+                                    {field.type === 'radio' && field.options && (
+                                        <div className="flex gap-4">
+                                            {field.options.map((option, i) => (
+                                                <div key={i} className="flex items-center space-x-2">
+                                                    <input
+                                                        type="radio"
+                                                        id={`${fieldName}-${i}`}
+                                                        value={option.value}
+                                                        {...form.register(fieldName, {
+                                                            required: field.validation?.required && t(`${field.label} 不能为空`),
+                                                        })}
+                                                    />
+                                                    <label htmlFor={`${fieldName}-${i}`}>{option.label}</label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {field.type === 'checkbox' && (
+                                        <Checkbox
+                                            id={fieldName}
+                                            {...form.register(fieldName)}
+                                        />
+                                    )}
+                                    {(field.type === 'text' || field.type === 'number' || field.type === 'password') && (
+                                        <Input
+                                            className="bg-gray-200/60 border border-gray-200/60"
+                                            id={fieldName}
+                                            type={field.type}
+                                            placeholder={field.placeholder || t("请输入...")}
+                                            {...form.register(fieldName, {
+                                                required: field.validation?.required && t(`${field.label} 不能为空`),
+                                                pattern: field.validation?.pattern ? {
+                                                    value: new RegExp(field.validation.pattern),
+                                                    message: t("格式不正确")
+                                                } : undefined,
+                                                onChange: () => form.trigger(fieldName),
+                                                onBlur: () => form.trigger(fieldName),
+                                            })}
+                                        />
+                                    )}
+                                </>
                             </FormControl>
                             <FormMessage>{errors[fieldName]?.message}</FormMessage>
                         </FormItem>

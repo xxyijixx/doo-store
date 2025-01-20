@@ -1,0 +1,102 @@
+#!/bin/bash
+
+#fonts color
+Green="\033[32m"
+Yellow="\033[33m"
+Red="\033[31m"
+GreenBG="\033[42;37m"
+YellowBG="\033[43;37m"
+RedBG="\033[41;37m"
+Font="\033[0m"
+
+#notification information
+OK="${Green}[OK]${Font}"
+Warn="${Yellow}[警告]${Font}"
+Error="${Red}[错误]${Font}"
+
+cur_path="$(pwd)"
+cur_arg=$@
+COMPOSE="docker-compose"
+
+judge() {
+    if [[ 0 -eq $? ]]; then
+        success "$1 完成"
+        sleep 1
+    else
+        error "$1 失败"
+        exit 1
+    fi
+}
+
+success() {
+    echo -e "${OK} ${GreenBG}$1${Font}"
+}
+
+warning() {
+    echo -e "${Warn} ${YellowBG}$1${Font}"
+}
+
+error() {
+    echo -e "${Error} ${RedBG}$1${Font}"
+}
+
+info() {
+    echo -e "$1"
+}
+
+
+run_exec() {
+    local container=$1
+    local cmd=$2
+    local name=`docker_name $container`
+    if [ -z "$name" ]; then
+        error "没有找到 $container 容器!"
+        exit 1
+    fi
+    docker exec -it "$name" /bin/sh -c "$cmd"
+}
+
+plugin_exec() {
+    mkdir -p "${cur_path}/docker/dood/nginx"
+    mkdir -p "${cur_path}/docker/dood/apps"
+    chmod -R 775 "${cur_path}/docker/dood/nginx"
+    chmod -R 775 "${cur_path}/docker/dood/apps"
+}
+
+manage_services() {
+    services=$(ls -d ${cur_path}/docker/dood/apps/*)
+    
+    action="$1"
+    
+    if [[ "$action" == "up" || "$action" == "down" || "$action" == "stop" ]]; then
+        for service_dir in $services; do
+            docker_compose_file="${service_dir}/docker-compose.yml"
+            service_name=$(basename "$service_dir")
+            
+            case "$action" in
+                "up")
+                    echo "Starting service $service_name from $service_dir"
+                    docker-compose -f "$docker_compose_file" up -d
+                    ;;
+                "down")
+                    echo "Stopping service $service_name from $service_dir"
+                    docker-compose -f "$docker_compose_file" down
+                    ;;
+                "stop")
+                    echo "Stopping service $service_name from $service_dir"
+                    docker-compose -f "$docker_compose_file" stop
+                    ;;
+            esac
+        done
+    fi
+}
+
+
+if [ $# -gt 0 ]; then
+    if [[ "$1" == "up" ]]; then
+        shit 1
+        manage_services up
+    fi
+else
+    $COMPOSE ps
+fi

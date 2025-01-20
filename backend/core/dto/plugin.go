@@ -2,7 +2,7 @@ package dto
 
 import (
 	"doo-store/backend/config"
-	"doo-store/backend/core/dto/response"
+
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -26,11 +26,12 @@ type Plugin struct {
 }
 
 type EnvElement struct {
-	Name     string `json:"name"`
-	Key      string `json:"key"`
-	Value    string `json:"value"`
-	Type     string `json:"type"`
-	Required bool   `json:"required"`
+	// Name     string    `json:"name"`
+	// Key      string    `json:"key"`
+	// Value    string    `json:"value"`
+	// Type     FieldType `json:"type"`
+	// Required bool      `json:"required"`
+	FormField
 }
 
 type Volume struct {
@@ -79,7 +80,7 @@ func (p *Plugin) GenService() string {
 	if len(p.Env) != 0 {
 		serviceContent = append(serviceContent, fmt.Sprintf("%senvironment:", p.getSpaces(2)))
 		for _, env := range p.Env {
-			serviceContent = append(serviceContent, fmt.Sprintf("%s- %s=${%s}", p.getSpaces(3), env.Key, env.Key))
+			serviceContent = append(serviceContent, fmt.Sprintf("%s- %s=${%s}", p.getSpaces(3), env.EnvKey, env.EnvKey))
 		}
 	}
 
@@ -99,16 +100,20 @@ func (p *Plugin) GenService() string {
 }
 
 func (p *Plugin) GenParams() string {
-	formFields := make([]response.FormField, 0)
+	formFields := make([]FormField, 0)
 	for _, env := range p.Env {
-		formField := response.FormField{
-			Label:    env.Name,
-			Default:  fmt.Sprintf("%v", env.Value),
-			EnvKey:   env.Key,
-			Type:     env.Type,
-			Required: env.Required,
-		}
-		formFields = append(formFields, formField)
+		// defaultValue := env.Default
+		// if defaultValue == nil {
+		// 	defaultValue = ""
+		// }
+		// formField := FormField{
+		// 	Label:   env.Label,
+		// 	Default: defaultValue,
+		// 	EnvKey:  env.EnvKey,
+		// 	Type:    env.Type,
+		// }
+		// formFields = append(formFields, formField)
+		formFields = append(formFields, env.FormField)
 	}
 	params := map[string]interface{}{
 		"form_fields": formFields,

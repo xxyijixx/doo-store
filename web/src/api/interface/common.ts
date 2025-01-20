@@ -52,19 +52,41 @@ export interface Detafocus {
   }
 
 export interface FormField {
-    default: string
-    label: string
-    env_key: string
-    key: string
-    value: string
-    values: object
-    type: string
-    rule: string
-    required: boolean
+    label: string;
+    env_key: string;
+    type: string;
+    default?: any;
+    options?: Option[];
+    validation?: Validation;
+    dependency?: Dependency;
+    placeholder?: string;
+    order: number;
+    hidden?: boolean;
+    readOnly?: boolean;
 }
 
+export interface Option {
+  label: string;
+  value: string;
+  subFields?: FormField[]; // Optional sub-fields specific to this option
+}
+
+export interface Dependency {
+  field: string;    // Field that this field depends on
+  value: any;       // Value of the dependent field
+  operator: string; // Comparison operator: eq, neq, in, etc.
+}
+
+export interface Validation {
+  required: boolean;
+  pattern?: string;
+  minLen?: number;
+  maxLen?: number;
+}
+
+
 export interface getEdit {
-    params: editForm[]
+    params: FormField[]
     docker_compose: string
     cpus: string
     memory_limit: string

@@ -195,15 +195,19 @@ func (p *AppInstallProcess) ValidateParam() error {
 	}
 
 	// 验证必填参数
-	for _, param := range params.FormFields {
-		if param.Required {
-			if _, exists := p.req.Params[param.EnvKey]; !exists {
-				log.Warn("缺少必填参数:", param.EnvKey)
-				return e.NewErrorWithDetail(p.ctx.C, constant.ErrPluginMissingParam, param.EnvKey, nil)
-			}
-		}
+	// for _, param := range params.FormFields {
+	// 	if param.Required {
+	// 		if _, exists := p.req.Params[param.EnvKey]; !exists {
+	// 			log.Warn("缺少必填参数:", param.EnvKey)
+	// 			return e.NewErrorWithDetail(p.ctx.C, constant.ErrPluginMissingParam, param.EnvKey, nil)
+	// 		}
+	// 	}
+	// }
+	vErr := dto.ValidateFormData(params.FormFields, p.req.Params)
+	if len(vErr) > 0 {
+		log.Warn("参数验证失败:", vErr)
+		return vErr[0]
 	}
-
 	// 资源限制
 	p.req.Params[constant.CPUS] = p.req.CPUS
 	p.req.Params[constant.MemoryLimit] = p.req.MemoryLimit

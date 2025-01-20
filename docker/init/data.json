@@ -154,6 +154,136 @@
       "docker_compose": ""
     },
     {
+      "name": "Nginx测试1111",
+      "key": "nginx-test111",
+      "description": "Nginx is a web server and a reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, with a strong focus on high concurrency, performance and low memory usage.",
+      "icon": "https://dootask.com/site/img/light/logo.svg",
+      "version": "alpine",
+      "github": "",
+      "class": "web",
+      "depends_version": "0.37.21",
+      "repo": "docker.io/library/nginx",
+      "volume": [],
+      "env": [
+        {
+          "label": "Cloud Provider",
+          "env_key": "CLOUD_PROVIDER",
+          "type": "select",
+          "default": "aliyun",
+          "order": 1,
+          "validation": {
+            "required": true
+          },
+          "options": [
+            {
+              "label": "Aliyun OSS",
+              "value": "aliyun"
+            },
+            {
+              "label": "AWS S3",
+              "value": "aws"
+            },
+            {
+              "label": "Google Cloud Storage",
+              "value": "gcp"
+            }
+          ]
+        },
+        {
+          "label": "OSS Region",
+          "env_key": "OSS_REGION",
+          "type": "select",
+          "order": 2,
+          "validation": {
+            "required": true
+          },
+          "dependency": {
+            "field": "CLOUD_PROVIDER",
+            "value": "aliyun",
+            "operator": "eq"
+          },
+          "options": [
+            {
+              "label": "China (Hangzhou)",
+              "value": "cn-hangzhou"
+            },
+            {
+              "label": "China (Beijing)",
+              "value": "cn-beijing"
+            },
+            {
+              "label": "China (Shanghai)",
+              "value": "cn-shanghai"
+            }
+          ]
+        },
+        {
+          "label": "OSS Endpoint",
+          "env_key": "OSS_ENDPOINT",
+          "type": "text",
+          "order": 3,
+          "placeholder": "e.g., oss-cn-hangzhou.aliyuncs.com",
+          "validation": {
+            "required": true,
+            "pattern": "^[a-z0-9-]+\\.aliyuncs\\.com$"
+          },
+          "dependency": {
+            "field": "CLOUD_PROVIDER",
+            "value": "aliyun",
+            "operator": "eq"
+          }
+        },
+        {
+          "label": "OSS Bucket",
+          "env_key": "OSS_BUCKET",
+          "type": "text",
+          "order": 4,
+          "validation": {
+            "required": true,
+            "pattern": "^[a-z0-9-]+$",
+            "minLen": 3,
+            "maxLen": 63
+          },
+          "dependency": {
+            "field": "CLOUD_PROVIDER",
+            "value": "aliyun",
+            "operator": "eq"
+          }
+        },
+        {
+          "label": "Access Key ID",
+          "env_key": "OSS_ACCESS_KEY_ID",
+          "type": "text",
+          "order": 5,
+          "validation": {
+            "required": true
+          },
+          "dependency": {
+            "field": "CLOUD_PROVIDER",
+            "value": "aliyun",
+            "operator": "eq"
+          }
+        },
+        {
+          "label": "Access Key Secret",
+          "env_key": "OSS_ACCESS_KEY_SECRET",
+          "type": "text",
+          "order": 6,
+          "validation": {
+            "required": true
+          },
+          "dependency": {
+            "field": "CLOUD_PROVIDER",
+            "value": "aliyun",
+            "operator": "eq"
+          }
+        }
+      ],
+      "command": "",
+      "nginx_config": "",
+      "docker_compose": ""
+    },
+    {
       "name": "Redis",
       "key": "redis",
       "description": "Redis is an in-memory data structure store, used as a database, cache and message broker.",
