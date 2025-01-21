@@ -192,7 +192,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                     </>
                 )}
             </CardContent>
-            <CardFooter className="flex justify-start  gap-2 lg:gap-3 md:gap-3 lg:ml-14 md:ml-14 lg:mt-5 md:pl-7 pl-20">
+            <CardFooter className="flex justify-start gap-2 lg:gap-3 md:gap-3 lg:ml-14 md:ml-14 lg:mt-5 md:pl-7 pl-20">
                 {isLoading ? (
                     <>
                         <Skeleton className="h-8 w-[56px] rounded-lg" />
