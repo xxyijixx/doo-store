@@ -158,8 +158,8 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
         <>
         {variantState === "success" && <SuccessToaster />}
         {variantState === "destructive" && <FalseToaster />}
-        <Card className="lg:w-auto md:w-auto w-auto h-[180px] lg:mb-0 md:mb-0 mb-3 relative">
-            <CardContent className="flex justify-start space-x-5 mt-6 pl-5">
+        <Card className="lg:w-auto md:w-auto w-auto h-[180px] lg:-mb-3 md:-mb-3.5 mb-1 relative">
+            <CardContent className="flex justify-start space-x-5 mt-3.5 pl-7">
                 {isLoading ? (
                     <>
                         <Skeleton className="h-10 w-10 rounded-full" />
@@ -170,7 +170,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                     </>
                 ) : (
                     <>
-                        <Avatar className="my-auto size-10">
+                        <Avatar className="my-auto size-10 mt-0.5">
                             <AvatarImage src={app.icon} />
                             <AvatarFallback>loading</AvatarFallback>
                         </Avatar>
@@ -186,13 +186,13 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                             {isLoading ? (
                                 <Skeleton className="h-4 w-56" />
                             ) : (
-                                <p className="text-base line-clamp-2 min-h-[42px] leading-[21px] pt-1 pr-5">{app.description || t("No description available")}</p>
+                                <p className="text-base line-clamp-2 min-h-[42px] leading-[21px] pt-2 pr-5">{app.description || t("No description available")}</p>
                             )}
                         </CardDescription>
                     </>
                 )}
             </CardContent>
-            <CardFooter className="flex justify-start -mt-1 gap-2 lg:gap-3 md:gap-3 lg:ml-14 md:ml-14 md:pl-6 pl-20">
+            <CardFooter className="flex justify-start  gap-2 lg:gap-3 md:gap-3 lg:ml-14 md:ml-14 lg:mt-5 md:pl-7 pl-20">
                 {isLoading ? (
                     <>
                         <Skeleton className="h-8 w-[56px] rounded-lg" />

@@ -264,15 +264,15 @@ function MainPage() {
                         <h1 className="sm:hidden text-2xl text-gray-800 md:text-3xl truncate max-w-[4em] ">
                             {t('应用商店')}
                         </h1>
-                        <div className={`flex items-center justify-end ${isSearchExpanded ? 'flex-grow md:flex-grow-0 lg:flex-grow-0' : ''}`}>
+                        <div className={`flex items-center mt-4 justify-end ${isSearchExpanded ? 'flex-grow md:flex-grow-0 lg:flex-grow-0' : ''}`}>
                             <UniSearch 
                                 onSearch={handleSearch} 
                                 clearAfterSearch={false}
                                 defaultValue={searchQuery}
                                 onExpandChange={handleSearchExpand}
                             />
-                            <div onClick={()=>setOpenUpload(true)} className="w-36 h-38 pl-2 hover:cursor-pointer">
-                                <div className="w-36 h-36 relative flex items-center justify-center bg-gray-200/50 rounded-full overflow-hidden transition-all duration-300">
+                            <div onClick={()=>setOpenUpload(true)} className="w-8 h-38 pl-2 hover:cursor-pointer">
+                                <div className="w-8 h-8 relative flex items-center justify-center bg-gray-200/50 rounded-full overflow-hidden transition-all duration-300">
                                     <PlusIcon/>
                                 </div>
                                 <div className="h-2"></div>
@@ -329,7 +329,7 @@ function MainPage() {
             <div className="flex-1 overflow-hidden">
                 <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                     <div 
-                        className="flex space-x-2 mb-3 py-1 min-w-max cursor-grab active:cursor-grabbing"
+                        className="flex space-x-2 mb-1 py-1 min-w-max cursor-grab active:cursor-grabbing"
                         onMouseDown={(e) => {
                             const ele = e.currentTarget;
                             const startX = e.pageX - ele.offsetLeft;
@@ -367,11 +367,11 @@ function MainPage() {
                     </div>
                 </div>
 
-                <div className="mt-4">
+                <div>
                     <AnimatePresence mode="wait">
                         {/* 如果当前 Tab 是 "all" 或 "allson" 且未选择 class，显示 all 类应用列表 */}
                         {(activeTab === "all" && selectedClass !== "installed") && (
-                            <div className={`grid lg:gap-4 md:gap-4 gap-2 m-1 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-280px)] max-h-[calc(100vh-230px)]  overflow-y-auto`}>
+                            <div className={`grid lg:gap-4 md:gap-4 gap-2 lg:mx-0 lg:my-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-280px)] max-h-[calc(100vh-230px)]  overflow-y-auto`}>
                                 {loading ? (
                                     Array.from({ length: 9 }).map((_, index) => (
                                         <motion.div
@@ -381,8 +381,8 @@ function MainPage() {
                                             exit={{ opacity: 0 }}
                                             transition={{ duration: 0.5 }}
                                         >
-                                            <Card key={index} className="lg:w-auto md:w-auto w-auto lg:h-[140px] lg:my-3 lg:mr-4 md:my-3 md:mr-4 my-3 mx-0 px-2">
-                                                <CardContent className="flex justify-start space-x-4 pt-6">
+                                            <Card key={index} className="lg:w-auto md:w-auto w-auto lg:h-[140px] lg:my-3 lg:mr-4 md:my-3 md:mr-4 my-3 px-2">
+                                                <CardContent className="flex justify-start space-x-4">
                                                     <Skeleton className="h-10 w-10 rounded-full" />
                                                     <CardDescription className="space-y-2 text-left">
                                                         <Skeleton className="h-6 w-[200px] rounded-lg" />
@@ -404,11 +404,11 @@ function MainPage() {
                                             exit={{ opacity: 0 }}
                                             transition={{ duration: 0.7 }}
                                         >
-                                            <Card key={app.id} className="lg:w-auto md:w-auto w-auto lg:h-[140px] lg:my-2 lg:mr-4 md:my-2 md:mr-4 my-0.5 mx-0 px-2">
-                                                <CardContent className="flex flex-col mt-5 ">
+                                            <Card key={app.id} className="lg:w-auto md:w-auto w-auto lg:h-[140px] md:h-[140px] h-[140px] lg:my-1 lg:mx-1 md:my-1 md:mx-1 my-0.5 mx-0 px-2">
+                                                <CardContent className="flex flex-col ">
                                                     <div className="flex w-full relative">
                                                         <div className="flex flex-1">
-                                                            <Avatar className="my-auto mr-12 size-10">
+                                                            <Avatar className="my-auto mr-5 mt-0 size-10">
                                                                 <AvatarImage src={app.icon} />
                                                                 <AvatarFallback>loading</AvatarFallback>
                                                             </Avatar>
@@ -421,8 +421,8 @@ function MainPage() {
                                                                 </p>
                                                             </CardDescription>
                                                         </div>
-                                                        <div className="absolute right-0 -top-2">
-                                                            <CardFooter className="pt-1">
+                                                        <div className="absolute -right-3 -top-1.5">
+                                                            <CardFooter>
                                                                 <Drawer
                                                                     status={app.status}
                                                                     isOpen={false}
