@@ -466,11 +466,11 @@ function MainPage() {
                                     className="
                                     grid lg:gap-6 md:gap-6 
                                     grid-cols-1 md:grid-cols-2 lg:grid-cols-3 
-                                    lg:max-h-[calc(100vh-280px)] 
-                                    md:max-h-[calc(100vh-280px)] 
-                                    max-h-[calc(100vh-280px)] 
+                                    lg:h-[calc(57vh-30px)]
+                                    md:max-h-[calc(100vh-150px)] 
+                                    max-h-[calc(100vh-180px)]  
                                     overflow-y-auto 
-                                    lg:mt-2 md:mt-1 mt-0
+                                    lg:mt-2 md:mt-1 mt-0.5
                                     "
                                 >
                                     {loading ? (

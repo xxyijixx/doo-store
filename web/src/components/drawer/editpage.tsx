@@ -29,7 +29,7 @@ function EditDrawer ({ isOpen, onClose, app }: EditDrawerProps){
                 <SheetHeader>
                     <SheetTitle className='lg:ml-0 md:ml-0 text-gray-700 z-50 lg:bg-transparent md:bg-transparent bg-gray-200/50 lg:py-0 md:py-0 py-3 flex items-center gap-2'>
                         <ChevronLeftIcon 
-                            className="h-6 w-6 ml-6 lg:hidden md:hidden block"
+                            className="h-6 w-6 ml-3 lg:hidden md:hidden block"
                             onClick={() => onClose()}
                         />
                         {t('参数修改')}
