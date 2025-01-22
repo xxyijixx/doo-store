@@ -219,6 +219,11 @@ function MainPage() {
         setIsSearchExpanded(expanded);
     };
 
+    //监控客户端
+    const isClient = navigator.userAgent.includes('YourClientIdentifier');
+
+
+
     useEffect(() => {
         const handleSwitchToInstalled = ()=> {
             setActiveTab('installed');
@@ -466,11 +471,13 @@ function MainPage() {
                                     className="
                                     grid lg:gap-6 md:gap-6 
                                     grid-cols-1 md:grid-cols-2 lg:grid-cols-3 
-                                    lg:h-[calc(57vh-30px)]
+                                    xl:h-[calc(81vh-290px)]
+                                    lg:h-[calc(90vh-390px)]
                                     md:max-h-[calc(100vh-150px)] 
-                                    max-h-[calc(100vh-180px)]  
+                                    max-h-[calc(100vh-80px)]  
                                     overflow-y-auto 
                                     lg:mt-2 md:mt-1 mt-0.5
+                                    lg:pb-6 xl:pb-6
                                     "
                                 >
                                     {loading ? (

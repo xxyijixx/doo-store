@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 import * as http from "@/api/modules/fouceinter";
 import { useTranslation } from "react-i18next";
 import { FormField } from "@/api/interface/common"
+import { useToast } from "@/hooks/use-toast";
 
 interface ProfileFormProps {
     app: Item; // 接收 app 数据
@@ -49,6 +50,9 @@ export function ProfileForm({
     const [error, setError] = useState<string>(""); // 错误信息
     // const [successMessage, setSuccessMessage] = useState<string>("");
     const [formFields, setFormFields] = useState<FormField[]>([]); // 存储 form_fields 数据
+
+    const { toast } = useToast();
+
 
     const form = useForm<FormValues>({
         defaultValues: {},
@@ -89,6 +93,13 @@ export function ProfileForm({
                 .catch((_error) => {
                     setError(t("请求失败，请稍后重试")); // 错误处理
                     setLoading(false);
+                    toast({
+                        title: t("安装出错"),
+                        description: t("安装过程中发生错误，请刷新。"),
+                        variant: "destructive",
+                        duration: 30000,
+                        className: "fixed top-16  lg:top-3 md:top-3 lg:right-6  md:right-4 right-1/2 translate-x-1/2 lg:translate-x-0 md:translate-x-0 w-[350px]"
+                    });
                 });
         }
     }, [app.key, setValue]);
@@ -144,6 +155,8 @@ export function ProfileForm({
     };
 
     return (
+        <>
+
         <Form {...form}>
             <form className="space-y-8 relative overflow-visible lg:px-0 md:px-0 px-3 pb-3" onSubmit={handleSubmit(handleRestart)}>
                 {/* 动态渲染 form_fields */}
@@ -159,6 +172,7 @@ export function ProfileForm({
                     }
 
                     return (
+                        
                         <FormItem key={index}>
                             <FormLabel>{field.label}</FormLabel>
                             <FormControl>
@@ -278,5 +292,6 @@ export function ProfileForm({
                 </div>
             </form>
         </Form>
+    </>
     );
 }
