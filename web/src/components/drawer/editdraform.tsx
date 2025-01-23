@@ -15,6 +15,8 @@ import { useEffect, useState } from "react";
 import * as http from "@/api/modules/fouceinter"
 import { useTranslation } from "react-i18next";
 import { FormField } from "@/api/interface/common"
+import { useToast } from "@/hooks/use-toast";
+import { SuccessToaster } from "@/components/ui/toaster"
 
 interface EditProps {
     app: Item;  // 接收 app 数据
@@ -34,6 +36,9 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
     const [loading, setLoading] = useState<boolean>(false);  // 加载状态
     const [error, setError] = useState<string>("");  // 错误信息
     const [formFields, setFormFields] = useState<FormField[]>([]);  // 存储 form_fields 数据
+
+    const { toast } = useToast();
+
 
     const form = useForm<FormValues>({
         defaultValues: {},
@@ -115,6 +120,13 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
             if (response) {
                 // 成功后，更新状态，使得页面渲染新的内容
                 console.log("真棒！修改成功");
+                toast({
+                    title: t("修改成功"),
+                    description: t("内容已做修改~"),
+                    variant: "success",
+                    duration: 2000,
+                });
+
                 onEditSuccess();
                 setCpuLimit(result.data?.cpus || cpuLimit);  // 确保获取到最新的值
                 setMemoryLimit(result.data?.memory_limit || memoryLimit);  // 同上
@@ -140,6 +152,8 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
     };
 
     return (
+        <>
+        <SuccessToaster />
         <Form {...form} >
             <form className="space-y-8 relative overflow-visible lg:px-0 md:px-0 px-3 pb-3" onSubmit={handleSubmit(handleRestart)}>
                 {/* 动态渲染 form_fields */}
@@ -269,5 +283,6 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
                 </div>
             </form>
         </Form>
+    </>
     );
 }
