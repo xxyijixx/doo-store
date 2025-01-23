@@ -139,7 +139,6 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
                 });
             } else {
                 console.error("API 请求失败:", result);
-                // setError(result.message || "请求失败，请稍后重试");
                 
             }
         } catch (error) {
@@ -265,7 +264,7 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
                         disabled={loading}
                         >{t('重启')}</Button>
                     <SheetClose
-                        className="cursor-pointer border-2 border-gray-200/60 rounded-md bg-gray-200/60 text-sm text-gray-600 shadow-sm hover:bg-white hover:border-theme-color/85 hover:text-theme-color/85 h-9 px-5 py-2"
+                        className="cursor-pointer border border-gray-200/60 rounded-md bg-gray-200/60 text-sm text-gray-600 shadow-sm hover:bg-white  hover:border-theme-color/85 hover:text-theme-color/85 h-9 px-5 py-2"
                     >{t('取消')}</SheetClose>
                 </div>
 

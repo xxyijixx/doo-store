@@ -286,7 +286,7 @@ networks:
         <hr  className='lg:block md:block hidden'/>
         <Form {...form}>
           <form
-            className="space-y-8 relative overflow-visible lg:px-0 md:px-0 px-3 pb-3 py-6"
+            className="space-y-8 relative overflow-visible lg:px-0 md:px-0 px-3 pb-3 py-5"
             onSubmit={handleSubmit(handleUpload)}
           >
             {/* 基础表单项 */}

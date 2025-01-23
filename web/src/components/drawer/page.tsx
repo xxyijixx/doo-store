@@ -105,7 +105,7 @@ function Drawer({ status, app }: DrawerProps) {
                             {t('返回')}
                         </SheetTitle>
                         <hr  className='lg:block md:block hidden'/>
-                        <SheetDescription className='pt-3'>
+                        <SheetDescription>
                         </SheetDescription>
                         <ProfileForm
                             app={app}
