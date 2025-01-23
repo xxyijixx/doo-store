@@ -16,7 +16,7 @@ import * as http from "@/api/modules/fouceinter"
 import { useTranslation } from "react-i18next";
 import { FormField } from "@/api/interface/common"
 import { useToast } from "@/hooks/use-toast";
-import { SuccessToaster } from "@/components/ui/toaster"
+import { SuccessToaster, FalseToaster } from "@/components/ui/toaster"
 
 interface EditProps {
     app: Item;  // 接收 app 数据
@@ -36,6 +36,8 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
     const [loading, setLoading] = useState<boolean>(false);  // 加载状态
     const [error, setError] = useState<string>("");  // 错误信息
     const [formFields, setFormFields] = useState<FormField[]>([]);  // 存储 form_fields 数据
+    // 当前 variant 状态，用于控制渲染
+    const [variantState, setVariantState] = useState<"success" | "destructive" | null>(null);
 
     const { toast } = useToast();
 
@@ -126,7 +128,7 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
                     variant: "success",
                     duration: 2000,
                 });
-
+                setVariantState("success");
                 onEditSuccess();
                 setCpuLimit(result.data?.cpus || cpuLimit);  // 确保获取到最新的值
                 setMemoryLimit(result.data?.memory_limit || memoryLimit);  // 同上
@@ -139,12 +141,25 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
                 });
             } else {
                 console.error("API 请求失败:", result);
+                toast({
+                    title: t("修改失败"),
+                    description: t("内容修改失败，请重试~"),
+                    variant: "destructive",
+                    duration: 2000,
+                });
+                setVariantState("destructive");
                 
             }
         } catch (error) {
-            console.log("来咯", error);
             setError(t("网络错误，请检查网络连接"));
             onEditFalse();
+            toast({
+                title: t("修改失败"),
+                description: t("内容修改失败，请重试~"),
+                variant: "destructive",
+                duration: 2000,
+            });
+            setVariantState("destructive");
         } finally {
             setLoading(false);
         }
@@ -152,7 +167,8 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
 
     return (
         <>
-        <SuccessToaster />
+        {variantState === "success" && <SuccessToaster />}
+        {variantState === "destructive" && <FalseToaster />}
         <Form {...form} >
             <form className="space-y-8 relative overflow-visible lg:px-0 md:px-0 px-3 pb-3" onSubmit={handleSubmit(handleRestart)}>
                 {/* 动态渲染 form_fields */}
