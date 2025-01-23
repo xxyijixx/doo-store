@@ -286,7 +286,7 @@ networks:
         <hr  className='lg:block md:block hidden'/>
         <Form {...form}>
           <form
-            className="space-y-8 relative overflow-visible lg:px-0 md:px-0 px-3 pb-3 pt-6"
+            className="space-y-8 relative overflow-visible lg:px-0 md:px-0 px-3 pb-3 py-6"
             onSubmit={handleSubmit(handleUpload)}
           >
             {/* 基础表单项 */}
@@ -443,7 +443,7 @@ networks:
             {/* 动态数据卷映射表单项 */}
             {renderDynamicVolumeInputs()}
 
-            <div className="flex justify-start space-x-3">
+            <div className="lg:flex md:flex hidden justify-start space-x-3">
               <Button
                 type="submit"
                 variant="surely"
@@ -457,6 +457,19 @@ networks:
                 {t("取消")}
               </SheetClose>
             </div>
+
+            {/* 添加小屏幕下的固定按钮组 */}
+            <div className="lg:hidden md:hidden flex absolute -top-20 pt-1 right-0  z-50">
+                    <Button
+                        type="submit"
+                        variant="minsure"
+                        className="cursor-pointer text-theme-color text-lg font-normal"
+                        onClick={handleSubmit(handleUpload)}
+                        disabled={loading}
+                    >
+                        {t('上传')}
+                    </Button>
+                </div>
           </form>
         </Form>
       </SheetContent>
