@@ -275,18 +275,18 @@ networks:
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="overflow-y-auto">
         <SheetHeader>
-          <SheetTitle className="text-gray-700 flex items-center gap-2">
+          <SheetTitle className="lg:ml-2 md:ml-2 text-gray-700 z-50 lg:bg-transparent md:bg-transparent bg-gray-200/50 lg:pb-1 md:py-0 py-3 flex items-center gap-2">
             <ChevronLeftIcon
-              className="h-6 w-6 ml-6 lg:hidden md:hidden block"
+              className="h-6 w-6 ml-1 lg:hidden md:hidden block"
               onClick={() => onClose()}
             />
             {t("应用上传")}
           </SheetTitle>
         </SheetHeader>
-        
+        <hr  className='lg:block md:block hidden'/>
         <Form {...form}>
           <form
-            className="space-y-8 relative overflow-visible lg:px-0 md:px-0 px-3 pb-3"
+            className="space-y-8 relative overflow-visible lg:px-0 md:px-0 px-3 pb-3 pt-6"
             onSubmit={handleSubmit(handleUpload)}
           >
             {/* 基础表单项 */}

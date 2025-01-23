@@ -96,7 +96,7 @@ export function ProfileForm({
                         title: t("Not found"),
                         description: t("没有有效的表单字段，无法获取表单字段。"),
                         variant: "destructive",
-                        duration: 3000,
+                        duration: 2000,
                     });
                     return;
                 }
@@ -187,8 +187,8 @@ export function ProfileForm({
                     const fieldName = field.env_key;
 
                     // 添加详细的字段验证和日志
-                    console.group(`处理表单字段 ${index}`);
-                    console.log('当前字段:', field);
+                    // console.group(`处理表单字段 ${index}`);
+                    // console.log('当前字段:', field);
                     
                     // 检查依赖关系
                     if (field.dependency) {
@@ -306,7 +306,7 @@ export function ProfileForm({
                 </div>
 
                 {/* 添加小屏幕下的固定按钮组 */}
-                <div className="lg:hidden md:hidden flex absolute -top-32 pt-6 right-0  z-50">
+                <div className="lg:hidden md:hidden flex absolute -top-32 pt-4 right-0  z-50">
                     <Button
                         type="submit"
                         variant="minsure"
