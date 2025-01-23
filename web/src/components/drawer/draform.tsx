@@ -45,7 +45,7 @@ export function ProfileForm({
 
     const { t } = useTranslation();
     const [dockerCompose, setDockerCompose] = useState<string>(""); // 存储docker_compose内容
-    const [cpuLimit, setCpuLimit] = useState<string>("1"); // 默认值为 1
+    const [cpuLimit, setCpuLimit] = useState<string>("0"); // 默认值为 1
     const [memoryLimit, setMemoryLimit] = useState<string>("0"); // 默认值为 120M
     const [loading, setLoading] = useState<boolean>(false); // 加载状态
     const [error, setError] = useState<string>(""); // 错误信息
@@ -81,16 +81,18 @@ export function ProfileForm({
                 const response = await http.getDetail(app.key);
                 
                 // 过滤无效的表单字段
-                const validFormFields = (response.data?.params.form_fields || [])
-                    .filter(field => 
+                const allFormFields = response.data?.params.form_fields || [];
+                const validFormFields = allFormFields.filter(field => 
                         field.env_key && 
-                        field.env_key.trim() !== '' && 
+                        field.env_key.trim() !== '' &&
                         field.label && 
                         field.type
                     );
+                
+                    console.log("表单字段:",allFormFields);
 
-                // 如果没有有效字段，显示错误并返回
-                if (validFormFields.length === 0) {
+                // 只有在存在字段但全部无效时才显示错误
+                if (allFormFields.length > 0 && validFormFields.length === 0) {
                     setRenderError(true);
                     toast({
                         title: t("Not found"),
@@ -100,6 +102,7 @@ export function ProfileForm({
                     });
                     return;
                 }
+
 
                 // 设置 Docker Compose 和表单字段
                 setDockerCompose(response.data?.docker_compose || "");

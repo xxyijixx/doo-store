@@ -31,7 +31,7 @@ type FormValues = {
 export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
     const { t } = useTranslation();
     const [dockerCompose, setDockerCompose] = useState<string>("");  // 存储docker_compose内容
-    const [cpuLimit, setCpuLimit] = useState<string>("1");  // 默认值为 1
+    const [cpuLimit, setCpuLimit] = useState<string>("0");  // 默认值为 1
     const [memoryLimit, setMemoryLimit] = useState<string>("0");  // 默认值为 120M
     const [loading, setLoading] = useState<boolean>(false);  // 加载状态
     const [error, setError] = useState<string>("");  // 错误信息

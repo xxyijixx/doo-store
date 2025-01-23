@@ -19,10 +19,21 @@ import { useTokenStore } from "@/store/ TokenContext";
 import { useTranslation } from "react-i18next";
 import { ChevronLeftIcon, ReloadIcon, PlusIcon } from "@radix-ui/react-icons"
 import { UploadSheet } from "@/components/drawer/upload";
+import { useToast } from "@/hooks/use-toast";
+import { FalseToaster } from "@/components/ui/toaster"
+
 
 const POLLING_INTERVAL = 5000; // 5秒
 
-const fetchAppsData = async (tab: string, className = '', currentPage: number, pageSize = 9, query: string = '') => {
+const fetchAppsData = async (
+    tab: string, 
+    className = '', 
+    currentPage: number, 
+    pageSize = 9, 
+    query: string = '', 
+    toastFn?: (options: any) => void,
+    t?: (key: string) => string  
+) => {
 
     const p = {
         page: 1,
@@ -52,6 +63,7 @@ const fetchAppsData = async (tab: string, className = '', currentPage: number, p
         }
     }
 
+
     try {
         let response;
         if (tab === 'all') {
@@ -74,20 +86,30 @@ const fetchAppsData = async (tab: string, className = '', currentPage: number, p
             throw new Error(response?.msg);
         }
     } catch (error) {
+        if (toastFn) {
+            toastFn({
+                title: t ? t("获取失败") : "获取失败",  
+                description: t ? t("日志获取失败，请退出重试~") : "日志获取失败，请退出重试~",
+                variant: "destructive",
+                duration: 2000,
+            });
+        }
         console.error("Error fetching data:", error);
         return { items: [], total: 0 }; // 请求失败时返回空数组和总数为 0
+
     }
 };
 
 
 const handleMicroData = () => {
+
     const eventCenterForMicroApp = window.eventCenterForAppNameVite;
     //
     if (eventCenterForMicroApp) {
-  
+
         const info = eventCenterForMicroApp.getData();
-       
-        console.log("info:",info)
+
+        console.log("info:", info)
         console.log("cc:", eventCenterForMicroApp)
         useTokenStore.getState().token = info?.userInfo?.token
         console.log('22222222333333333', useTokenStore.getState().token);
@@ -107,6 +129,7 @@ handleMicroData();
 function MainPage() {
 
     const { t } = useTranslation();
+    const { toast } = useToast();
 
     const [apps, setApps] = useState<Item[]>([]);
     const [installedApps, setInstalledApps] = useState<Item[]>([]);  // 存储已安装的应用
@@ -124,10 +147,11 @@ function MainPage() {
     const [openUpload, setOpenUpload] = useState(false);
 
 
+
     // 请求数据
     const loadData = async (query: string = '', page: number = currentPage) => {
         setLoading(true);
-        const data = await fetchAppsData(activeTab, selectedClass, page, pageSize, query);
+        const data = await fetchAppsData(activeTab, selectedClass, page, pageSize, query, toast, t);
         if (activeTab === 'installed') {
             console.log('installedApps', installedApps);
             setInstalledApps(data?.items || []); // 已安装应用的搜索结果
@@ -140,11 +164,11 @@ function MainPage() {
         setLoading(false);
     };
 
-    
+
 
     const loadTags = async () => {
         const res = await http.getTags()
-        if(res.data) {
+        if (res.data) {
             setTags(res.data)
         }
     }
@@ -152,10 +176,10 @@ function MainPage() {
     // 添加新的状态更新函数
     const updateAppsStatus = async () => {
         try {
-            const data = await fetchAppsData(activeTab, selectedClass, currentPage, pageSize, searchQuery);
+            const data = await fetchAppsData(activeTab, selectedClass, currentPage, pageSize, searchQuery, toast, t);
             if (data?.items) {
                 // 只更新现有应用的状态
-                setFilteredApps(prevApps => 
+                setFilteredApps(prevApps =>
                     prevApps.map(prevApp => {
                         const updatedApp = data.items.find(newApp => newApp.id === prevApp.id);
                         return updatedApp ? { ...prevApp, status: updatedApp.status } : prevApp;
@@ -164,6 +188,12 @@ function MainPage() {
             }
         } catch (error) {
             console.error('Error updating status:', error);
+            toast({
+                title: t("更新失败"),
+                description: t("状态更新失败，请退出刷新后重试~"),
+                variant: "destructive",
+                duration: 2000,
+            });
         }
     };
 
@@ -225,282 +255,224 @@ function MainPage() {
 
 
     useEffect(() => {
-        const handleSwitchToInstalled = ()=> {
+        const handleSwitchToInstalled = () => {
             setActiveTab('installed');
             setCurrentPage(1);
             setSearchQuery("");
             loadData();
         };
-        
+
         window.addEventListener('switchToInstalled', handleSwitchToInstalled);
-        
+
         return () => {
             window.removeEventListener('switchToInstalled', handleSwitchToInstalled);
         };
     }, []);
 
     return (
-        <div className="flex flex-col min-h-[calc(100vh-66px)]">
-            <div className="flex-none">
-                <div className="flex justify-between items-center mb-4">
-                    <div className="flex items-center justify-between flex-1">
-                        <div className="flex items-center">
-                            <Button 
-                                variant="goback" 
-                                size="icon"
-                                onClick={() => window.history.back()}
-                            >
-                                <ChevronLeftIcon className="h-6 w-6" />
-                            </Button>
-                            
-                            <h1 className="hidden sm:flex lg:text-3xl lg:font-medium md:font-medium text-2xl text-center text-gray-800">
+        <>
+            <FalseToaster />
+            <div className="flex flex-col min-h-[calc(100vh-66px)]">
+                <div className="flex-none">
+                    <div className="flex justify-between items-center mb">
+                        <div className="flex items-center justify-between flex-1">
+                            <div className="flex items-center">
+                                <Button
+                                    variant="goback"
+                                    size="icon"
+                                    onClick={() => window.history.back()}
+                                >
+                                    <ChevronLeftIcon className="h-6 w-6" />
+                                </Button>
+
+                                <h1 className="hidden sm:flex lg:text-3xl lg:font-medium md:font-medium text-2xl text-center text-gray-800">
+                                    {t('应用商店')}
+                                </h1>
+
+                                <Button
+                                    variant="goback"
+                                    size="icon"
+                                    onClick={() => loadData(searchQuery, currentPage)}
+                                    className="hidden md:block lg:block ml-2"
+                                >
+                                    <ReloadIcon className="h-5 w-5" />
+                                </Button>
+                            </div>
+                            <h1 className="sm:hidden text-2xl text-gray-800 md:text-3xl truncate max-w-[4em] ">
                                 {t('应用商店')}
                             </h1>
-
-                            <Button 
-                                variant="goback" 
-                                size="icon"
-                                onClick={() => loadData(searchQuery, currentPage)}
-                                className="hidden md:block lg:block ml-2"
-                            >
-                                <ReloadIcon className="h-5 w-5" />
-                            </Button>
-                        </div>
-                        <h1 className="sm:hidden text-2xl text-gray-800 md:text-3xl truncate max-w-[4em] ">
-                            {t('应用商店')}
-                        </h1>
-                        <div className={`flex items-center mt-4 justify-end ${isSearchExpanded ? 'flex-grow md:flex-grow-0 lg:flex-grow-0' : ''}`}>
-                            <UniSearch 
-                                onSearch={handleSearch} 
-                                clearAfterSearch={false}
-                                defaultValue={searchQuery}
-                                onExpandChange={handleSearchExpand}
-                            />
-                            <div onClick={()=>setOpenUpload(true)} className="w-8 h-38 pl-2 hover:cursor-pointer">
-                                <div className="w-8 h-8 relative flex items-center justify-center bg-gray-200/50 rounded-full overflow-hidden transition-all duration-300">
-                                    <PlusIcon/>
+                            <div className={`flex items-center mt-4 justify-end ${isSearchExpanded ? 'flex-grow md:flex-grow-0 lg:flex-grow-0' : ''}`}>
+                                <UniSearch
+                                    onSearch={handleSearch}
+                                    clearAfterSearch={false}
+                                    defaultValue={searchQuery}
+                                    onExpandChange={handleSearchExpand}
+                                />
+                                <div onClick={() => setOpenUpload(true)} className="w-8 h-38 pl-2 hover:cursor-pointer">
+                                    <div className="w-8 h-8 relative flex items-center justify-center bg-gray-200/50 rounded-full overflow-hidden transition-all duration-300">
+                                        <PlusIcon />
+                                    </div>
+                                    <div className="h-2"></div>
                                 </div>
-                                <div className="h-2"></div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <UploadSheet isOpen={openUpload} onClose={() => {setOpenUpload(false)}} />
-                <AnimatePresence mode="wait">
-                    <div key="b1" className="flex lg:-space-x-1 border-b lg:border-gray-200 md:border-gray-200 relative mb-3">
-                        <>
-                            <motion.div
-                                key="Aoading"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ duration: 1 }}
-                                className="w-full lg:w-auto md:w-auto"
-                            >
-                                <ul className="flex items-center w-full">
-                                    <li 
-                                        className={`text-md pt-2 transition-all duration-300 relative z-10 w-1/2 lg:w-auto md:w-auto lg:mr-8 md:mr-8 ${
-                                            activeTab === 'all' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
-                                        }`}
-                                    >
-                                        <Button
-                                            variant={activeTab === "all" ? "combar" : "defbar"}
-                                            onClick={() => handleTabChange("all")}
-                                            className="w-full lg:w-auto md:w-auto lg:min-w-[10px] md:min-w-[10px] min-w-[130px] lg:justify-start md:justify-start justify-center"
-                                        >
-                                            {t('全部')}
-                                        </Button>
-                                    </li>
-                                    <li
-                                        className={`text-md pt-2 transition-all duration-300 relative z-10 w-1/2 lg:w-auto md:w-auto ${
-                                            activeTab === 'installed' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
-                                        }`}
-                                    >
-                                        <Button
-                                            variant={activeTab === "installed" ? "combar" : "defbar"}
-                                            onClick={() => handleTabChange("installed")}
-                                            className="w-full lg:w-auto md:w-auto lg:min-w-[10px] md:min-w-[10px] min-w-[130px] lg:justify-start md:justify-start justify-center"
-                                        >
-                                            {t('已安装')}
-                                        </Button>
-                                    </li>
-                                </ul>
-                            </motion.div>
-                        </>
-                    </div>
-                </AnimatePresence>
-            </div>
-
-            <div className="flex-1 overflow-hidden">
-                <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                    <div 
-                        className="flex space-x-2 mb-1 py-1 min-w-max cursor-grab active:cursor-grabbing"
-                        onMouseDown={(e) => {
-                            const ele = e.currentTarget;
-                            const startX = e.pageX - ele.offsetLeft;
-                            const scrollLeft = ele.parentElement?.scrollLeft || 0;
-                            const handleMouseMove = (e: MouseEvent) => {
-                                const x = e.pageX - ele.offsetLeft;
-                                const walk = (x - startX) * 2;
-                                if (ele.parentElement) {
-                                    ele.parentElement.scrollLeft = scrollLeft - walk;
-                                }
-                            };
-                            const handleMouseUp = () => {
-                                document.removeEventListener('mousemove', handleMouseMove);
-                                document.removeEventListener('mouseup', handleMouseUp);
-                            };
-                            document.addEventListener('mousemove', handleMouseMove);
-                            document.addEventListener('mouseup', handleMouseUp);
-                        }}
-                    >
-                        <Button
-                            variant={selectedClass === "allson" ? "combarson" : "defbarson"}
-                            onClick={() => setSelectedClass("allson")}
-                        >
-                            {t('全部')}
-                        </Button>
-                        {tags.map(tag => (
-                            <Button 
-                                key={tag.id}
-                                variant={selectedClass === tag.key ? "combarson" : "defbarson"}
-                                onClick={() => setSelectedClass(tag.key)}
-                            >
-                                {tag.name}
-                            </Button>
-                        ))}
-                    </div>
-                </div>
-
-                <div>
+                    <UploadSheet isOpen={openUpload} onClose={() => { setOpenUpload(false) }} />
                     <AnimatePresence mode="wait">
-                        {/* 如果当前 Tab 是 "all" 或 "allson" 且未选择 class，显示 all 类应用列表 */}
-                        {(activeTab === "all" && selectedClass !== "installed") && (
-                            <div className={`grid lg:gap-4 md:gap-4 gap-2 lg:mx-0 lg:my-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-280px)] max-h-[calc(100vh-230px)]  overflow-y-auto`}>
-                                {loading ? (
-                                    Array.from({ length: 9 }).map((_, index) => (
-                                        <motion.div
-                                            key={"a" + index}
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            transition={{ duration: 0.5 }}
-                                        >
-                                            <Card key={index} className="lg:w-auto md:w-auto w-auto lg:h-[140px] lg:my-3 lg:mr-4 md:my-3 md:mr-4 my-3 px-2">
-                                                <CardContent className="flex justify-start space-x-4">
-                                                    <Skeleton className="h-10 w-10 rounded-full" />
-                                                    <CardDescription className="space-y-2 text-left">
-                                                        <Skeleton className="h-6 w-[200px] rounded-lg" />
-                                                        <Skeleton className="h-4 w-[300px] rounded-lg" />
-                                                    </CardDescription>
-                                                </CardContent>
-                                                <CardFooter className="flex justify-end pt-2">
-                                                    <Skeleton className="h-8 w-[80px] rounded-lg" />
-                                                </CardFooter>
-                                            </Card>
-                                        </motion.div>
-                                    ))
-                                ) : (
-                                    filteredApps.map((app) => (
-                                        <motion.div
-                                            key={"d" + app.id}
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            transition={{ duration: 0.7 }}
-                                        >
-                                            <Card key={app.id} className="lg:w-auto md:w-auto w-auto lg:h-[140px] md:h-[140px] h-[140px] lg:my-1 lg:mx-1 md:my-1 md:mx-1 my-0.5 mx-0 px-2">
-                                                <CardContent className="flex flex-col ">
-                                                    <div className="flex w-full relative">
-                                                        <div className="flex flex-1">
-                                                            <Avatar className="my-auto mr-5 mt-0 size-10">
-                                                                <AvatarImage src={app.icon} />
-                                                                <AvatarFallback>loading</AvatarFallback>
-                                                            </Avatar>
-                                                            <CardDescription className="space-y-1 text-left w-full">
-                                                                <div className="lg:pr-0 md:pr-16 pr-16">
-                                                                    <h1 className="text-xl font-medium text-slate-900 dark:text-white">{app.name}</h1>
-                                                                </div>
-                                                                <p className="text-base line-clamp-2 min-h-[42px] pt-1 w-11/12 md:w-4/5 lg:w-4/5">
-                                                                    {app.description || "No description available"}
-                                                                </p>
-                                                            </CardDescription>
-                                                        </div>
-                                                        <div className="absolute -right-3 -top-1.5">
-                                                            <CardFooter>
-                                                                <Drawer
-                                                                    status={app.status}
-                                                                    isOpen={false}
-                                                                    app={app}
-                                                                    loadData={loadData}
-                                                                />
-                                                            </CardFooter>
-                                                        </div>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        </motion.div>
-                                    ))
-                                )}
-                                <div className="mt-auto lg:hidden md:hidden">
-                                    <PaginationCom
-                                        currentPage={currentPage}
-                                        totalPages={totalPages}
-                                        totalItems={totalItems}
-                                        pageSize={pageSize}
-                                        onPageChange={handlePageChange}
-                                        onPageSizeChange={(_: number) => {
-                                            // 如果暂时不需要处理页面大小变化，可以留空
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-
-                        {/* 如果 Tab 是 "installed"，只显示已安装应用 */}
-                        {activeTab === "installed" && (
-                            <motion.div
-                                key="eoading"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ duration: 0.5 }}
-                            >
-                                <div
-                                    className="
-                                    grid lg:gap-6 md:gap-6 
-                                    grid-cols-1 md:grid-cols-2 lg:grid-cols-3 
-                                    xl:h-[calc(81vh-290px)]
-                                    lg:h-[calc(90vh-390px)]
-                                    md:max-h-[calc(100vh-150px)] 
-                                    max-h-[calc(100vh-80px)]  
-                                    overflow-y-auto 
-                                    lg:mt-2 md:mt-1 mt-0.5
-                                    lg:pb-6 xl:pb-6
-                                    "
+                        <div key="b1" className="flex lg:-space-x-1 border-b lg:border-gray-200 md:border-gray-200 relative mb-3">
+                            <>
+                                <motion.div
+                                    key="Aoading"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 1 }}
+                                    className="w-full lg:w-auto md:w-auto"
                                 >
+                                    <ul className="flex items-center w-full">
+                                        <li
+                                            className={`text-md pt-2 transition-all duration-300 relative z-10 w-1/2 lg:w-auto md:w-auto lg:mr-8 md:mr-8 ${activeTab === 'all' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
+                                                }`}
+                                        >
+                                            <Button
+                                                variant={activeTab === "all" ? "combar" : "defbar"}
+                                                onClick={() => handleTabChange("all")}
+                                                className="w-full lg:w-auto md:w-auto lg:min-w-[10px] md:min-w-[10px] min-w-[130px] lg:justify-start md:justify-start justify-center"
+                                            >
+                                                {t('全部')}
+                                            </Button>
+                                        </li>
+                                        <li
+                                            className={`text-md pt-2 transition-all duration-300 relative z-10 w-1/2 lg:w-auto md:w-auto ${activeTab === 'installed' ? 'border-b-2 border-theme-color' : 'border-b-2 border-transparent'
+                                                }`}
+                                        >
+                                            <Button
+                                                variant={activeTab === "installed" ? "combar" : "defbar"}
+                                                onClick={() => handleTabChange("installed")}
+                                                className="w-full lg:w-auto md:w-auto lg:min-w-[10px] md:min-w-[10px] min-w-[130px] lg:justify-start md:justify-start justify-center"
+                                            >
+                                                {t('已安装')}
+                                            </Button>
+                                        </li>
+                                    </ul>
+                                </motion.div>
+                            </>
+                        </div>
+                    </AnimatePresence>
+                </div>
+
+                <div className="flex-1 overflow-hidden">
+                    <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+                        <div
+                            className="flex space-x-2 mb-1 py-1 min-w-max cursor-grab active:cursor-grabbing"
+                            onMouseDown={(e) => {
+                                const ele = e.currentTarget;
+                                const startX = e.pageX - ele.offsetLeft;
+                                const scrollLeft = ele.parentElement?.scrollLeft || 0;
+                                const handleMouseMove = (e: MouseEvent) => {
+                                    const x = e.pageX - ele.offsetLeft;
+                                    const walk = (x - startX) * 2;
+                                    if (ele.parentElement) {
+                                        ele.parentElement.scrollLeft = scrollLeft - walk;
+                                    }
+                                };
+                                const handleMouseUp = () => {
+                                    document.removeEventListener('mousemove', handleMouseMove);
+                                    document.removeEventListener('mouseup', handleMouseUp);
+                                };
+                                document.addEventListener('mousemove', handleMouseMove);
+                                document.addEventListener('mouseup', handleMouseUp);
+                            }}
+                        >
+                            <Button
+                                variant={selectedClass === "allson" ? "combarson" : "defbarson"}
+                                onClick={() => setSelectedClass("allson")}
+                            >
+                                {t('全部')}
+                            </Button>
+                            {tags.map(tag => (
+                                <Button
+                                    key={tag.id}
+                                    variant={selectedClass === tag.key ? "combarson" : "defbarson"}
+                                    onClick={() => setSelectedClass(tag.key)}
+                                >
+                                    {tag.name}
+                                </Button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div>
+                        <AnimatePresence mode="wait">
+                            {/* 如果当前 Tab 是 "all" 或 "allson" 且未选择 class，显示 all 类应用列表 */}
+                            {(activeTab === "all" && selectedClass !== "installed") && (
+                                <div className={`grid lg:gap-4 md:gap-4 gap-2 lg:mx-0 lg:my-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-280px)] max-h-[calc(100vh-230px)]  overflow-y-auto`}>
                                     {loading ? (
-                                        <div></div>
+                                        Array.from({ length: 9 }).map((_, index) => (
+                                            <motion.div
+                                                key={"a" + index}
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                transition={{ duration: 0.5 }}
+                                            >
+                                                <Card key={index} className="lg:w-auto md:w-auto w-auto lg:h-[140px] lg:my-3 lg:mr-4 md:my-3 md:mr-4 my-3 px-2">
+                                                    <CardContent className="flex justify-start space-x-4">
+                                                        <Skeleton className="h-10 w-10 rounded-full" />
+                                                        <CardDescription className="space-y-2 text-left">
+                                                            <Skeleton className="h-6 w-[200px] rounded-lg" />
+                                                            <Skeleton className="h-4 w-[300px] rounded-lg" />
+                                                        </CardDescription>
+                                                    </CardContent>
+                                                    <CardFooter className="flex justify-end pt-2">
+                                                        <Skeleton className="h-8 w-[80px] rounded-lg" />
+                                                    </CardFooter>
+                                                </Card>
+                                            </motion.div>
+                                        ))
                                     ) : (
                                         filteredApps.map((app) => (
                                             <motion.div
-                                                key={"fo" + app.id}
+                                                key={"d" + app.id}
                                                 initial={{ opacity: 0 }}
                                                 animate={{ opacity: 1 }}
                                                 exit={{ opacity: 0 }}
                                                 transition={{ duration: 0.7 }}
                                             >
-                                                <InStalledBtn key={app.id} app={app} loadData={loadData} />
+                                                <Card key={app.id} className="lg:w-auto md:w-auto w-auto lg:h-[140px] md:h-[140px] h-[140px] lg:my-1 lg:mx-1 md:my-1 md:mx-1 my-0.5 mx-0 px-2">
+                                                    <CardContent className="flex flex-col ">
+                                                        <div className="flex w-full relative">
+                                                            <div className="flex flex-1">
+                                                                <Avatar className="my-auto mr-5 mt-0 size-10">
+                                                                    <AvatarImage src={app.icon} />
+                                                                    <AvatarFallback>loading</AvatarFallback>
+                                                                </Avatar>
+                                                                <CardDescription className="space-y-1 text-left w-full">
+                                                                    <div className="lg:pr-0 md:pr-16 pr-16">
+                                                                        <h1 className="text-xl font-medium text-slate-900 dark:text-white">{app.name}</h1>
+                                                                    </div>
+                                                                    <p className="text-base line-clamp-2 min-h-[42px] pt-1 w-11/12 md:w-4/5 lg:w-4/5">
+                                                                        {app.description || "No description available"}
+                                                                    </p>
+                                                                </CardDescription>
+                                                            </div>
+                                                            <div className="absolute -right-3 -top-1.5">
+                                                                <CardFooter>
+                                                                    <Drawer
+                                                                        status={app.status}
+                                                                        isOpen={false}
+                                                                        app={app}
+                                                                        loadData={loadData}
+                                                                    />
+                                                                </CardFooter>
+                                                            </div>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
                                             </motion.div>
                                         ))
                                     )}
                                     <div className="mt-auto lg:hidden md:hidden">
-                                    {loading ? (
-                                        <div className="flex justify-center items-center py-4">
-                                            <Skeleton className="h-10 w-full max-w-md rounded-lg" />
-                                        </div>
-                                    ) : (
                                         <PaginationCom
                                             currentPage={currentPage}
                                             totalPages={totalPages}
@@ -511,36 +483,85 @@ function MainPage() {
                                                 // 如果暂时不需要处理页面大小变化，可以留空
                                             }}
                                         />
-                                    )}
                                     </div>
                                 </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-            </div>
+                            )}
 
-            <div className="flex-none">
-                <div className="mt-auto hidden lg:block md:block">
-                {loading ? (
-                    <div className="flex justify-end items-center py-4">
-                        <Skeleton className="h-10 w-full max-w-md rounded-lg" />
+
+                            {/* 如果 Tab 是 "installed"，只显示已安装应用 */}
+                            {activeTab === "installed" && (
+                                <motion.div
+                                    key="eoading"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.5 }}
+                                >
+                                    <div
+                                       className={`grid lg:gap-4 md:gap-4 gap-2 lg:mx-0 lg:my-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-280px)] max-h-[calc(100vh-230px)] overflow-y-auto`}
+                                    >
+                                        {loading ? (
+                                            <div></div>
+                                        ) : (
+                                            filteredApps.map((app) => (
+                                                <motion.div
+                                                    key={"fo" + app.id}
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    exit={{ opacity: 0 }}
+                                                    transition={{ duration: 0.7 }}
+                                                >
+                                                    <InStalledBtn key={app.id} app={app} loadData={loadData} />
+                                                </motion.div>
+                                            ))
+                                        )}
+                                        <div className="mt-auto lg:hidden md:hidden">
+                                            {loading ? (
+                                                <div className="flex justify-center items-center py-4">
+                                                    <Skeleton className="h-10 w-full max-w-md rounded-lg" />
+                                                </div>
+                                            ) : (
+                                                <PaginationCom
+                                                    currentPage={currentPage}
+                                                    totalPages={totalPages}
+                                                    totalItems={totalItems}
+                                                    pageSize={pageSize}
+                                                    onPageChange={handlePageChange}
+                                                    onPageSizeChange={(_: number) => {
+                                                        // 如果暂时不需要处理页面大小变化，可以留空
+                                                    }}
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
-                ) : (
-                    <PaginationCom
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        totalItems={totalItems}
-                        pageSize={pageSize}
-                        onPageChange={handlePageChange}
-                        onPageSizeChange={(_: number) => {
-                            // 如果暂时不需要处理页面大小变化，可以留空
-                        }}
-                    />
-                )}
+                </div>
+
+                <div className="flex-none">
+                    <div className="mt-auto hidden lg:block md:block">
+                        {loading ? (
+                            <div className="flex justify-end items-center py-4">
+                                <Skeleton className="h-10 w-full max-w-md rounded-lg" />
+                            </div>
+                        ) : (
+                            <PaginationCom
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                totalItems={totalItems}
+                                pageSize={pageSize}
+                                onPageChange={handlePageChange}
+                                onPageSizeChange={(_: number) => {
+                                    // 如果暂时不需要处理页面大小变化，可以留空
+                                }}
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     )
 }
 

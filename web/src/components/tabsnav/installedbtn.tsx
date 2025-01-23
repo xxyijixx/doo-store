@@ -158,7 +158,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
         <>
         {variantState === "success" && <SuccessToaster />}
         {variantState === "destructive" && <FalseToaster />}
-        <Card className="lg:w-auto md:w-auto w-auto h-[180px] lg:-mb-3 md:-mb-3.5 mb-2 relative">
+        <Card className="lg:w-auto md:w-auto w-auto h-[180px] lg:mb-0 md:mb-0 md:mr-1 mb-2 relative">
             <CardContent className="flex justify-start space-x-5 mt-1.5 pl-7">
                 {isLoading ? (
                     <>
