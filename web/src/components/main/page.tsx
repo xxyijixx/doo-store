@@ -249,11 +249,6 @@ function MainPage() {
         setIsSearchExpanded(expanded);
     };
 
-    //监控客户端
-    const isClient = navigator.userAgent.includes('YourClientIdentifier');
-
-
-
     useEffect(() => {
         const handleSwitchToInstalled = () => {
             setActiveTab('installed');
