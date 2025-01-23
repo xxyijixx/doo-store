@@ -25,7 +25,7 @@ export function SuccessToaster() {
                           <AvatarImage src={successIcon}/>
                           <AvatarFallback />
                         </Avatar>
-                        {title && <ToastTitle className="font-bold ml-16">{title}</ToastTitle>}
+                        {title && <ToastTitle className="font-bold">{title}</ToastTitle>}
                       </div>
                       {description && (
                         <ToastDescription className="ml-10 ">{description}</ToastDescription>
@@ -57,7 +57,39 @@ export function FalseToaster() {
                         <AvatarImage src={falseIcon}/>
                         <AvatarFallback />
                       </Avatar>
-                        {title && <ToastTitle className="font-bold ml-16">{title}</ToastTitle>}
+                        {title && <ToastTitle className="font-bold">{title}</ToastTitle>}
+                    </div>
+                  {description && (
+                    <ToastDescription className="ml-10">{description}</ToastDescription>
+                  )}
+                
+                {action}
+            </div>
+            
+            <ToastClose />
+          </Toast>
+        )
+      })}
+      <ToastViewport />
+    </ToastProvider>
+  )
+}
+
+export function InvalidToaster() {
+  const { toasts } = useToast()
+
+  return (
+    <ToastProvider>
+      {toasts.map(function ({ id, title, description, action, ...props }) {
+        return (
+          <Toast key={id} {...props}>
+                <div className="grid gap-1">
+                  <div className="flex items-center">
+                      <Avatar className="size-6 mr-4">
+                        <AvatarImage src={falseIcon}/>
+                        <AvatarFallback />
+                      </Avatar>
+                        {title && <ToastTitle className="font-bold">{title}</ToastTitle>}
                     </div>
                   {description && (
                     <ToastDescription className="ml-10">{description}</ToastDescription>
