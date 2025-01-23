@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import * as http from "@/api/modules/fouceinter";
 import { useTranslation } from "react-i18next";
 import { ChevronLeftIcon } from "@radix-ui/react-icons"
+import { useToast } from "@/hooks/use-toast";
+import { InvalidToaster } from "@/components/ui/toaster"
 
 interface AlertLogHaveProps {
     isLogOpen: boolean;
@@ -20,6 +22,8 @@ interface AlertLogHaveProps {
 export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
 
     const { t } = useTranslation();
+    const { toast } = useToast();
+
 
     const [logInfo, setLogInfo] = useState('');
     const codemirrorRef = useRef<ReactCodeMirrorRef>(null);  //创建对 Codemirror 编辑器的引用，便于侧边滚动到最后
@@ -59,7 +63,6 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
             const response = await http.getLogs(app.id, logparams)
             setLogInfo(response.data ||''); // 设置返回的日志数据
             console.log("日志 data:", response.data);
-
             //  设置Codemirror 的引用，滚动到最后
             if (codemirrorRef.current) {
                 if(codemirrorRef.current.view){
@@ -72,7 +75,12 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
             }
         } catch (error) {
             console.log("Failed to fetch logs:", error);
-            alert('container.fetchLogError'); // 错误提示
+            toast({
+                title: t("获取失败"),
+                description: t("日志获取失败，请退出重试~"),
+                variant: "destructive",
+                duration: 2000,
+            });
 
         }
     };
@@ -83,6 +91,8 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
     };
 
     return (
+        <>
+        <InvalidToaster />
         <Sheet open={isOpen} onOpenChange={onClose}>
             <SheetContent className="overflow-hidden lg:overflow-x-hidden">
                 <SheetHeader>
@@ -163,6 +173,7 @@ export function AlertLogHave({ isOpen, onClose, app }: AlertLogHaveProps) {
                 </div>
             </SheetContent>
         </Sheet>
+        </>
     );
 }
 
