@@ -113,7 +113,12 @@ export function ProfileForm({
 
             } catch (error) {
                 console.error("获取表单字段错误:", error);
-                setError(t("请求失败，请稍后重试"));
+                toast({
+                    title: t("获取失败"),
+                    description: t("获取表单字段错误，请重试~"),
+                    variant: "destructive",
+                    duration: 2000,
+                });
                 setRenderError(true);
             } finally {
                 setLoading(false);
