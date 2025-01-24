@@ -89,7 +89,7 @@ const fetchAppsData = async (
         if (toastFn) {
             toastFn({
                 title: t ? t("获取失败") : "获取失败",  
-                description: t ? t("日志获取失败，请退出重试~") : "日志获取失败，请退出重试~",
+                description: t ? t("数据获取失败，请退出重试~") : "数据获取失败，请退出重试~",
                 variant: "destructive",
                 duration: 2000,
             });

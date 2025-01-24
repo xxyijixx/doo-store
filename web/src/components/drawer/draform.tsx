@@ -315,7 +315,7 @@ export function ProfileForm({
                 </div>
 
                 {/* 添加小屏幕下的固定按钮组 */}
-                <div className="lg:hidden md:hidden flex absolute -top-32 pt-4 right-0  z-50">
+                <div className="lg:hidden md:hidden flex absolute -top-32 pt-7 right-0  z-50">
                     <Button
                         type="submit"
                         variant="minsure"
