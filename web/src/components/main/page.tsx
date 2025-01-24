@@ -445,7 +445,7 @@ function MainPage() {
                                                                 </Avatar>
                                                                 <CardDescription className="space-y-1 text-left w-full">
                                                                     <div className="lg:pr-0 md:pr-16 pr-16">
-                                                                        <h1 className="text-xl font-medium line-clamp-2 text-slate-900 dark:text-white">{app.name}</h1>
+                                                                        <h1 className="text-xl font-medium line-clamp-1 text-slate-900 dark:text-white">{app.name}</h1>
                                                                     </div>
                                                                     <p className="text-base line-clamp-2 min-h-[42px] pt-1 w-11/12 md:w-4/5 lg:w-4/5">
                                                                         {app.description || "No description available"}
