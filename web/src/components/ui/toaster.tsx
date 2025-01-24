@@ -11,18 +11,19 @@ import {
 import successIcon from "@/assets/安装成功.png"
 import falseIcon from "@/assets/安装失败.png"
 
+
 export function SuccessToaster() {
   const { toasts } = useToast()
 
   return (
     <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, ...props }) {
+      {toasts.map(function ({ id, title, description, action, icon, ...props }) {
         return (
           <Toast key={id} {...props}>
                 <div className="grid gap-1">
                       <div className="flex items-center">
                         <Avatar className="size-5 mr-5">
-                          <AvatarImage src={successIcon}/>
+                          <AvatarImage src={icon || successIcon}/>
                           <AvatarFallback />
                         </Avatar>
                         {title && <ToastTitle className="font-bold">{title}</ToastTitle>}
@@ -30,10 +31,8 @@ export function SuccessToaster() {
                       {description && (
                         <ToastDescription className="ml-10 ">{description}</ToastDescription>
                       )}
-                
                 {action}
             </div>
-            
             <ToastClose />
           </Toast>
         )
@@ -48,24 +47,22 @@ export function FalseToaster() {
 
   return (
     <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, ...props }) {
+      {toasts.map(function ({ id, title, description, action, icon, ...props }) {
         return (
           <Toast key={id} {...props}>
                 <div className="grid gap-1">
-                  <div className="flex items-center">
-                      <Avatar className="size-6 mr-4">
-                        <AvatarImage src={falseIcon}/>
-                        <AvatarFallback />
-                      </Avatar>
+                      <div className="flex items-center">
+                        <Avatar className="size-5 mr-5">
+                          <AvatarImage src={icon || falseIcon}/>
+                          <AvatarFallback />
+                        </Avatar>
                         {title && <ToastTitle className="font-bold">{title}</ToastTitle>}
-                    </div>
-                  {description && (
-                    <ToastDescription className="ml-10">{description}</ToastDescription>
-                  )}
-                
+                      </div>
+                      {description && (
+                        <ToastDescription className="ml-10 ">{description}</ToastDescription>
+                      )}
                 {action}
             </div>
-            
             <ToastClose />
           </Toast>
         )
@@ -80,13 +77,13 @@ export function InvalidToaster() {
 
   return (
     <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, ...props }) {
+      {toasts.map(function ({ id, title, description, action, icon, ...props }) {
         return (
           <Toast key={id} {...props}>
                 <div className="grid gap-1">
                   <div className="flex items-center">
                       <Avatar className="size-6 mr-4">
-                        <AvatarImage src={falseIcon}/>
+                        <AvatarImage src={icon || falseIcon}/>
                         <AvatarFallback />
                       </Avatar>
                         {title && <ToastTitle className="font-bold">{title}</ToastTitle>}

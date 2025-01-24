@@ -511,11 +511,6 @@ function MainPage() {
                                             ))
                                         )}
                                         <div className="mt-auto lg:hidden md:hidden">
-                                            {loading ? (
-                                                <div className="flex justify-center items-center py-4">
-                                                    <Skeleton className="h-10 w-full max-w-md rounded-lg" />
-                                                </div>
-                                            ) : (
                                                 <PaginationCom
                                                     currentPage={currentPage}
                                                     totalPages={totalPages}
@@ -526,7 +521,6 @@ function MainPage() {
                                                         // 如果暂时不需要处理页面大小变化，可以留空
                                                     }}
                                                 />
-                                            )}
                                         </div>
                                     </div>
                                 </motion.div>
@@ -537,11 +531,6 @@ function MainPage() {
 
                 <div className="flex-none">
                     <div className="mt-auto hidden lg:block md:block">
-                        {loading ? (
-                            <div className="flex justify-end items-center py-4">
-                                <Skeleton className="h-10 w-full max-w-md rounded-lg" />
-                            </div>
-                        ) : (
                             <PaginationCom
                                 currentPage={currentPage}
                                 totalPages={totalPages}
@@ -552,7 +541,6 @@ function MainPage() {
                                     // 如果暂时不需要处理页面大小变化，可以留空
                                 }}
                             />
-                        )}
                     </div>
                 </div>
             </div>

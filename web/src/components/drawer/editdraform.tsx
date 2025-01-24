@@ -16,7 +16,9 @@ import * as http from "@/api/modules/fouceinter"
 import { useTranslation } from "react-i18next";
 import { FormField } from "@/api/interface/common"
 import { useToast } from "@/hooks/use-toast";
-import { SuccessToaster, FalseToaster } from "@/components/ui/toaster"
+import { SuccessToaster, FalseToaster } from "@/components/ui/toaster";
+import successIcon from "@/assets/安装成功.png"
+import falseIcon from "@/assets/安装失败.png"
 
 interface EditProps {
     app: Item;  // 接收 app 数据
@@ -106,7 +108,6 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
         });
 
         try {
-
             // 构建请求体
             const requestBody = {
                 cpus: cpuLimit,
@@ -116,7 +117,6 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
             };
 
             const response = await http.putInsParams(app.id, requestBody)
-
             const result = await response;
             console.log("请展出",result);
             if (response) {
@@ -127,6 +127,7 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
                     description: t("内容已做修改~"),
                     variant: "success",
                     duration: 2000,
+                    icon: successIcon,
                 });
                 setVariantState("success");
                 onEditSuccess();
@@ -146,6 +147,7 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
                     description: t("内容修改失败，请重试~"),
                     variant: "destructive",
                     duration: 2000,
+                    icon: falseIcon,
                 });
                 setVariantState("destructive");
                 
@@ -158,6 +160,7 @@ export function EditForm({ app, onEditSuccess, onEditFalse }: EditProps) {
                 description: t("内容修改失败，请重试~"),
                 variant: "destructive",
                 duration: 2000,
+                icon: falseIcon,
             });
             setVariantState("destructive");
         } finally {
