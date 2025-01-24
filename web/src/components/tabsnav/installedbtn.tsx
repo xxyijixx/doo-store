@@ -146,8 +146,8 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
             <span
                 className={
                     !isRunning
-                        ? "ml-3 border rounded-sm border-red-400 pt-1 px-2 text-sm font-normal text-red-400"
-                        : "ml-3 border rounded-sm border-theme-color pt-1 px-2 text-sm font-normal text-theme-color"
+                        ? "ml-3 border rounded-sm border-red-400 pt-1 px-2 line-clamp-1 text-sm font-normal text-red-400"
+                        : "ml-3 border rounded-sm border-theme-color pt-1 px-2 line-clamp-1 text-sm font-normal text-theme-color"
                 }
             >
                 {appStatus}
@@ -178,15 +178,20 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                             {isLoading ? (
                                 <Skeleton className="h-6 w-48" />
                             ) : (
-                                <div className="text-xl font-medium text-slate-950 dark:text-white flex">
-                                    {app.name}
-                                    {statusDisplay}
+                                <div className="flex items-center space-x-2">
+                                    <div className="text-xl font-medium line-clamp-1 text-slate-900 h-8 dark:text-white">
+                                        {app.name}
+                                    </div>
+                                    <div className="h-6">
+                                        {statusDisplay}
+                                    </div>
                                 </div>
+
                             )}
                             {isLoading ? (
                                 <Skeleton className="h-4 w-56" />
                             ) : (
-                                <p className="text-base line-clamp-2 min-h-[42px] leading-[21px] pt-2 pr-5">{app.description || t("No description available")}</p>
+                                <p className="text-base line-clamp-2 max-h-[45px] leading-[21px] pt-2 pr-5">{app.description || t("No description available")}</p>
                             )}
                         </CardDescription>
                     </>

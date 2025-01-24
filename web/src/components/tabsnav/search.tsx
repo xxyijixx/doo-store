@@ -12,13 +12,16 @@ interface UniSearchProps {
     clearAfterSearch?: boolean; // 添加新属性控制搜索后是否清空
     defaultValue?: string; // 默认搜索值
     onExpandChange?: (expanded: boolean) => void;  // 展开状态变化回调
+    className?: string; // 添加这个属性
+    
 }
 
 const UniSearch: React.FC<UniSearchProps> = ({ 
     onSearch, 
     clearAfterSearch = false,
     defaultValue = "",
-    onExpandChange 
+    onExpandChange ,
+    className = "" 
 }) => {
     const { t } = useTranslation();
     const [query, setQuery] = useState(defaultValue);
@@ -75,13 +78,14 @@ const UniSearch: React.FC<UniSearchProps> = ({
         <div 
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
+            className={`${className}`}
         >
             <div className={`relative flex group items-center ${
-                query.length > 0 || isExpanded ? "w-[180px]" : "w-8"
-            } h-8 lg:mr-0 md:mr-0 mr-0 transition-all duration-300`}>
+                query.length > 0 || isExpanded ? "w-[180px]" : "w-10"
+            } h-10 lg:mr-0 md:mr-0 mr-0 transition-all duration-300`}>
                 <div 
-                    className={`relative flex items-center h-8 bg-gray-200/50 rounded-full overflow-hidden transition-all duration-300 ${
-                        query.length > 0 || isExpanded ? "w-[180px]" : "w-8"
+                    className={`relative flex items-center h-10 bg-gray-100 rounded-full overflow-hidden transition-all duration-300 ${
+                        query.length > 0 || isExpanded ? "w-[180px]" : "w-10"
                     }`}
                     onClick={() => {
                         if (!isExpanded) {
@@ -118,9 +122,9 @@ const UniSearch: React.FC<UniSearchProps> = ({
                                     onExpandChange?.(true);
                                 }
                             }}
-                            className="absolute w-8 h-full right-0 rounded-full flex items-center justify-center hover:cursor-pointer"
+                            className="absolute w-8 h-full right-1 rounded-full flex items-center justify-center hover:cursor-pointer"
                         >
-                            <MagnifyingGlassIcon className="shrink-0 font-bold text-gray-800" />
+                            <MagnifyingGlassIcon className="shrink-0 font-bold text-gray-800 w-5 h-5" />
                     </div>
                    
                 </div>
