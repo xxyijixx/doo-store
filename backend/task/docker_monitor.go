@@ -90,7 +90,9 @@ func (dm *DockerMonitor) getContainerStatuses(apps []*model.AppInstalled) map[st
 
 	for _, container := range containers {
 		containerName := strings.TrimPrefix(container.Names[0], "/")
-		appStatusMap[containerName] = container.State
+		if appStatusMap[containerName] == "init" {
+			appStatusMap[containerName] = container.State
+		}
 	}
 
 	return appStatusMap

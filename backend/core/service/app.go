@@ -490,7 +490,7 @@ func (AppService) UploadApp(ctx dto.ServiceContext, req request.PluginUpload) er
 
 		dockerCompose := req.Plugin.GenComposeFile()
 
-		err = compose.Check(dockerCompose)
+		_, err = compose.PreCheck(dockerCompose)
 		if err != nil {
 			return err
 		}

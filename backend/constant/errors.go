@@ -12,6 +12,7 @@ var (
 	ErrPluginVersionNotSupport       = "ErrPluginVersionNotSupport"       // 当前版本不满足要求，需要版本 {{.detail}} 或以上
 	ErrPluginUnmarshalDockerCompose  = "ErrPluginUnmarshalDockerCompose"  // 无法解析 Docker Compose 文件
 	ErrPluginNetworkModeHost         = "ErrPluginNetworkModeHost"         // 使用了 host 网络模式
+	ErrPluginOnlyOneService          = "ErrPluginOnlyOneService"          // 只能有一个服务
 	ErrPluginNotAllowedPrivileged    = "ErrPluginNotAllowedPrivileged"    // 不允许使用特权模式
 	ErrPluginInvalidLocalVolumeMount = "ErrPluginInvalidLocalVolumeMount" // 本地卷挂载路径无效
 	ErrPluginEnvVarInVolumeMount     = "ErrPluginEnvVarInVolumeMount"     // 不允许在挂载路径使用环境变量

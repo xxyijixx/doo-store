@@ -26,17 +26,21 @@ import (
 )
 
 type AppInstallProcess struct {
-	ctx           dto.ServiceContext
-	app           *model.App
-	appDetail     *model.AppDetail
-	appInstalled  *model.AppInstalled
-	appKey        string
-	containerName string
-	envContent    string
-	req           request.AppInstall
-	ipAddress     string
-	client        docker.Client
-	nm            *nginx.NginxManager
+	ctx                  dto.ServiceContext
+	app                  *model.App
+	appDetail            *model.AppDetail
+	appInstalled         *model.AppInstalled
+	appKey               string
+	containerName        string
+	defaultContainerName string
+	envContent           string
+	envJson              string
+	req                  request.AppInstall
+	ipAddress            string
+	client               docker.Client
+	dockerCompose        *compose.DockerComposeConfig
+	finalDockerCompose   *compose.DockerComposeConfig
+	nm                   *nginx.NginxManager
 }
 
 // NewAppInstallProcess 创建新的应用安装流程实例
@@ -155,13 +159,61 @@ func (p *AppInstallProcess) DHCP() error {
 	return nil
 }
 
+func (p *AppInstallProcess) genEnv() error {
+	var err error
+	// 资源限制
+	p.req.Params[constant.CPUS] = p.req.CPUS
+	p.req.Params[constant.MemoryLimit] = p.req.MemoryLimit
+
+	p.envContent, p.envJson, err = docker.GenEnv(p.appKey, p.defaultContainerName, p.ipAddress, p.req.Params, false)
+	if err != nil {
+		log.Error("生成环境变量失败:", err)
+		return err
+	}
+
+	// 替换环境变量，再执行一次检查
+	p.finalDockerCompose, err = compose.FullCheck(p.req.DockerCompose, p.envContent)
+	if err != nil {
+		return err
+	}
+	envChange := false
+	// 是否释放原分配的IP并注册新IP
+	ipList := p.finalDockerCompose.ExtractIpAddress()
+	if len(ipList) > 0 {
+		if ipList[0] != p.ipAddress {
+			// 释放已注册的IP
+			docker.GlobalIPAllocator.ReleaseIP(p.ipAddress)
+			p.ipAddress = ipList[0]
+			docker.GlobalIPAllocator.RegisterIP(p.ipAddress)
+			envChange = true
+		}
+	}
+
+	containerNameList := p.finalDockerCompose.ExtractContainerName()
+	if len(containerNameList) > 0 {
+		if containerNameList[0] != p.containerName {
+			p.containerName = containerNameList[0]
+		}
+	}
+
+	// 重新生成一下环境变量配置
+	if envChange {
+		p.envContent, p.envJson, err = docker.GenEnv(p.appKey, p.defaultContainerName, p.ipAddress, p.req.Params, false)
+		if err != nil {
+			log.Error("生成环境变量失败:", err)
+			return err
+		}
+	}
+	return nil
+}
+
 // ValidateParam 验证参数
 // 检查docker-compose文件、创建工作目录、验证必填参数等
 func (p *AppInstallProcess) ValidateParam() error {
 	var err error
 
 	// 检测 docker-compose 文件
-	err = compose.Check(p.req.DockerCompose)
+	p.dockerCompose, err = compose.PreCheck(p.req.DockerCompose)
 	if err != nil {
 		log.Error("docker-compose文件验证失败:", err)
 		return err
@@ -179,7 +231,8 @@ func (p *AppInstallProcess) ValidateParam() error {
 	}
 
 	// 容器名称
-	p.containerName = config.EnvConfig.GetDefaultContainerName(p.app.Key)
+	p.defaultContainerName = config.EnvConfig.GetDefaultContainerName(p.app.Key)
+	p.containerName = p.defaultContainerName
 
 	paramJson, err := json.Marshal(p.req.Params)
 	if err != nil {
@@ -208,14 +261,8 @@ func (p *AppInstallProcess) ValidateParam() error {
 		log.Warn("参数验证失败:", vErr)
 		return vErr[0]
 	}
-	// 资源限制
-	p.req.Params[constant.CPUS] = p.req.CPUS
-	p.req.Params[constant.MemoryLimit] = p.req.MemoryLimit
 
-	var envJson string
-	p.envContent, envJson, err = docker.GenEnv(p.appKey, p.containerName, p.ipAddress, p.req.Params, false)
-	if err != nil {
-		log.Error("生成环境变量失败:", err)
+	if err = p.genEnv(); err != nil {
 		return err
 	}
 
@@ -227,7 +274,7 @@ func (p *AppInstallProcess) ValidateParam() error {
 		Repo:          p.appDetail.Repo,
 		Version:       p.appDetail.Version,
 		Params:        string(paramJson),
-		Env:           envJson,
+		Env:           p.envJson,
 		DockerCompose: p.req.DockerCompose,
 		Key:           p.app.Key,
 		Status:        constant.Installing,

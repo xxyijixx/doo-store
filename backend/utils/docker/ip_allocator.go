@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"sync"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -140,7 +141,8 @@ func (a *IPAllocator) RegisterIP(ip string) error {
 		return fmt.Errorf("IP %s 已被使用", ip)
 	}
 	if a.excludedIPs[ip] {
-		return fmt.Errorf("IP %s 在排除列表中", ip)
+		// return fmt.Errorf("IP %s 在排除列表中", ip)
+		log.Warnf("IP %s 在排除列表中，但被注册", ip)
 	}
 
 	// 注册IP
