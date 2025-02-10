@@ -10,6 +10,7 @@ const (
 	Installing = "Installing"
 	Paused     = "Paused"
 	UpErr      = "UpErr"
+	Unknown    = "Unknown"
 
 	AppNormal   = "Normal"
 	AppUnused   = "Unused"

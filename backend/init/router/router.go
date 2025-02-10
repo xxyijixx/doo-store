@@ -29,15 +29,15 @@ func Init() *gin.Engine {
 	r.Use(middleware.Base())
 	r.Use(i18n.GinI18nLocalize())
 
-	swaggerRouter := r.Group("swagger")
-	swaggerRouter.GET("/*any", gs.WrapHandler(swaggerFiles.Handler))
-
 	t, err := template.New("index").Parse(string(web.IndexByte))
 	if err != nil {
 		common.PrintError(fmt.Sprintf("模板解析失败: %s", err.Error()))
 		os.Exit(1)
 	}
 	r.SetHTMLTemplate(t)
+
+	swaggerRouter := r.Group("swagger")
+	swaggerRouter.GET("/*any", gs.WrapHandler(swaggerFiles.Handler))
 
 	PrivateGroup := r.Group("/api/v1")
 
