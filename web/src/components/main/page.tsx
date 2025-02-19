@@ -14,13 +14,19 @@ import { Button } from "@/components/ui/button";
 import { Item } from "@/type.d/common";
 import { Tag } from "@/api/interface/common"
 import { motion, AnimatePresence } from "framer-motion"; // 引入 framer-motion
-import * as http from '@/api/modules/fouceinter'
+import * as http from '@/api/modules/fouceinter';
 import { useTokenStore } from "@/store/ TokenContext";
 import { useTranslation } from "react-i18next";
-import { ChevronLeftIcon, ReloadIcon, PlusIcon } from "@radix-ui/react-icons"
+import { ChevronLeftIcon, ReloadIcon, PlusIcon } from "@radix-ui/react-icons";
 import { UploadSheet } from "@/components/drawer/upload";
 import { useToast } from "@/hooks/use-toast";
-import { FalseToaster } from "@/components/ui/toaster"
+import { FalseToaster } from "@/components/ui/toaster";
+import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+} from "@/components/ui/hover-card"
+  
 
 
 const POLLING_INTERVAL = 5000; // 5秒
@@ -444,7 +450,7 @@ function MainPage() {
                                                 exit={{ opacity: 0 }}
                                                 transition={{ duration: 0.7 }}
                                             >
-                                                <Card key={app.id} className="lg:w-auto md:w-auto w-auto lg:h-[140px] md:h-[140px] h-[140px] lg:my-1 lg:mx-1 md:my-1 md:mx-1 my-0.5 mx-0 px-2">
+                                                <Card key={app.id} className="lg:w-auto md:w-auto w-auto lg:h-[140px] md:h-[140px] h-[140px] lg:my-1 lg:mx-1 md:my-1 md:mx-1 my-0.5 mx-0 px-2 hover:border-2 hover:border-theme-color/30">
                                                     <CardContent className="flex flex-col ">
                                                         <div className="flex w-full relative">
                                                             <div className="flex flex-1">
@@ -456,9 +462,15 @@ function MainPage() {
                                                                     <div className="lg:pr-0 md:pr-16 pr-16">
                                                                         <h1 className="text-xl font-medium line-clamp-1 text-slate-900 dark:text-white">{app.name}</h1>
                                                                     </div>
-                                                                    <p className="text-base line-clamp-2 min-h-[42px] pt-1 w-11/12 md:w-4/5 lg:w-4/5">
-                                                                        {app.description || "No description available"}
-                                                                    </p>
+                                                                    <div >
+                                                                        {/* {app.description || "No description available"} */}
+                                                                        <HoverCard>
+                                                                            <HoverCardTrigger className="text-base line-clamp-2 min-h-[42px] pt-1 w-11/12 md:w-4/5 lg:w-4/5">{app.description || "No description available"}</HoverCardTrigger>
+                                                                            <HoverCardContent>
+                                                                                {app.description || "No description available"}
+                                                                            </HoverCardContent>
+                                                                        </HoverCard>
+                                                                    </div>
                                                                 </CardDescription>
                                                             </div>
                                                             <div className="absolute -right-3 -top-1.5">

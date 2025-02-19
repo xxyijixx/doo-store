@@ -18,6 +18,11 @@ import { useTranslation } from "react-i18next"
 import { FalseToaster,  SuccessToaster  } from '@/components/ui/toaster'
 import { useToast } from "@/hooks/use-toast";
 import * as http from "@/api/modules/fouceinter";
+import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+} from "@/components/ui/hover-card"
 
 interface InStalledBtnProps {
     app: Item;
@@ -178,8 +183,8 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
         <>
         {variantState === "success" && <SuccessToaster />}
         {variantState === "destructive" && <FalseToaster />}
-        <Card className="lg:w-auto md:w-auto w-auto h-[180px] lg:mb-0 md:mb-0 md:mr-1 mb-2 relative">
-            <CardContent className="flex justify-start space-x-5 mt-1.5 pl-7">
+        <Card className="lg:w-auto md:w-auto w-auto h-[180px] lg:mb-0 md:mb-0 md:mr-1 mb-2 relative hover:border-2 hover:border-theme-color/30">
+            <CardContent className="flex justify-start space-x-5 mt-0 pl-7 hover:mt-0">
                 {isLoading ? (
                     <>
                         <Skeleton className="h-10 w-10 rounded-full" />
@@ -211,7 +216,15 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                             {isLoading ? (
                                 <Skeleton className="h-4 w-56" />
                             ) : (
-                                <p className="text-base line-clamp-2 h-[45px] leading-[21px] pt-2 pr-5">{app.description || t("No description available")}</p>
+                                <div>
+                                    {/* {app.description || t("No description available")} */}
+                                    <HoverCard>
+                                        <HoverCardTrigger className="text-base line-clamp-2 h-[45px] leading-[21px] pt-2 pr-5">{app.description || "No description available"}</HoverCardTrigger>
+                                        <HoverCardContent>
+                                            {app.description || "No description available"}
+                                        </HoverCardContent>
+                                    </HoverCard>
+                                </div>
                             )}
                         </CardDescription>
                     </>
