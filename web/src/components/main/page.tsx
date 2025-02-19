@@ -168,6 +168,7 @@ function MainPage() {
         setFilteredApps(data?.items || []); // 过滤后的应用
         setTotalItems(data?.total || 0); // 设置接口返回的总数
         setLoading(false);
+
     };
 
     const loadTags = async () => {
@@ -416,7 +417,7 @@ function MainPage() {
                     <div>
                         <AnimatePresence mode="wait">
                             {/* 如果当前 Tab 是 "all" 或 "allson" 且未选择 class，显示 all 类应用列表 */}
-                            {(activeTab === "all" && selectedClass !== "installed") && (
+                            {(activeTab === "all") && (
                                 <div className={`grid lg:gap-4 md:gap-4 gap-2 lg:mx-0 lg:my-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-280px)] max-h-[calc(100vh-230px)]  overflow-y-auto`}>
                                     {loading ? (
                                         Array.from({ length: 9 }).map((_, index) => (
