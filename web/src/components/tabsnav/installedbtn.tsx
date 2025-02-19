@@ -7,7 +7,7 @@ import {
     CardFooter,
 } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect,useRef } from "react"
 import { AlertDialogDemo } from "@/components/tabsnav/uninstallalert"
 import { PureLoadingOverlay } from "@/components/tabsnav/loading"
 import {  AlertLogHave } from "@/components/tabsnav/logalert"
@@ -28,6 +28,9 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
 
     const { t } = useTranslation()
     const { toast } = useToast();
+
+    // 使用 useRef 保存上一次的 app.status
+    const prevStatusRef = useRef<string | null>(null);
 
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [isLogHaveOpen, setIsLogHaveOpen] = useState(false)
@@ -54,6 +57,23 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
     const isInstalling = useMemo(() => {
         return app.status == "Installing"
     },[app.status])
+
+    useEffect(() => {
+        if (prevStatusRef.current === "Installing" && app.status === "UpErr") {
+            console.log("安装失败", app.message)
+            toast({
+                title: t(`${app.name} 安装失败`),
+                description: app.message,
+                variant: "destructive",
+                duration: 3000,
+                className: "fixed top-20 lg:top-3 md:top-3 lg:right-6  md:right-4 right-1/2 translate-x-1/2 lg:translate-x-0 md:translate-x-0 w-[350px]"
+            });
+            setVariantState("destructive");
+        }
+        // 更新 prevStatusRef 的值为当前的 app.status
+        prevStatusRef.current = app.status;
+        // console.log("安装失败", app.message)
+    }, [app.status, t, toast]);  // 监听 app.status 的变化
 
 
     const appStatus = useMemo(() => {
@@ -84,7 +104,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                 action: action,
                 params: {}
             }).then(res => {
-                console.log(res)
+                console.log("putAppStatus res：",res)
                 loadData()
                 setIsLoading(false)  // 关闭 loading 蒙版
             }).catch(err => {
@@ -191,7 +211,7 @@ export function InStalledBtn({ app, loadData }: InStalledBtnProps ) {
                             {isLoading ? (
                                 <Skeleton className="h-4 w-56" />
                             ) : (
-                                <p className="text-base line-clamp-2 max-h-[45px] leading-[21px] pt-2 pr-5">{app.description || t("No description available")}</p>
+                                <p className="text-base line-clamp-2 h-[45px] leading-[21px] pt-2 pr-5">{app.description || t("No description available")}</p>
                             )}
                         </CardDescription>
                     </>

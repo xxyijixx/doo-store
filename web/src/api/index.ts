@@ -22,7 +22,7 @@ class RequestHttp {
         config.baseURL = "/store";
         config.headers.Token = useTokenStore.getState().token;
 
-        config.headers.Token = 'YIG8ANC8q2QxFV_Gf8qwkPdBj2EpsqGqlfc3qvSdg7ksVkZcokOUtQn43XGK0NK3PgHwfM3QTnveiI8-t7ZtwqnB0kpNgtZ2CI-0rscYV5_jUl2M_kwxYOwGAVjZ4FIU';
+        config.headers.Token = 'YIG8ANC8q2QxFV_Gf8qwkPdBj2EpsqGqlfc3qvSdg7ksVkZcokOUtQn43XGK0NK3PgHwfM3QTnveiI8-t7ZtwqnB0kpNgtZ2gruviO7pzvfvqyMTzM6N60oPTlL7_OCT';
         return config;
       },
       function (error) {

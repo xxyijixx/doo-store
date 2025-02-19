@@ -22,6 +22,7 @@ export interface Item {
     depends_version: string
     sort: number
     status: string
+    message: string
 }
 
 export interface form_fields<T> {

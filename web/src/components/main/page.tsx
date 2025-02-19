@@ -164,8 +164,6 @@ function MainPage() {
         setLoading(false);
     };
 
-
-
     const loadTags = async () => {
         const res = await http.getTags()
         if (res.data) {
@@ -182,7 +180,18 @@ function MainPage() {
                 setFilteredApps(prevApps =>
                     prevApps.map(prevApp => {
                         const updatedApp = data.items.find(newApp => newApp.id === prevApp.id);
-                        return updatedApp ? { ...prevApp, status: updatedApp.status } : prevApp;
+                        //查看状态变化过程是否有效
+                        // if (updatedApp) {
+                        //     console.log(`应用 ${prevApp.name} 状态变化:`, {
+                        //         oldStatus: prevApp.status,
+                        //         newStatus: updatedApp.status,
+                        //         oldMessage: prevApp.message,
+                        //         newMessage: updatedApp.message
+                        //     });
+                        // }
+                        // return updatedApp ? { ...prevApp, status: updatedApp.status } : prevApp;
+                        // 重要修改：完整更新应用信息，包括 message
+                    return updatedApp ? { ...prevApp, ...updatedApp } : prevApp;
                     })
                 );
             }
