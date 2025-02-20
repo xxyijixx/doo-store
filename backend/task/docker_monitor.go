@@ -112,7 +112,7 @@ func (dm *DockerMonitor) updateAppStatus(appName string, status string, message 
 	}
 
 	// 只有状态发生变化时才更新
-	if appInstalled.Status != status {
+	if appInstalled.Status != status && appInstalled.Status != constant.UpErr {
 		log.Debugf("更新状态 %s [%s]", status, message)
 		_, err = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Updates(
 			map[string]interface{}{

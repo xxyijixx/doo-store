@@ -325,13 +325,23 @@ func (*AppService) UpdateAppParams(ctx dto.ServiceContext, req request.AppInstal
 	ipAddress := appInstalled.IpAddress
 
 	req.Params[constant.CPUS] = req.CPUS
-	req.Params[constant.MemoryLimit] = req.MemoryLimit
 
+	if req.MemoryLimit == "" || req.MemoryLimit == "0" {
+		req.Params[constant.MemoryLimit] = "0"
+	} else {
+		if req.MemoryUnit != "m" && req.MemoryUnit != "0" {
+			req.MemoryUnit = "m"
+		}
+		req.Params[constant.MemoryLimit] = req.MemoryLimit + req.MemoryUnit
+	}
+
+	// TODO 参数更新
 	envContent, envJson, err := docker.GenEnv(appKey, containerName, ipAddress, req.Params, false)
 	if err != nil {
 		log.Info("错误生成环境变量文件", err)
 		return nil, errors.New(constant.ErrPluginModifyParamFailed)
 	}
+
 	appInstalled.Env = envJson
 	paramJson, err := json.Marshal(req.Params)
 	if err != nil {

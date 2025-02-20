@@ -142,9 +142,9 @@
       "volume": [],
       "env": [
         {
-          "name": "port",
-          "key": "NGINX_PORT",
-          "value": "80",
+          "label": "port",
+          "env_key": "NGINX_PORT",
+          "default": "80",
           "type": "number",
           "required": true
         }
@@ -305,9 +305,10 @@
       ],
       "env": [
         {
-          "name": "port",
-          "key": "REDIS_PORT",
-          "value": "6379",
+          "label": "port",
+          "env_key": "REDIS_PORT",
+          "default": "6379",
+          "type": "number",
           "required": false
         }
       ],
@@ -328,39 +329,39 @@
       "volume": [],
       "env": [
         {
-          "name": "cloud_provider",
-          "key": "CLOUD_PROVIDER",
-          "value": "aliyun",
+          "label": "cloud_provider",
+          "env_key": "CLOUD_PROVIDER",
+          "default": "aliyun",
           "required": true
         },
         {
-          "name": "oss_region",
-          "key": "OSS_REGION",
-          "value": "",
+          "label": "oss_region",
+          "env_key": "OSS_REGION",
+          "default": "",
           "required": true
         },
         {
-          "name": "oss_endpoint",
-          "key": "OSS_ENDPOINT",
-          "value": "",
+          "label": "oss_endpoint",
+          "env_key": "OSS_ENDPOINT",
+          "default": "",
           "required": true
         },
         {
-          "name": "oss_bucket",
-          "key": "OSS_BUCKET",
-          "value": "",
+          "label": "oss_bucket",
+          "env_key": "OSS_BUCKET",
+          "default": "",
           "required": true
         },
         {
-          "name": "oss_access_key_id",
-          "key": "OSS_ACCESS_KEY_ID",
-          "value": "",
+          "label": "oss_access_key_id",
+          "env_key": "OSS_ACCESS_KEY_ID",
+          "default": "",
           "required": true
         },
         {
-          "name": "oss_access_key_secret",
-          "key": "OSS_ACCESS_KEY_SECRET",
-          "value": "",
+          "label": "oss_access_key_secret",
+          "env_key": "OSS_ACCESS_KEY_SECRET",
+          "default": "",
           "required": true
         }
       ],

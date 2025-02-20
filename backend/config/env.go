@@ -97,6 +97,8 @@ var defaultConfig = envConfigSchema{
 
 	DB_PREFIX: "",
 
+	DOOTASK_URL: "http://127.0.0.1:2222",
+
 	DOOTASK_DB_HOST:     "mariadb",
 	DOOTASK_DB_PORT:     "3306",
 	DOOTASK_DB_DATABASE: "dootask",
@@ -139,6 +141,8 @@ type envConfigSchema struct {
 	PLUGIN_CIDR string
 
 	DB_PREFIX string
+
+	DOOTASK_URL string
 
 	DOOTASK_DB_HOST     string
 	DOOTASK_DB_PORT     string

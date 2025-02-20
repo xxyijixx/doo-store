@@ -17,6 +17,7 @@ type AppInstall struct {
 	DockerCompose string                 `json:"docker_compose" binding:"required"`
 	CPUS          string                 `json:"cpus" binding:"required"`
 	MemoryLimit   string                 `json:"memory_limit" binding:"required"`
+	MemoryUnit    string                 `json:"memory_unit"`
 	Params        map[string]interface{} `json:"params" binding:"required"`
 }
 
