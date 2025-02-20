@@ -152,6 +152,8 @@ function MainPage() {
 
     const [openUpload, setOpenUpload] = useState(false);
 
+    const [tabKey, setTabKey] = useState(0); // 用于强制渲染
+
 
 
     // 请求数据
@@ -159,10 +161,10 @@ function MainPage() {
         setLoading(true);
         const data = await fetchAppsData(activeTab, selectedClass, page, pageSize, query, toast, t);
         if (activeTab === 'installed') {
-            console.log('installedApps', installedApps);
+            // console.log('installedApps', installedApps);
             setInstalledApps(data?.items || []); // 已安装应用的搜索结果
         } else if (activeTab === 'all') {
-            console.log('apps', apps);
+            // console.log('apps', apps);
             setApps(data?.items || []); // 所有应用的搜索结果
         }
         setFilteredApps(data?.items || []); // 过滤后的应用
@@ -224,7 +226,7 @@ function MainPage() {
                 updateAppsStatus(); // 只更新状态
             }, POLLING_INTERVAL);
 
-            return () => clearInterval(intervalId);
+            return () => clearInterval(intervalId);// 清除旧的轮询定时器
         }
     }, [activeTab, selectedClass, currentPage, searchQuery]);
 
@@ -232,10 +234,13 @@ function MainPage() {
     useEffect(() => {
         loadTags()
         loadData(searchQuery, currentPage); /// 根据 currentPage 加载数据
-
-
-
     }, [activeTab, selectedClass, currentPage, searchQuery]);
+
+    useEffect(() => {
+        setTabKey(prevKey => prevKey + 1);  // 每次切换 Tab 时，更新 key 强制重新渲染
+    }, [activeTab]);  // 监听 activeTab 切换
+
+    
 
 
     // 切换 Tab 的方法
@@ -264,6 +269,7 @@ function MainPage() {
     const handleSearchExpand = (expanded: boolean) => {
         setIsSearchExpanded(expanded);
     };
+
 
     useEffect(() => {
         const handleSwitchToInstalled = () => {
@@ -414,10 +420,10 @@ function MainPage() {
                         </div>
                     </div>
 
-                    <div>
+                    <div key={tabKey}>
                         <AnimatePresence mode="wait">
                             {/* 如果当前 Tab 是 "all" 或 "allson" 且未选择 class，显示 all 类应用列表 */}
-                            {(activeTab === "all") && (
+                            {(activeTab === "all" && selectedClass !== "installed") && (
                                 <div className={`grid lg:gap-4 md:gap-4 gap-2 lg:mx-0 lg:my-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-280px)] max-h-[calc(100vh-230px)]  overflow-y-auto`}>
                                     {loading ? (
                                         Array.from({ length: 9 }).map((_, index) => (
@@ -516,7 +522,7 @@ function MainPage() {
                                     transition={{ duration: 0.5 }}
                                 >
                                     <div
-                                       className={`grid lg:gap-4 md:gap-4 gap-2 lg:mx-0 lg:my-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-280px)] max-h-[calc(100vh-230px)] overflow-y-auto`}
+                                        className={`grid lg:gap-4 md:gap-4 gap-2 lg:mx-0 lg:my-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-280px)] max-h-[calc(100vh-230px)] overflow-y-auto`}
                                     >
                                         {loading ? (
                                             <div></div>
