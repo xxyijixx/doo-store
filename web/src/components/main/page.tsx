@@ -14,13 +14,19 @@ import { Button } from "@/components/ui/button";
 import { Item } from "@/type.d/common";
 import { Tag } from "@/api/interface/common"
 import { motion, AnimatePresence } from "framer-motion"; // 引入 framer-motion
-import * as http from '@/api/modules/fouceinter'
+import * as http from '@/api/modules/fouceinter';
 import { useTokenStore } from "@/store/ TokenContext";
 import { useTranslation } from "react-i18next";
-import { ChevronLeftIcon, ReloadIcon, PlusIcon } from "@radix-ui/react-icons"
+import { ChevronLeftIcon, ReloadIcon, PlusIcon } from "@radix-ui/react-icons";
 import { UploadSheet } from "@/components/drawer/upload";
 import { useToast } from "@/hooks/use-toast";
-import { FalseToaster } from "@/components/ui/toaster"
+import { FalseToaster } from "@/components/ui/toaster";
+import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+} from "@/components/ui/hover-card"
+  
 
 
 const POLLING_INTERVAL = 5000; // 5秒
@@ -146,6 +152,8 @@ function MainPage() {
 
     const [openUpload, setOpenUpload] = useState(false);
 
+    const [tabKey, setTabKey] = useState(0); // 用于强制渲染
+
 
 
     // 请求数据
@@ -153,18 +161,17 @@ function MainPage() {
         setLoading(true);
         const data = await fetchAppsData(activeTab, selectedClass, page, pageSize, query, toast, t);
         if (activeTab === 'installed') {
-            console.log('installedApps', installedApps);
+            // console.log('installedApps', installedApps);
             setInstalledApps(data?.items || []); // 已安装应用的搜索结果
         } else if (activeTab === 'all') {
-            console.log('apps', apps);
+            // console.log('apps', apps);
             setApps(data?.items || []); // 所有应用的搜索结果
         }
         setFilteredApps(data?.items || []); // 过滤后的应用
         setTotalItems(data?.total || 0); // 设置接口返回的总数
         setLoading(false);
+
     };
-
-
 
     const loadTags = async () => {
         const res = await http.getTags()
@@ -182,7 +189,18 @@ function MainPage() {
                 setFilteredApps(prevApps =>
                     prevApps.map(prevApp => {
                         const updatedApp = data.items.find(newApp => newApp.id === prevApp.id);
-                        return updatedApp ? { ...prevApp, status: updatedApp.status } : prevApp;
+                        //查看状态变化过程是否有效
+                        // if (updatedApp) {
+                        //     console.log(`应用 ${prevApp.name} 状态变化:`, {
+                        //         oldStatus: prevApp.status,
+                        //         newStatus: updatedApp.status,
+                        //         oldMessage: prevApp.message,
+                        //         newMessage: updatedApp.message
+                        //     });
+                        // }
+                        // return updatedApp ? { ...prevApp, status: updatedApp.status } : prevApp;
+                        // 重要修改：完整更新应用信息，包括 message
+                    return updatedApp ? { ...prevApp, ...updatedApp } : prevApp;
                     })
                 );
             }
@@ -208,7 +226,7 @@ function MainPage() {
                 updateAppsStatus(); // 只更新状态
             }, POLLING_INTERVAL);
 
-            return () => clearInterval(intervalId);
+            return () => clearInterval(intervalId);// 清除旧的轮询定时器
         }
     }, [activeTab, selectedClass, currentPage, searchQuery]);
 
@@ -216,10 +234,13 @@ function MainPage() {
     useEffect(() => {
         loadTags()
         loadData(searchQuery, currentPage); /// 根据 currentPage 加载数据
-
-
-
     }, [activeTab, selectedClass, currentPage, searchQuery]);
+
+    useEffect(() => {
+        setTabKey(prevKey => prevKey + 1);  // 每次切换 Tab 时，更新 key 强制重新渲染
+    }, [activeTab]);  // 监听 activeTab 切换
+
+    
 
 
     // 切换 Tab 的方法
@@ -248,6 +269,7 @@ function MainPage() {
     const handleSearchExpand = (expanded: boolean) => {
         setIsSearchExpanded(expanded);
     };
+
 
     useEffect(() => {
         const handleSwitchToInstalled = () => {
@@ -398,7 +420,7 @@ function MainPage() {
                         </div>
                     </div>
 
-                    <div>
+                    <div key={tabKey}>
                         <AnimatePresence mode="wait">
                             {/* 如果当前 Tab 是 "all" 或 "allson" 且未选择 class，显示 all 类应用列表 */}
                             {(activeTab === "all" && selectedClass !== "installed") && (
@@ -435,7 +457,7 @@ function MainPage() {
                                                 exit={{ opacity: 0 }}
                                                 transition={{ duration: 0.7 }}
                                             >
-                                                <Card key={app.id} className="lg:w-auto md:w-auto w-auto lg:h-[140px] md:h-[140px] h-[140px] lg:my-1 lg:mx-1 md:my-1 md:mx-1 my-0.5 mx-0 px-2">
+                                                <Card key={app.id} className="lg:w-auto md:w-auto w-auto lg:h-[140px] md:h-[140px] h-[140px] lg:my-1 lg:mx-1 md:my-1 md:mx-1 my-0.5 mx-0 px-2 hover:border-2 hover:border-theme-color/30">
                                                     <CardContent className="flex flex-col ">
                                                         <div className="flex w-full relative">
                                                             <div className="flex flex-1">
@@ -447,9 +469,15 @@ function MainPage() {
                                                                     <div className="lg:pr-0 md:pr-16 pr-16">
                                                                         <h1 className="text-xl font-medium line-clamp-1 text-slate-900 dark:text-white">{app.name}</h1>
                                                                     </div>
-                                                                    <p className="text-base line-clamp-2 min-h-[42px] pt-1 w-11/12 md:w-4/5 lg:w-4/5">
-                                                                        {app.description || "No description available"}
-                                                                    </p>
+                                                                    <div >
+                                                                        {/* {app.description || "No description available"} */}
+                                                                        <HoverCard>
+                                                                            <HoverCardTrigger className="text-base line-clamp-2 min-h-[42px] pt-1 w-11/12 md:w-4/5 lg:w-4/5">{app.description || "No description available"}</HoverCardTrigger>
+                                                                            <HoverCardContent>
+                                                                                {app.description || "No description available"}
+                                                                            </HoverCardContent>
+                                                                        </HoverCard>
+                                                                    </div>
                                                                 </CardDescription>
                                                             </div>
                                                             <div className="absolute -right-3 -top-1.5">
@@ -494,7 +522,7 @@ function MainPage() {
                                     transition={{ duration: 0.5 }}
                                 >
                                     <div
-                                       className={`grid lg:gap-4 md:gap-4 gap-2 lg:mx-0 lg:my-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-280px)] max-h-[calc(100vh-230px)] overflow-y-auto`}
+                                        className={`grid lg:gap-4 md:gap-4 gap-2 lg:mx-0 lg:my-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-280px)] max-h-[calc(100vh-230px)] overflow-y-auto`}
                                     >
                                         {loading ? (
                                             <div></div>
