@@ -56,6 +56,7 @@ export interface FormField {
     label: string;
     env_key: string;
     type: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     default?: any;
     options?: Option[];
     validation?: Validation;
@@ -74,6 +75,7 @@ export interface Option {
 
 export interface Dependency {
   field: string;    // Field that this field depends on
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any;       // Value of the dependent field
   operator: string; // Comparison operator: eq, neq, in, etc.
 }

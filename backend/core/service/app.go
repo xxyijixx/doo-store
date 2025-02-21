@@ -191,6 +191,7 @@ func (*AppService) UninstallApp(ctx dto.ServiceContext, req request.AppUnInstall
 	}
 	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
 	composeFile := docker.GetComposeFile(appKey)
+	usedIPAddress := []string{}
 	err = repo.DB.Transaction(func(tx *gorm.DB) error {
 		_, err = repo.Use(tx).AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Delete()
 		if err != nil {
@@ -200,6 +201,21 @@ func (*AppService) UninstallApp(ctx dto.ServiceContext, req request.AppUnInstall
 		_, err = repo.Use(tx).App.Where(repo.App.ID.Eq(appInstalled.AppID)).Update(repo.App.Status, constant.AppUnused)
 		if err != nil {
 			log.Info("更新插件状态失败", err)
+			return err
+		}
+		// TODO 获取使用的IP信息
+		ipAddress, err := repo.Use(tx).AppServiceStatus.Select(repo.AppServiceStatus.IpAddress).Where((repo.AppServiceStatus.InstallID.Eq(appInstalled.ID))).Find()
+		if err != nil {
+			log.Info("获取使用的IP信息失败", err)
+			return err
+		}
+		for _, ip := range ipAddress {
+			usedIPAddress = append(usedIPAddress, strings.Split(ip.IpAddress, ",")...)
+		}
+		// TODO 删除服务信息
+		_, err = repo.Use(tx).AppServiceStatus.Where((repo.AppServiceStatus.InstallID.Eq(appInstalled.ID))).Delete()
+		if err != nil {
+			log.Info("删除服务信息失败", err)
 			return err
 		}
 		if appInstalled.Status != constant.UpErr {
@@ -217,7 +233,9 @@ func (*AppService) UninstallApp(ctx dto.ServiceContext, req request.AppUnInstall
 		return errors.New(constant.ErrPluginUninstallFailed)
 	}
 	// 释放IP
-	docker.GlobalIPAllocator.ReleaseIP(appInstalled.IpAddress)
+	for _, ip := range usedIPAddress {
+		docker.GlobalIPAllocator.ReleaseIP(ip)
+	}
 	nm, err := nginx.NewNginxManager()
 	if err != nil {
 		return err
@@ -622,6 +640,25 @@ func appUp(appInstalled *model.AppInstalled, envContent string) error {
 			stdout, err = docker.ParseError(stdout, err)
 			log.Info("Error docker compose up:", stdout, err)
 			return err
+		}
+		// 执行一次docker compose ps更新状态
+		containers, err := compose.ParseDockerComposePsOutput(composeFile)
+		if err != nil {
+			return err
+		}
+		for _, container := range containers {
+			log.WithFields(log.Fields{
+				// "container": container,
+				"containerName":  container.Name,
+				"containerState": container.State,
+			}).Debug("Docker容器状态")
+			_, _ = repo.Use(tx).AppServiceStatus.Where(repo.AppServiceStatus.InstallID.Eq(appInstalled.ID)).
+				Where(repo.AppServiceStatus.ContainerName.Eq(container.Name)).Updates(
+				model.AppServiceStatus{
+					Status:  container.State,
+					Message: "",
+				},
+			)
 		}
 		fmt.Println(stdout)
 		_, err = repo.Use(tx).AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Updates(

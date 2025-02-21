@@ -94,7 +94,7 @@ func (dm *DockerMonitor) getContainerStatuses(apps []*model.AppInstalled) map[st
 			appStatusMap[containerName] = container.State
 		}
 	}
-
+	log.Info("容器状态", appStatusMap)
 	return appStatusMap
 }
 

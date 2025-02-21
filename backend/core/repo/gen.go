@@ -16,13 +16,14 @@ import (
 )
 
 var (
-	Q            = new(Query)
-	App          *app
-	AppDetail    *appDetail
-	AppInstalled *appInstalled
-	AppLog       *appLog
-	AppTag       *appTag
-	Tag          *tag
+	Q                = new(Query)
+	App              *app
+	AppDetail        *appDetail
+	AppInstalled     *appInstalled
+	AppLog           *appLog
+	AppServiceStatus *appServiceStatus
+	AppTag           *appTag
+	Tag              *tag
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
@@ -31,44 +32,48 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	AppDetail = &Q.AppDetail
 	AppInstalled = &Q.AppInstalled
 	AppLog = &Q.AppLog
+	AppServiceStatus = &Q.AppServiceStatus
 	AppTag = &Q.AppTag
 	Tag = &Q.Tag
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:           db,
-		App:          newApp(db, opts...),
-		AppDetail:    newAppDetail(db, opts...),
-		AppInstalled: newAppInstalled(db, opts...),
-		AppLog:       newAppLog(db, opts...),
-		AppTag:       newAppTag(db, opts...),
-		Tag:          newTag(db, opts...),
+		db:               db,
+		App:              newApp(db, opts...),
+		AppDetail:        newAppDetail(db, opts...),
+		AppInstalled:     newAppInstalled(db, opts...),
+		AppLog:           newAppLog(db, opts...),
+		AppServiceStatus: newAppServiceStatus(db, opts...),
+		AppTag:           newAppTag(db, opts...),
+		Tag:              newTag(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	App          app
-	AppDetail    appDetail
-	AppInstalled appInstalled
-	AppLog       appLog
-	AppTag       appTag
-	Tag          tag
+	App              app
+	AppDetail        appDetail
+	AppInstalled     appInstalled
+	AppLog           appLog
+	AppServiceStatus appServiceStatus
+	AppTag           appTag
+	Tag              tag
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:           db,
-		App:          q.App.clone(db),
-		AppDetail:    q.AppDetail.clone(db),
-		AppInstalled: q.AppInstalled.clone(db),
-		AppLog:       q.AppLog.clone(db),
-		AppTag:       q.AppTag.clone(db),
-		Tag:          q.Tag.clone(db),
+		db:               db,
+		App:              q.App.clone(db),
+		AppDetail:        q.AppDetail.clone(db),
+		AppInstalled:     q.AppInstalled.clone(db),
+		AppLog:           q.AppLog.clone(db),
+		AppServiceStatus: q.AppServiceStatus.clone(db),
+		AppTag:           q.AppTag.clone(db),
+		Tag:              q.Tag.clone(db),
 	}
 }
 
@@ -82,33 +87,36 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:           db,
-		App:          q.App.replaceDB(db),
-		AppDetail:    q.AppDetail.replaceDB(db),
-		AppInstalled: q.AppInstalled.replaceDB(db),
-		AppLog:       q.AppLog.replaceDB(db),
-		AppTag:       q.AppTag.replaceDB(db),
-		Tag:          q.Tag.replaceDB(db),
+		db:               db,
+		App:              q.App.replaceDB(db),
+		AppDetail:        q.AppDetail.replaceDB(db),
+		AppInstalled:     q.AppInstalled.replaceDB(db),
+		AppLog:           q.AppLog.replaceDB(db),
+		AppServiceStatus: q.AppServiceStatus.replaceDB(db),
+		AppTag:           q.AppTag.replaceDB(db),
+		Tag:              q.Tag.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	App          IAppDo
-	AppDetail    IAppDetailDo
-	AppInstalled IAppInstalledDo
-	AppLog       IAppLogDo
-	AppTag       IAppTagDo
-	Tag          ITagDo
+	App              IAppDo
+	AppDetail        IAppDetailDo
+	AppInstalled     IAppInstalledDo
+	AppLog           IAppLogDo
+	AppServiceStatus IAppServiceStatusDo
+	AppTag           IAppTagDo
+	Tag              ITagDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		App:          q.App.WithContext(ctx),
-		AppDetail:    q.AppDetail.WithContext(ctx),
-		AppInstalled: q.AppInstalled.WithContext(ctx),
-		AppLog:       q.AppLog.WithContext(ctx),
-		AppTag:       q.AppTag.WithContext(ctx),
-		Tag:          q.Tag.WithContext(ctx),
+		App:              q.App.WithContext(ctx),
+		AppDetail:        q.AppDetail.WithContext(ctx),
+		AppInstalled:     q.AppInstalled.WithContext(ctx),
+		AppLog:           q.AppLog.WithContext(ctx),
+		AppServiceStatus: q.AppServiceStatus.WithContext(ctx),
+		AppTag:           q.AppTag.WithContext(ctx),
+		Tag:              q.Tag.WithContext(ctx),
 	}
 }
 

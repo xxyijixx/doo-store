@@ -230,9 +230,9 @@ func (dcc DockerComposeConfig) preCheck() error {
 			return errors.New(constant.ErrPluginNetworkModeHost)
 		}
 		// 当前只允许一个service
-		if len(dcc.Services) > 1 {
-			return errors.New(constant.ErrPluginOnlyOneService)
-		}
+		// if len(dcc.Services) > 1 {
+		// 	return errors.New(constant.ErrPluginOnlyOneService)
+		// }
 	}
 	return nil
 }

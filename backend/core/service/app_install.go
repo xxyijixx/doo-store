@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/docker/docker/api/types/container"
 	log "github.com/sirupsen/logrus"
@@ -308,6 +309,26 @@ func (p *AppInstallProcess) Install() error {
 		log.Error("未找到安装信息")
 		return errors.New(constant.ErrPluginInstallFailed)
 	}
+	// TODO 安装服务
+	// repo.AppServiceStatus.
+	appServiceList := make([]*model.AppServiceStatus, 0)
+	for name, service := range p.finalDockerCompose.Services {
+		IPAddress := []string{}
+		for _, network := range service.Networks {
+			IPAddress = append(IPAddress, network.IPAddress)
+		}
+		appService := model.AppServiceStatus{
+			ServiceName:   name,
+			ContainerName: service.ContainerName,
+			IpAddress:     strings.Join(IPAddress, ","),
+			Image:         service.Image,
+			InstallID:     p.appInstalled.ID,
+			Status:        constant.Installing,
+		}
+		appServiceList = append(appServiceList, &appService)
+	}
+	repo.AppServiceStatus.Create(appServiceList...)
+
 	err = appUp(p.appInstalled, p.envContent)
 	if err != nil {
 		log.Error("应用启动失败:", err)
