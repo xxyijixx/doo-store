@@ -136,9 +136,6 @@ function MainPage() {
 
     const { t } = useTranslation();
     const { toast } = useToast();
-
-    const [apps, setApps] = useState<Item[]>([]);
-    const [installedApps, setInstalledApps] = useState<Item[]>([]);  // 存储已安装的应用
     const [filteredApps, setFilteredApps] = useState<Item[]>([]);  // 存储过滤后的应用列表
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("all"); // 当前激活的 Tab（"all" 或 "installed"）
@@ -160,13 +157,6 @@ function MainPage() {
     const loadData = async (query: string = '', page: number = currentPage) => {
         setLoading(true);
         const data = await fetchAppsData(activeTab, selectedClass, page, pageSize, query, toast, t);
-        if (activeTab === 'installed') {
-            // console.log('installedApps', installedApps);
-            setInstalledApps(data?.items || []); // 已安装应用的搜索结果
-        } else if (activeTab === 'all') {
-            // console.log('apps', apps);
-            setApps(data?.items || []); // 所有应用的搜索结果
-        }
         setFilteredApps(data?.items || []); // 过滤后的应用
         setTotalItems(data?.total || 0); // 设置接口返回的总数
         setLoading(false);
