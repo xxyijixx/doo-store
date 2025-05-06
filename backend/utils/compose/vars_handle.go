@@ -9,7 +9,7 @@ import (
 )
 
 var envMap = map[string]string{
-	"DOOTASK_NETWORK_NAME": config.EnvConfig.DOOTASK_NETWORK_NAME,
+	"DOOTASK_NETWORK_NAME": config.EnvConfig.App().NETWORK_NAME,
 }
 
 func ReplaceEnvVariables(input string) string {

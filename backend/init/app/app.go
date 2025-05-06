@@ -18,10 +18,6 @@ func Init() {
 	constant.AppInstallDir = path.Join(constant.DataDir, "apps")
 	constant.NginxDir = path.Join(constant.DataDir, "nginx")
 
-	if config.EnvConfig.ENV == "prod" {
-		constant.DooTaskUrl = "http://" + config.EnvConfig.DOOTASK_APP_IPPR + ".3"
-		config.EnvConfig.DOOTASK_URL = "http://" + config.EnvConfig.DOOTASK_APP_IPPR + ".3"
-	}
 
 	plugins, err := repo.AppInstalled.Select(repo.AppInstalled.ID, repo.AppInstalled.IpAddress).Find()
 	if err != nil && err != gorm.ErrRecordNotFound {

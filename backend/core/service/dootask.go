@@ -34,7 +34,7 @@ func (d *DootaskService) GetUserInfo(token string) (*dto.UserInfoResp, error) {
 		return nil, errors.New(constant.ErrNoPermission)
 	}
 	// url := fmt.Sprintf("%s%s?token=%s", constant.DooTaskUrl, "/api/users/info", token)
-	url := fmt.Sprintf("%s%s?token=%s", config.EnvConfig.DOOTASK_URL, "/api/users/info", token)
+	url := fmt.Sprintf("%s%s?token=%s", config.EnvConfig.DooTask().URL, "/api/users/info", token)
 	result, err := d.client.Get(url)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (d *DootaskService) GetUserInfo(token string) (*dto.UserInfoResp, error) {
 // GetVersionInfo 获取版本信息
 func (d *DootaskService) GetVersoinInfo() (*dto.VersionInfoResp, error) {
 	// url := fmt.Sprintf("%s%s", constant.DooTaskUrl, "/api/system/version")
-	url := fmt.Sprintf("%s%s", config.EnvConfig.DOOTASK_URL, "/api/system/version")
+	url := fmt.Sprintf("%s%s", config.EnvConfig.DooTask().URL, "/api/system/version")
 	result, err := d.client.Get(url)
 	if err != nil {
 		return nil, err

@@ -16,24 +16,23 @@ func GenEnv(appKey, containerName, ipAddress string, envs map[string]any, writeF
 	envFile := fmt.Sprintf("%s/%s/.env", constant.AppInstallDir, appKey)
 	envContent = fmt.Sprintf("%s=%s\n", "CONTAINER_NAME", containerName)
 	envContent += fmt.Sprintf("%s=%s\n", "IP_ADDRESS", ipAddress)
-	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DIR", config.EnvConfig.GetDootaskDir())
-	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_APP_ID", config.EnvConfig.DOOTASK_APP_ID)
-	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_APP_IPPR", config.EnvConfig.DOOTASK_APP_IPPR)
-	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_APP_KEY", config.EnvConfig.DOOTASK_APP_KEY)
-	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_NETWORK_NAME", config.EnvConfig.GetNetworkName())
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DIR", config.EnvConfig.DooTask().DIR)
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_APP_ID", config.EnvConfig.DooTask().APP_ID)
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_APP_IPPR", config.EnvConfig.DooTask().APP_IPPR)
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_APP_KEY", config.EnvConfig.DooTask().APP_KEY)
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_NETWORK_NAME", config.EnvConfig.App().NETWORK_NAME)
 
 	// 数据库相关配置
-	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_HOST", config.EnvConfig.DOOTASK_DB_HOST)
-	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_PORT", config.EnvConfig.DOOTASK_DB_PORT)
-	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_DATABASE", config.EnvConfig.DOOTASK_DB_DATABASE)
-	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_USERNAME", config.EnvConfig.DOOTASK_DB_USERNAME)
-	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_PASSWORD", config.EnvConfig.DOOTASK_DB_PASSWORD)
-	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_PREFIX", config.EnvConfig.DOOTASK_DB_PREFIX)
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_HOST", config.EnvConfig.DooTaskDB().HOST)
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_PORT", config.EnvConfig.DooTaskDB().PORT)
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_DATABASE", config.EnvConfig.DooTaskDB().DATABASE)
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_USERNAME", config.EnvConfig.DooTaskDB().USERNAME)
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_PASSWORD", config.EnvConfig.DooTaskDB().PASSWORD)
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DB_PREFIX", config.EnvConfig.DooTaskDB().PREFIX)
 
 	// Redis相关
-	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_REDIS_HOST", config.EnvConfig.DOOTASK_REDIS_HOST)
-	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_REDIS_PORT", config.EnvConfig.DOOTASK_REDIS_PORT)
-
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_REDIS_HOST", config.EnvConfig.DooTaskRedis().HOST)
+	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_REDIS_PORT", config.EnvConfig.DooTaskRedis().PORT)
 
 	for key, value := range envs {
 		var envValue string
