@@ -14,12 +14,14 @@ import (
 	"doo-store/backend/utils/compose"
 	"doo-store/backend/utils/docker"
 	"doo-store/backend/utils/nginx"
+	"doo-store/backend/utils/redis"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/docker/docker/api/types/container"
 	log "github.com/sirupsen/logrus"
@@ -585,6 +587,12 @@ func (AppService) ListRunningAppKeys(ctx dto.ServiceContext) (any, error) {
 	if err != nil {
 		return []string{}, err
 	}
+	// todo 后续考虑维护redis中的数据
+	jsonData, err := json.Marshal(result)
+	if err != nil {
+		redis.Set(context.TODO(), "pluginstore:apps:running", jsonData, 30*time.Second)
+	}
+
 	return result, nil
 }
 
