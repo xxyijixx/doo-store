@@ -17,38 +17,41 @@ func (*App) TableName() string {
 	return TableName("apps")
 }
 
-
 const (
-	Running    = "Running"
-	UnHealthy  = "UnHealthy"
-	Restarting = "Restarting"
-	Error      = "Error"
-	Dead       = "Dead"
-	Stopped    = "Stopped"
-	Installing = "Installing"
-	Paused     = "Paused"
-	UpErr      = "UpErr"
-	Unknown    = "Unknown"
+	// 插件状态
+	PluginStatusRunning    = "Running"
+	PluginStatusUnHealthy  = "UnHealthy"
+	PluginStatusRestarting = "Restarting"
+	PluginStatusError      = "Error"
+	PluginStatusDead       = "Dead"
+	PluginStatusStopped    = "Stopped"
+	PluginStatusInstalling = "Installing"
+	PluginStatusPaused     = "Paused"
+	PluginStatusUpErr      = "UpErr"
+	PluginStatusUnknown    = "Unknown"
 
+	// 插件安装状态
 	AppNormal   = "Normal"
 	AppUnused   = "Unused"
 	AppTakeDown = "TakeDown"
 	AppInUse    = "InUse"
 
+	// 环境变量
 	CPUS          = "CPUS"
 	MemoryLimit   = "MEMORY_LIMIT"
 	HostIP        = "HOST_IP"
 	ContainerName = "CONTAINER_NAME"
 )
 
-type AppOperate string
+// 插件操作
+type PluginAction string
 
 var (
-	Start   AppOperate = "start"
-	Stop    AppOperate = "stop"
-	Restart AppOperate = "restart"
-	Delete  AppOperate = "delete"
-	Backup  AppOperate = "backup"
-	Update  AppOperate = "update"
-	Upgrade AppOperate = "upgrade"
+	PluginActionStart   PluginAction = "start"
+	PluginActionStop    PluginAction = "stop"
+	PluginActionRestart PluginAction = "restart"
+	PluginActionDelete  PluginAction = "delete"
+	PluginActionBackup  PluginAction = "backup"
+	PluginActionUpdate  PluginAction = "update"
+	PluginActionUpgrade PluginAction = "upgrade"
 )

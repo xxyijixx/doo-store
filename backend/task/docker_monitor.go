@@ -74,9 +74,11 @@ func (dm *DockerMonitor) getContainerStatuses(apps []*model.AppInstalled) map[st
 	filterArgs := filters.NewArgs()
 	appStatusMap := make(map[string]string)
 
+	// 将状态标记为 “init”表示这些容器是本系统的容器
 	for _, app := range apps {
 		filterArgs.Add("name", app.Name)
-		appStatusMap[app.Name] = "init"
+
+		appStatusMap[app.Name] = docker.CustomContainerStatusInit
 	}
 
 	containers, err := dm.client.ContainerList(dm.ctx, container.ListOptions{
@@ -90,7 +92,7 @@ func (dm *DockerMonitor) getContainerStatuses(apps []*model.AppInstalled) map[st
 
 	for _, container := range containers {
 		containerName := strings.TrimPrefix(container.Names[0], "/")
-		if appStatusMap[containerName] == "init" {
+		if appStatusMap[containerName] == docker.CustomContainerStatusInit {
 			appStatusMap[containerName] = container.State
 		}
 	}
@@ -106,13 +108,13 @@ func (dm *DockerMonitor) updateAppStatus(appName string, status string, message 
 	}
 
 	// 跳过处理 Installing 状态的应用
-	if strings.EqualFold(appInstalled.Status, constant.Installing) {
+	if strings.EqualFold(appInstalled.Status, model.PluginStatusInstalling) {
 		log.Debugf("Skipping status update for app %s as it is in Installing state", appName)
 		return
 	}
 
 	// 只有状态发生变化时才更新
-	if appInstalled.Status != status && appInstalled.Status != constant.UpErr {
+	if appInstalled.Status != status && appInstalled.Status != model.PluginStatusUpErr {
 		log.Debugf("更新状态 %s [%s]", status, message)
 		_, err = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Updates(
 			map[string]interface{}{
@@ -131,20 +133,20 @@ func (dm *DockerMonitor) updateAppStatus(appName string, status string, message 
 func (dm *DockerMonitor) updateAppStatuses(appStatusMap map[string]string) {
 	for appName, status := range appStatusMap {
 		switch status {
-		case "running":
-			dm.updateAppStatus(appName, constant.Running, "")
-		case "exited":
+		case docker.ContainerStatusRunning:
+			dm.updateAppStatus(appName, model.PluginStatusRunning, "")
+		case docker.ContainerStatusExited:
 			dm.handleExitedContainer(appName)
-		case "restarting":
-			dm.updateAppStatus(appName, constant.Restarting, "Container is restarting")
-		case "paused":
-			dm.updateAppStatus(appName, constant.Paused, "Container is paused")
-		case "dead":
-			dm.updateAppStatus(appName, constant.Dead, "Container is in dead state")
-		case "init":
-			dm.updateAppStatus(appName, constant.Error, "Container is not existing")
+		case docker.ContainerStatusRestarting:
+			dm.updateAppStatus(appName, model.PluginStatusRestarting, "Container is restarting")
+		case docker.ContainerStatusPaused:
+			dm.updateAppStatus(appName, model.PluginStatusPaused, "Container is paused")
+		case docker.ContainerStatusDead:
+			dm.updateAppStatus(appName, model.PluginStatusDead, "Container is in dead state")
+		case docker.CustomContainerStatusInit:
+			dm.updateAppStatus(appName, model.PluginStatusError, "Container is not existing")
 		default:
-			dm.updateAppStatus(appName, constant.Unknown, fmt.Sprintf("Unknown state: %s", status))
+			dm.updateAppStatus(appName, model.PluginStatusUnknown, fmt.Sprintf("Unknown state: %s", status))
 		}
 	}
 }
@@ -157,9 +159,9 @@ func (dm *DockerMonitor) handleExitedContainer(appName string) {
 		return
 	}
 	if container.State.ExitCode == 0 {
-		dm.updateAppStatus(appName, constant.Stopped, "Container stopped normally")
+		dm.updateAppStatus(appName, model.PluginStatusStopped, "Container stopped normally")
 	} else {
 		message := fmt.Sprintf("Container exited with code %d: %s", container.State.ExitCode, container.State.Error)
-		dm.updateAppStatus(appName, constant.Error, message)
+		dm.updateAppStatus(appName, model.PluginStatusError, message)
 	}
 }

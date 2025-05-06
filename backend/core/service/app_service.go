@@ -2,13 +2,13 @@ package service
 
 import (
 	"context"
-	"doo-store/backend/config"
 	"doo-store/backend/constant"
 	"doo-store/backend/core/dto"
 	"doo-store/backend/core/dto/request"
 	"doo-store/backend/core/dto/response"
 	"doo-store/backend/core/model"
 	"doo-store/backend/core/repo"
+	schemasReq "doo-store/backend/core/schemas/req"
 	"doo-store/backend/task"
 	"doo-store/backend/utils/common"
 	"doo-store/backend/utils/compose"
@@ -143,56 +143,32 @@ func (*AppService) UpdateAppInstall(ctx dto.ServiceContext, req request.AppInsta
 	if err != nil {
 		return err
 	}
-	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
-	composeFile := docker.GetComposeFile(appKey)
 
 	supportActions := []string{"start", "stop"}
 	if !common.InArray(req.Action, supportActions) {
 		return errors.New(constant.ErrPluginUnsupportedAction)
 	}
-
-	if req.Action == "stop" {
-		err := appStop(appInstalled)
+	action := model.PluginAction(req.Action)
+	switch action {
+	case model.PluginActionStop:
+		err = pluginActionManager.Stop(appInstalled)
 		return err
+	case model.PluginActionStart:
+		err = pluginActionManager.Start(appInstalled)
+		return err
+	default:
+		return errors.New(constant.ErrPluginUnsupportedAction)
 	}
-	stdout := ""
-	if req.Action == "start" {
-		// 插件未正常启动，执行up操作
-		if appInstalled.Status == constant.UpErr {
-			stdout, err = compose.Up(composeFile)
-		} else {
-			stdout, err = compose.Operate(composeFile, req.Action)
-		}
-		if err != nil {
-			log.Info("Error docker compose operate")
-
-			_, err = docker.ParseError(stdout, err)
-			_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Updates(
-				map[string]interface{}{
-					repo.AppInstalled.Message.ColumnName().String(): err.Error(),
-				},
-			)
-			return err
-		}
-		_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Updates(
-			map[string]interface{}{
-				repo.AppInstalled.Status.ColumnName().String():  constant.Running,
-				repo.AppInstalled.Message.ColumnName().String(): "",
-			},
-		)
-	}
-
-	insertLog(appInstalled.ID, fmt.Sprintf("插件操作[%s]", req.Action), stdout)
-	return nil
 }
 
+// UninstallApp 插件卸载
 func (*AppService) UninstallApp(ctx dto.ServiceContext, req request.AppUnInstall) error {
 	appInstalled, err := repo.AppInstalled.Where(repo.AppInstalled.Key.Eq(req.Key)).First()
 	if err != nil {
 		return err
 	}
-	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
-	composeFile := docker.GetComposeFile(appKey)
+
+	appKey, composeFile := pluginHelper.GetAppKeyAndComposeFile(appInstalled.Key)
 	usedIPAddress := []string{}
 	err = repo.DB.Transaction(func(tx *gorm.DB) error {
 		_, err = repo.Use(tx).AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Delete()
@@ -200,7 +176,7 @@ func (*AppService) UninstallApp(ctx dto.ServiceContext, req request.AppUnInstall
 			log.Info("删除插件失败", err)
 			return err
 		}
-		_, err = repo.Use(tx).App.Where(repo.App.ID.Eq(appInstalled.AppID)).Update(repo.App.Status, constant.AppUnused)
+		_, err = repo.Use(tx).App.Where(repo.App.ID.Eq(appInstalled.AppID)).Update(repo.App.Status, model.AppUnused)
 		if err != nil {
 			log.Info("更新插件状态失败", err)
 			return err
@@ -220,7 +196,7 @@ func (*AppService) UninstallApp(ctx dto.ServiceContext, req request.AppUnInstall
 			log.Info("删除服务信息失败", err)
 			return err
 		}
-		if appInstalled.Status != constant.UpErr {
+		if appInstalled.Status != model.PluginStatusUpErr {
 			stdout, err := compose.Down(composeFile)
 			if err != nil {
 				log.Info("Error docker compose down")
@@ -340,7 +316,7 @@ func (*AppService) UpdateAppParams(ctx dto.ServiceContext, req request.AppInstal
 		return nil, err
 	}
 	// TODO 参数校验
-	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
+	appKey := pluginHelper.GetAppKey(appInstalled.Key)
 	containerName := appInstalled.Name
 	ipAddress := appInstalled.IpAddress
 
@@ -356,7 +332,14 @@ func (*AppService) UpdateAppParams(ctx dto.ServiceContext, req request.AppInstal
 	}
 
 	// TODO 参数更新
-	envContent, envJson, err := docker.GenEnv(appKey, containerName, ipAddress, req.Params, false)
+
+	envContent, envJson, err := pluginHelper.GenEnv(schemasReq.GenEnvReq{
+		AppKey:        appKey,
+		ContainerName: containerName,
+		IPAddress:     ipAddress,
+		Envs:          req.Params,
+		WriteFile:     false,
+	})
 	if err != nil {
 		log.Info("错误生成环境变量文件", err)
 		return nil, errors.New(constant.ErrPluginModifyParamFailed)
@@ -369,7 +352,7 @@ func (*AppService) UpdateAppParams(ctx dto.ServiceContext, req request.AppInstal
 	}
 	appInstalled.Params = string(paramJson)
 	_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Updates(appInstalled)
-	err = appRe(appInstalled, envContent)
+	err = pluginActionManager.Restart(appInstalled, envContent)
 	if err != nil {
 		log.Info("重启失败", err)
 		insertLog(appInstalled.ID, "插件重启", err.Error())
@@ -428,7 +411,7 @@ func (*AppService) GetAppLogs(ctx dto.ServiceContext, req request.AppLogsSearch)
 	}
 
 	// 校验插件状态
-	if appInstalled.Status != constant.Running {
+	if appInstalled.Status != model.PluginStatusRunning {
 		return nil, errors.New(constant.ErrPluginNotRunning)
 	}
 
@@ -503,7 +486,7 @@ func (AppService) UploadApp(ctx dto.ServiceContext, req request.PluginUpload) er
 			Class:          req.Plugin.Class,
 			Description:    req.Plugin.Description,
 			DependsVersion: req.Plugin.DependsVersion,
-			Status:         constant.AppUnused,
+			Status:         model.AppUnused,
 		}
 		err := repo.Use(tx).App.Create(app)
 		if err != nil {
@@ -538,7 +521,7 @@ func (AppService) UploadApp(ctx dto.ServiceContext, req request.PluginUpload) er
 			Params:         req.Plugin.GenParams(),
 			DockerCompose:  dockerCompose,
 			NginxConfig:    nginxConfig,
-			Status:         constant.AppNormal,
+			Status:         model.AppNormal,
 		}
 		err = repo.Use(tx).AppDetail.Create(appDetail)
 		if err != nil {
@@ -555,7 +538,7 @@ func (AppService) UploadApp(ctx dto.ServiceContext, req request.PluginUpload) er
 
 func (AppService) GetInstalledAppInfo(ctx dto.ServiceContext, req request.GetInstalledPluginInfo) (*response.GetInstalledPluginInfoResp, error) {
 	// 获取已安装并正常运行的插件信息
-	info, err := repo.AppInstalled.Where(repo.AppInstalled.Key.Eq(req.Key), repo.AppInstalled.Status.Eq(constant.Running)).First()
+	info, err := repo.AppInstalled.Where(repo.AppInstalled.Key.Eq(req.Key), repo.AppInstalled.Status.Eq(model.PluginStatusRunning)).First()
 	if err != nil {
 		log.Info("查询插件安装信息失败", err)
 		return nil, err
@@ -583,7 +566,7 @@ func (AppService) GetInstalledAppInfo(ctx dto.ServiceContext, req request.GetIns
 
 func (AppService) ListRunningAppKeys(ctx dto.ServiceContext) (any, error) {
 	result := []string{}
-	err := repo.AppInstalled.Select(repo.AppInstalled.Key).Where(repo.AppInstalled.Status.Eq(constant.Running)).Pluck(repo.AppInstalled.Key, &result)
+	err := repo.AppInstalled.Select(repo.AppInstalled.Key).Where(repo.AppInstalled.Status.Eq(model.PluginStatusRunning)).Pluck(repo.AppInstalled.Key, &result)
 	if err != nil {
 		return []string{}, err
 	}
@@ -594,120 +577,6 @@ func (AppService) ListRunningAppKeys(ctx dto.ServiceContext) (any, error) {
 	}
 
 	return result, nil
-}
-
-func appRe(appInstalled *model.AppInstalled, envContent string) error {
-	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
-	composeFile := docker.GetComposeFile(appKey)
-	_, err := compose.Down(composeFile)
-	if err != nil {
-		log.Info("Error docker compose down", err)
-		return err
-	}
-	_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.Installing)
-	// 写入docker-compose.yaml和环境文件
-	composeFile, err = docker.WriteComposeFile(appKey, appInstalled.DockerCompose)
-	if err != nil {
-		log.Error("DockerCompose文件写入失败", err)
-		return err
-	}
-	_, err = docker.WriteEnvFile(appKey, envContent)
-	if err != nil {
-		log.Error("环境变量文件写入失败", err)
-		return err
-	}
-	stdout, err := compose.Up(composeFile)
-	if err != nil {
-		log.Info("Error docker compose up", stdout)
-		_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
-		return err
-	}
-	_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.Running)
-
-	return nil
-}
-
-// appUp
-// envContent key=value
-func appUp(appInstalled *model.AppInstalled, envContent string) error {
-	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
-	err := repo.DB.Transaction(func(tx *gorm.DB) error {
-		composeFile, err := docker.WriteComposeFile(appKey, appInstalled.DockerCompose)
-		log.Info("Docker容器UP,", composeFile)
-		if err != nil {
-			log.Info("Error WriteFile", err)
-			return err
-		}
-		_, err = docker.WriteEnvFile(appKey, envContent)
-		if err != nil {
-			log.Info("Error WriteFile", err)
-			return err
-		}
-		stdout, err := compose.Up(composeFile)
-		if err != nil {
-			stdout, err = docker.ParseError(stdout, err)
-			log.Info("Error docker compose up:", stdout, err)
-			return err
-		}
-		// 执行一次docker compose ps更新状态
-		containers, err := compose.ParseDockerComposePsOutput(composeFile)
-		if err != nil {
-			return err
-		}
-		for _, container := range containers {
-			log.WithFields(log.Fields{
-				// "container": container,
-				"containerName":  container.Name,
-				"containerState": container.State,
-			}).Debug("Docker容器状态")
-			_, _ = repo.Use(tx).AppServiceStatus.Where(repo.AppServiceStatus.InstallID.Eq(appInstalled.ID)).
-				Where(repo.AppServiceStatus.ContainerName.Eq(container.Name)).Updates(
-				model.AppServiceStatus{
-					Status:  container.State,
-					Message: "",
-				},
-			)
-		}
-		fmt.Println(stdout)
-		_, err = repo.Use(tx).AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Updates(
-			model.AppInstalled{
-				Status:  constant.Running,
-				Message: "",
-			},
-		)
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-	if err != nil {
-		_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Updates(
-			model.AppInstalled{
-				Status:  constant.UpErr,
-				Message: err.Error(),
-			},
-		)
-		insertLog(appInstalled.ID, "插件启动", err.Error())
-	} else {
-		insertLog(appInstalled.ID, "插件启动", "")
-	}
-	return err
-}
-
-// appStop 插件停止
-func appStop(appInstalled *model.AppInstalled) error {
-	appKey := config.EnvConfig.APP_PREFIX + appInstalled.Key
-	composeFile := docker.GetComposeFile(appKey)
-	_, err := repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(appInstalled.ID)).Update(repo.AppInstalled.Status, constant.Stopped)
-	if err != nil {
-		return err
-	}
-	stdout, err := compose.Stop(composeFile)
-	if err != nil {
-		return fmt.Errorf("error docker compose stop: %s", err.Error())
-	}
-	insertLog(appInstalled.ID, "插件停止", stdout)
-	return nil
 }
 
 func createDir(dirPath string) error {

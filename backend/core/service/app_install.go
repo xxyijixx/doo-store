@@ -20,9 +20,10 @@ import (
 	"path"
 	"strings"
 
+	schemasReq "doo-store/backend/core/schemas/req"
+
 	"github.com/docker/docker/api/types/container"
 	log "github.com/sirupsen/logrus"
-
 	"gorm.io/gorm"
 )
 
@@ -166,7 +167,13 @@ func (p *AppInstallProcess) genEnv() error {
 	p.req.Params[constant.CPUS] = p.req.CPUS
 	p.req.Params[constant.MemoryLimit] = p.req.MemoryLimit
 
-	p.envContent, p.envJson, err = docker.GenEnv(p.appKey, p.defaultContainerName, p.ipAddress, p.req.Params, false)
+	p.envContent, p.envJson, err = pluginHelper.GenEnv(schemasReq.GenEnvReq{
+		AppKey:        p.appKey,
+		ContainerName: p.defaultContainerName,
+		IPAddress:     p.ipAddress,
+		Envs:          p.req.Params,
+		WriteFile:     false,
+	})
 	if err != nil {
 		log.Error("生成环境变量失败:", err)
 		return err
@@ -199,7 +206,13 @@ func (p *AppInstallProcess) genEnv() error {
 
 	// 重新生成一下环境变量配置
 	if envChange {
-		p.envContent, p.envJson, err = docker.GenEnv(p.appKey, p.defaultContainerName, p.ipAddress, p.req.Params, false)
+		p.envContent, p.envJson, err = pluginHelper.GenEnv(schemasReq.GenEnvReq{
+			AppKey:        p.appKey,
+			ContainerName: p.defaultContainerName,
+			IPAddress:     p.ipAddress,
+			Envs:          p.req.Params,
+			WriteFile:     false,
+		})
 		if err != nil {
 			log.Error("生成环境变量失败:", err)
 			return err
@@ -278,12 +291,12 @@ func (p *AppInstallProcess) ValidateParam() error {
 		Env:           p.envJson,
 		DockerCompose: p.req.DockerCompose,
 		Key:           p.app.Key,
-		Status:        constant.Installing,
+		Status:        model.PluginStatusInstalling,
 		IpAddress:     p.ipAddress,
 	}
 	// 更新插件状态
 	err = repo.DB.Transaction(func(tx *gorm.DB) error {
-		_, err = repo.Use(tx).App.Where(repo.App.ID.Eq(p.appInstalled.AppID)).Update(repo.App.Status, constant.AppInUse)
+		_, err = repo.Use(tx).App.Where(repo.App.ID.Eq(p.appInstalled.AppID)).Update(repo.App.Status, model.AppInUse)
 		if err != nil {
 			return err
 		}
@@ -310,7 +323,6 @@ func (p *AppInstallProcess) Install() error {
 		return errors.New(constant.ErrPluginInstallFailed)
 	}
 	// TODO 安装服务
-	// repo.AppServiceStatus.
 	appServiceList := make([]*model.AppServiceStatus, 0)
 	for name, service := range p.finalDockerCompose.Services {
 		IPAddress := []string{}
@@ -323,13 +335,13 @@ func (p *AppInstallProcess) Install() error {
 			IpAddress:     strings.Join(IPAddress, ","),
 			Image:         service.Image,
 			InstallID:     p.appInstalled.ID,
-			Status:        constant.Installing,
+			Status:        model.PluginStatusInstalling,
 		}
 		appServiceList = append(appServiceList, &appService)
 	}
 	repo.AppServiceStatus.Create(appServiceList...)
 
-	err = appUp(p.appInstalled, p.envContent)
+	err = pluginActionManager.Up(p.appInstalled, p.envContent)
 	if err != nil {
 		log.Error("应用启动失败:", err)
 		return err
@@ -362,11 +374,11 @@ func (p *AppInstallProcess) AddNginx() error {
 		if err != nil {
 			log.Error("添加Nginx配置失败:", err)
 
-			std, err := compose.Operate(docker.GetComposeFile(p.appKey), "stop")
+			std, err := compose.Operate(pluginHelper.GetComposeFile(p.appKey), "stop")
 			if err != nil {
 				log.Error("停止容器失败:", std, err)
 			}
-			_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(p.appInstalled.ID)).Update(repo.AppInstalled.Status, constant.UpErr)
+			_, _ = repo.AppInstalled.Where(repo.AppInstalled.ID.Eq(p.appInstalled.ID)).Update(repo.AppInstalled.Status, model.PluginStatusUpErr)
 			return err
 		}
 

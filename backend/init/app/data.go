@@ -2,7 +2,6 @@ package app
 
 import (
 	"doo-store/backend/config"
-	"doo-store/backend/constant"
 	"doo-store/backend/core/dto"
 	"doo-store/backend/core/model"
 	"doo-store/backend/core/repo"
@@ -61,7 +60,7 @@ func LoadData() error {
 				Class:          p.Class,
 				Description:    p.Description,
 				DependsVersion: p.DependsVersion,
-				Status:         constant.AppUnused,
+				Status:         model.AppUnused,
 			}
 			err := repo.Use(tx).App.Create(app)
 			if err != nil {
@@ -78,7 +77,7 @@ func LoadData() error {
 				Params:         p.GenParams(),
 				DockerCompose:  p.GenComposeFile(),
 				NginxConfig:    p.GenNginxConfig(),
-				Status:         constant.AppNormal,
+				Status:         model.AppNormal,
 			}
 			err = repo.Use(tx).AppDetail.Create(appDetail)
 			if err != nil {

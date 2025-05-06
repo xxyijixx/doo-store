@@ -1,8 +1,9 @@
-package docker
+package service
 
 import (
 	"doo-store/backend/config"
 	"doo-store/backend/constant"
+	schemasReq "doo-store/backend/core/schemas/req"
 	"doo-store/backend/utils/compose"
 	"encoding/json"
 	"fmt"
@@ -12,10 +13,32 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func GenEnv(appKey, containerName, ipAddress string, envs map[string]any, writeFile bool) (envContent, envJson string, err error) {
-	envFile := fmt.Sprintf("%s/%s/.env", constant.AppInstallDir, appKey)
-	envContent = fmt.Sprintf("%s=%s\n", "CONTAINER_NAME", containerName)
-	envContent += fmt.Sprintf("%s=%s\n", "IP_ADDRESS", ipAddress)
+type PluginHelper struct {
+}
+
+var pluginHelper = PluginHelper{}
+
+func (h PluginHelper) GetAppKey(key string) string {
+	return config.EnvConfig.App().APP_PREFIX + key
+}
+
+func (h PluginHelper) GetComposeFile(key string) string {
+	appKey := h.GetAppKey(key)
+	composeFile := fmt.Sprintf("%s/%s/docker-compose.yml", constant.AppInstallDir, appKey)
+	
+	return composeFile
+}
+
+func (h PluginHelper) GetAppKeyAndComposeFile(key string) (appKey, composeFile string) {
+	appKey = h.GetAppKey(key)
+	composeFile = h.GetComposeFile(appKey)
+	return
+}
+
+func (h PluginHelper) GenEnv(genEnvReq schemasReq.GenEnvReq) (envContent, envJson string, err error) {
+	envFile := fmt.Sprintf("%s/%s/.env", constant.AppInstallDir, genEnvReq.AppKey)
+	envContent = fmt.Sprintf("%s=%s\n", "CONTAINER_NAME", genEnvReq.ContainerName)
+	envContent += fmt.Sprintf("%s=%s\n", "IP_ADDRESS", genEnvReq.IPAddress)
 	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_DIR", config.EnvConfig.DooTask().DIR)
 	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_APP_ID", config.EnvConfig.DooTask().APP_ID)
 	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_APP_IPPR", config.EnvConfig.DooTask().APP_IPPR)
@@ -34,7 +57,7 @@ func GenEnv(appKey, containerName, ipAddress string, envs map[string]any, writeF
 	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_REDIS_HOST", config.EnvConfig.DooTaskRedis().HOST)
 	envContent += fmt.Sprintf("%s=%s\n", "DOOTASK_REDIS_PORT", config.EnvConfig.DooTaskRedis().PORT)
 
-	for key, value := range envs {
+	for key, value := range genEnvReq.Envs {
 		var envValue string
 		switch v := value.(type) {
 		case float64:
@@ -46,7 +69,7 @@ func GenEnv(appKey, containerName, ipAddress string, envs map[string]any, writeF
 		}
 		envContent += fmt.Sprintf("%s=%s\n", key, envValue)
 	}
-	if writeFile {
+	if genEnvReq.WriteFile {
 		err = os.WriteFile(envFile, []byte(envContent), 0644)
 		if err != nil {
 			log.Debug("Error WriteFile", err)
@@ -71,8 +94,8 @@ func GenEnv(appKey, containerName, ipAddress string, envs map[string]any, writeF
 }
 
 // 写环境变量文件
-func WriteEnvFile(appKey, envContent string) (string, error) {
-	envFile := GetEnvFile(appKey)
+func (h PluginHelper) WriteEnvFile(appKey, envContent string) (string, error) {
+	envFile := h.GetEnvFile(appKey)
 	err := os.WriteFile(envFile, []byte(envContent), 0644)
 	if err != nil {
 		return "", fmt.Errorf("failed to write environment file: %w", err)
@@ -80,9 +103,9 @@ func WriteEnvFile(appKey, envContent string) (string, error) {
 	return envFile, nil
 }
 
-// 写Compose文件
-func WriteComposeFile(appKey, composeContent string) (string, error) {
-	composeFile := GetComposeFile(appKey)
+// 写Compose File
+func (h PluginHelper) WriteComposeFile(appKey, composeContent string) (string, error) {
+	composeFile := h.GetComposeFile(appKey)
 	// 替换部分环境变量
 	composeContent = compose.ReplaceEnvVariables(composeContent)
 	err := os.WriteFile(composeFile, []byte(composeContent), 0644)
@@ -92,12 +115,7 @@ func WriteComposeFile(appKey, composeContent string) (string, error) {
 	return composeFile, nil
 }
 
-func GetComposeFile(appKey string) string {
-	composeFile := fmt.Sprintf("%s/%s/docker-compose.yml", constant.AppInstallDir, appKey)
-	return composeFile
-}
-
-func GetEnvFile(appKey string) string {
+func (h PluginHelper) GetEnvFile(appKey string) string {
 	envFile := fmt.Sprintf("%s/%s/.env", constant.AppInstallDir, appKey)
 	return envFile
 }

@@ -14,10 +14,11 @@ import (
 
 func Init() {
 
-	constant.DataDir = resolveDataDir(config.EnvConfig.DATA_DIR)
+	// 初始化目录
+	constant.DataDir = resolveDataDir(config.EnvConfig.App().DATA_DIR)
 	constant.AppInstallDir = path.Join(constant.DataDir, "apps")
 	constant.NginxDir = path.Join(constant.DataDir, "nginx")
-
+	
 
 	plugins, err := repo.AppInstalled.Select(repo.AppInstalled.ID, repo.AppInstalled.IpAddress).Find()
 	if err != nil && err != gorm.ErrRecordNotFound {
@@ -38,14 +39,14 @@ func Init() {
 }
 
 func resolveDataDir(dataDir string) string {
-	if dataDir != "" {
-		return dataDir
+	if dataDir == "" {
+		var err error
+		dataDir, err = os.Getwd()
+		if err != nil {
+			fmt.Printf("获取当前工作目录失败: %v\n", err)
+			return ""
+		}
+		dataDir = path.Join(dataDir, "docker", "dood")
 	}
-
-	workingDir, err := os.Getwd()
-	if err != nil {
-		fmt.Printf("获取当前工作目录失败: %v\n", err)
-		return ""
-	}
-	return path.Join(workingDir, "docker", "dood")
+	return dataDir
 }
