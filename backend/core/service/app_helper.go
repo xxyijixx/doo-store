@@ -24,8 +24,12 @@ func (h PluginHelper) GetAppKey(key string) string {
 
 func (h PluginHelper) GetComposeFile(key string) string {
 	appKey := h.GetAppKey(key)
+	return h.getComposeFileByAppKey(appKey)
+}
+
+func (h PluginHelper) getComposeFileByAppKey(appKey string) string {
 	composeFile := fmt.Sprintf("%s/%s/docker-compose.yml", constant.AppInstallDir, appKey)
-	
+
 	return composeFile
 }
 
@@ -105,7 +109,7 @@ func (h PluginHelper) WriteEnvFile(appKey, envContent string) (string, error) {
 
 // 写Compose File
 func (h PluginHelper) WriteComposeFile(appKey, composeContent string) (string, error) {
-	composeFile := h.GetComposeFile(appKey)
+	composeFile := h.getComposeFileByAppKey(appKey)
 	// 替换部分环境变量
 	composeContent = compose.ReplaceEnvVariables(composeContent)
 	err := os.WriteFile(composeFile, []byte(composeContent), 0644)
