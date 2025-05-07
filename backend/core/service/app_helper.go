@@ -19,7 +19,7 @@ type PluginHelper struct {
 var pluginHelper = PluginHelper{}
 
 func (h PluginHelper) GetAppKey(key string) string {
-	return config.EnvConfig.App().APP_PREFIX + key
+	return config.EnvConfig.App().PLUGIN_PREFIX + key
 }
 
 func (h PluginHelper) GetComposeFile(key string) string {
@@ -35,7 +35,7 @@ func (h PluginHelper) getComposeFileByAppKey(appKey string) string {
 
 func (h PluginHelper) GetAppKeyAndComposeFile(key string) (appKey, composeFile string) {
 	appKey = h.GetAppKey(key)
-	composeFile = h.GetComposeFile(appKey)
+	composeFile = h.getComposeFileByAppKey(appKey)
 	return
 }
 

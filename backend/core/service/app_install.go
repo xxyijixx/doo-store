@@ -233,7 +233,7 @@ func (p *AppInstallProcess) ValidateParam() error {
 		return err
 	}
 
-	p.appKey = config.EnvConfig.APP_PREFIX + p.app.Key
+	p.appKey = pluginHelper.GetAppKey(p.app.Key)
 
 	// 创建工作目录
 	workspaceDir := path.Join(constant.AppInstallDir, p.appKey)

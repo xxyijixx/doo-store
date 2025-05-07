@@ -7,9 +7,14 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
+	"golang.org/x/text/language"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+)
+
+var (
+	Language = []string{language.Chinese.String(), language.TraditionalChinese.String(), language.English.String(), language.Korean.String(), language.Japanese.String(), language.German.String(), language.French.String(), language.Indonesian.String()}
 )
 
 var EnvConfig = envConfigSchema{}
@@ -28,26 +33,27 @@ func (s *envConfigSchema) GetNginxContainerName() string {
 }
 
 func (s *envConfigSchema) GetDefaultContainerName(key string) string {
-	return fmt.Sprintf("dootask-p-%s-%s", key, s.APP_ID)
+	return fmt.Sprintf("dootask-plugin-%s-%s", key, s.APP_ID)
 }
 
 func init() {
 	envInit()
-	systemInit()
 }
 
 // 应用基本配置
 type AppConfig struct {
-	ENV          string
-	APP_ID       string
-	APP_KEY      string
-	STORAGE      string
-	SQLITE_PATH  string
-	DATA_DIR     string
-	APP_PREFIX   string
-	DB_PREFIX    string
-	PLUGIN_CIDR  string
-	NETWORK_NAME string
+	ENV                 string
+	APP_ID              string
+	APP_KEY             string
+	STORAGE             string
+	SQLITE_PATH         string
+	DATA_DIR            string
+	PLUGIN_PREFIX       string
+	DB_PREFIX           string
+	PLUGIN_CIDR         string
+	NETWORK_NAME        string
+	SHARED_COMPOSE      bool
+	SHARED_COMPOSE_NAME string
 }
 
 // MySQL数据库配置
@@ -98,16 +104,18 @@ type ThirdPartyConfig struct {
 // 环境配置结构体
 type envConfigSchema struct {
 	// 应用基本配置
-	ENV         string
-	APP_KEY     string
-	APP_ID      string
-	APP_IPPR    string
-	STORAGE     string
-	SQLITE_PATH string
-	DATA_DIR    string
-	APP_PREFIX  string
-	DB_PREFIX   string
-	PLUGIN_CIDR string
+	ENV                 string
+	APP_KEY             string
+	APP_ID              string
+	APP_IPPR            string
+	STORAGE             string
+	SQLITE_PATH         string
+	DATA_DIR            string
+	PLUGIN_PREFIX       string
+	DB_PREFIX           string
+	PLUGIN_CIDR         string
+	SHARED_COMPOSE      bool
+	SHARED_COMPOSE_NAME string
 
 	// MySQL数据库配置
 	MYSQL_HOST     string
@@ -133,15 +141,22 @@ type envConfigSchema struct {
 // 获取应用配置
 func (s *envConfigSchema) App() AppConfig {
 	return AppConfig{
-		ENV:          s.ENV,
-		APP_ID:       s.APP_ID,
-		STORAGE:      s.STORAGE,
-		SQLITE_PATH:  s.SQLITE_PATH,
-		DATA_DIR:     s.DATA_DIR,
-		APP_PREFIX:   s.APP_PREFIX,
-		DB_PREFIX:    s.DB_PREFIX,
-		PLUGIN_CIDR:  fmt.Sprintf("%s.30/24", s.APP_IPPR),
-		NETWORK_NAME: fmt.Sprintf("dootask-networks-%s", s.APP_ID),
+		ENV:            s.ENV,
+		APP_ID:         s.APP_ID,
+		STORAGE:        s.STORAGE,
+		SQLITE_PATH:    s.SQLITE_PATH,
+		DATA_DIR:       s.DATA_DIR,
+		PLUGIN_PREFIX:  s.PLUGIN_PREFIX,
+		DB_PREFIX:      s.DB_PREFIX,
+		PLUGIN_CIDR:    fmt.Sprintf("%s.30/24", s.APP_IPPR),
+		NETWORK_NAME:   fmt.Sprintf("dootask-networks-%s", s.APP_ID),
+		SHARED_COMPOSE: s.SHARED_COMPOSE,
+		SHARED_COMPOSE_NAME: func() string {
+			if s.SHARED_COMPOSE_NAME == "" {
+				return s.PLUGIN_PREFIX
+			}
+			return s.SHARED_COMPOSE_NAME
+		}(),
 	}
 }
 
@@ -268,8 +283,10 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("STORAGE", "sqlite")
 	v.SetDefault("SQLITE_PATH", "./app.db")
 	v.SetDefault("DATA_DIR", "")
-	v.SetDefault("APP_PREFIX", "plugin-dootask")
+	v.SetDefault("PLUGIN_PREFIX", "plugin-dootask")
 	v.SetDefault("PLUGIN_CIDR", "")
+	v.SetDefault("SHARED_COMPOSE", true)
+	v.SetDefault("SHARED_COMPOSE_NAME", "")
 
 	// MySQL配置默认值
 	v.SetDefault("DB_PREFIX", "pre_")
@@ -298,9 +315,11 @@ func mapConfigToStruct(v *viper.Viper) {
 	EnvConfig.STORAGE = v.GetString("STORAGE")
 	EnvConfig.SQLITE_PATH = v.GetString("SQLITE_PATH")
 	EnvConfig.DATA_DIR = v.GetString("DATA_DIR")
-	EnvConfig.APP_PREFIX = v.GetString("APP_PREFIX")
+	EnvConfig.PLUGIN_PREFIX = v.GetString("PLUGIN_PREFIX")
 	EnvConfig.DB_PREFIX = v.GetString("DB_PREFIX")
 	EnvConfig.PLUGIN_CIDR = v.GetString("PLUGIN_CIDR")
+	EnvConfig.SHARED_COMPOSE = v.GetBool("SHARED_COMPOSE")
+	EnvConfig.SHARED_COMPOSE_NAME = v.GetString("SHARED_COMPOSE_NAME")
 
 	// MySQL配置 - 从多个键获取值
 	EnvConfig.MYSQL_HOST = getConfigValue(v, []string{"MYSQL_HOST", "DB_HOST"}, "127.0.0.1")

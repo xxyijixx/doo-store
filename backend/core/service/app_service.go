@@ -199,7 +199,7 @@ func (*AppService) UninstallApp(ctx dto.ServiceContext, req request.AppUnInstall
 		if appInstalled.Status != model.PluginStatusUpErr {
 			stdout, err := compose.Down(composeFile)
 			if err != nil {
-				log.Info("Error docker compose down")
+				log.Info("Error docker compose down", stdout)
 				return err
 			}
 			fmt.Println(stdout)
